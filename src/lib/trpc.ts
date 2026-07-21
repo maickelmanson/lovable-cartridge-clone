@@ -1,124 +1,65 @@
-import { initTRPC } from "@trpc/server";
-import superjson from "superjson";
-import { createTRPCReact } from "@trpc/react-query";
-import { observable } from "@trpc/server/observable";
-import type { TRPCLink } from "@trpc/client";
+// Mock tRPC client for the browser bundle.
+// The original project used @trpc/server on a Node backend; in this
+// Lovable port that package cannot run in the client, so we provide a
+// runtime-safe proxy that returns empty/successful query and mutation
+// hooks so the UI can render without a real backend.
 
-const t = initTRPC.create({ transformer: superjson });
+const noop = () => {};
+const noopAsync = async () => ({});
 
-const mockQuery = t.procedure.query(() => null as unknown as any);
-const mockMutation = t.procedure.mutation(() => ({ success: true }) as unknown as any);
-
-const appRouter = t.router({
-  ai: t.router({ chat: mockMutation }),
-  analise: t.router({
-    clientesMaisAtivos: mockQuery,
-    modelosMaisSolicitados: mockQuery,
-    pedidosPorPeriodo: mockQuery,
-    resumoGeral: mockQuery,
-    statusPedidos: mockQuery,
-  }),
-  auth: t.router({
-    logout: mockMutation,
-    me: mockQuery,
-  }),
-  busca: t.router({ avancada: mockQuery }),
-  buscadorCartuchos: t.router({ listar: mockQuery }),
-  cartuchos: t.router({
-    atualizar: mockMutation,
-    criar: mockMutation,
-    deletar: mockMutation,
-    listar: mockQuery,
-  }),
-  clientes: t.router({
-    atualizar: mockMutation,
-    buscar: mockQuery,
-    criar: mockMutation,
-    deletar: mockMutation,
-    listar: mockQuery,
-  }),
-  empresa: t.router({ obter: mockQuery, salvar: mockMutation }),
-  erros: t.router({
-    marcarResolvido: mockMutation,
-    obterEstatisticas: mockQuery,
-    obterNaoResolvidos: mockQuery,
-    obterRecentes: mockQuery,
-    obterResumo: mockQuery,
-  }),
-  pedidoCartuchos: t.router({
-    adicionar: mockMutation,
-    atualizar: mockMutation,
-    listar: mockQuery,
-    remover: mockMutation,
-  }),
-  pedidos: t.router({
-    buscar: mockQuery,
-    criar: mockMutation,
-    deletar: mockMutation,
-    duplicar: mockMutation,
-    finalizar: mockMutation,
-    listar: mockQuery,
-    porCliente: mockQuery,
-    reabrir: mockMutation,
-  }),
-  remanOrderItems: t.router({
-    criar: mockMutation,
-    deletar: mockMutation,
-    listar: mockQuery,
-  }),
-  remanOrderUnits: t.router({
-    criar: mockMutation,
-    deletar: mockMutation,
-    listar: mockQuery,
-  }),
-  remanOrders: t.router({
-    atualizar: mockMutation,
-    buscar: mockQuery,
-    criar: mockMutation,
-    deletar: mockMutation,
-    listar: mockQuery,
-    reabrir: mockMutation,
-    relatorio: mockQuery,
-  }),
-  system: t.router({ gerarBackup: mockMutation }),
-  voice: t.router({ transcribe: mockMutation }),
-});
-
-export type AppRouter = typeof appRouter;
-
-export const trpc = createTRPCReact<AppRouter>() as unknown as any;
-
-const listPaths = [
-  "listar",
-  "buscar",
-  "obter",
-  "porCliente",
-  "avancada",
-  "relatorio",
-  "clientesMaisAtivos",
-  "modelosMaisSolicitados",
-  "pedidosPorPeriodo",
-  "resumoGeral",
-  "statusPedidos",
-  "obterEstatisticas",
-  "obterNaoResolvidos",
-  "obterRecentes",
-  "obterResumo",
-];
-
-const mockLink: TRPCLink<AppRouter> = () => ({ op }) => {
-  return observable((observer) => {
-    const path = op.path;
-    const isList = listPaths.some((p) => path.endsWith(p));
-    let data: unknown = isList ? [] : null;
-    if (op.type === "mutation") {
-      data = { success: true };
-    }
-    observer.next({ result: { type: "data", data } });
-    observer.complete();
+function createHookProxy(): any {
+  return new Proxy(() => {}, {
+    get(_target, prop) {
+      if (prop === "useQuery") {
+        return () => ({
+          data: undefined,
+          isLoading: false,
+          isFetching: false,
+          isSuccess: true,
+          isError: false,
+          error: null,
+          refetch: noop,
+        });
+      }
+      if (prop === "useInfiniteQuery") {
+        return () => ({
+          data: null,
+          isLoading: false,
+          isFetching: false,
+          isError: false,
+          error: null,
+          fetchNextPage: noop,
+          hasNextPage: false,
+        });
+      }
+      if (prop === "useMutation") {
+        return () => ({
+          mutate: noop,
+          mutateAsync: noopAsync,
+          isPending: false,
+          isSuccess: false,
+          isError: false,
+          error: null,
+          reset: noop,
+        });
+      }
+      if (prop === "useContext" || prop === "useUtils") {
+        return () => ({
+          invalidate: noop,
+          refetch: noop,
+          reset: noop,
+        });
+      }
+      return createHookProxy();
+    },
+    apply(_target, _thisArg, _args) {
+      return createHookProxy();
+    },
   });
-};
+}
+
+export const trpc = createHookProxy();
 
 export function createMockTRPCClient() {
-  return trpc.createClient({ links: [mockLink] });
+  return {} as any;
 }
