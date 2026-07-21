@@ -196,7 +196,7 @@ export default function TestBuscadorCartuchos() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.cartuchos.map((cartucho) => (
+                      {data.cartuchos.map((cartucho: any) => (
                         <tr key={cartucho.id} className="border-b hover:bg-muted/50">
                           <td className="py-2 px-4 font-mono text-xs">
                             {cartucho.modelo02}

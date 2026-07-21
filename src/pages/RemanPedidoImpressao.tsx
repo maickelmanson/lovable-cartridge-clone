@@ -52,7 +52,7 @@ export default function RemanPedidoImpressao() {
   // Agrupar produtos: apenas itens com quantidade > 0 (funcionando)
   const produtosAgrupados = (items || [])
     .filter((item: any) => item.quantity > 0)
-    .map(item => ({
+    .map((item: any) => ({
       modelo: item.modelo01 || item.descriptionSnapshot || "SEM MODELO",
       quantidade: item.quantity,
       valorUnit: parseFloat(item.unitPrice || "0"),
@@ -183,7 +183,7 @@ export default function RemanPedidoImpressao() {
               </tr>
             </thead>
             <tbody>
-              {produtosAgrupados.map((prod, idx) => (
+              {produtosAgrupados.map((prod: any, idx: any) => (
                 <tr key={idx}>
                   <td className="py-2 px-3 border border-black uppercase">{prod.modelo}</td>
                   <td className="py-2 px-3 border border-black text-center">{prod.quantidade}</td>
