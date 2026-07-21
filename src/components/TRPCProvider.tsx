@@ -1,13 +1,7 @@
-import { QueryClient } from "@tanstack/react-query";
-import { trpc, createMockTRPCClient } from "@/lib/trpc";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
-const trpcClient = createMockTRPCClient();
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      {children}
-    </trpc.Provider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
