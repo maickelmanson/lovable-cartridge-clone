@@ -14,7 +14,418 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cartuchos_cadastro: {
+        Row: {
+          created_at: string
+          id: number
+          modelo_01: string
+          modelo_02: string
+          owner_id: string
+          price_final_customer: number | null
+          price_reseller: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          modelo_01: string
+          modelo_02: string
+          owner_id?: string
+          price_final_customer?: number | null
+          price_reseller?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          modelo_01?: string
+          modelo_02?: string
+          owner_id?: string
+          price_final_customer?: number | null
+          price_reseller?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clientes: {
+        Row: {
+          cnpj: string | null
+          commercial_profile: Database["public"]["Enums"]["commercial_profile"]
+          cpf: string | null
+          created_at: string
+          endereco: string | null
+          id: number
+          inscricao_estadual: string | null
+          nome: string
+          observacoes: string | null
+          owner_id: string
+          telefone: string | null
+          telefone2: string | null
+          updated_at: string
+        }
+        Insert: {
+          cnpj?: string | null
+          commercial_profile?: Database["public"]["Enums"]["commercial_profile"]
+          cpf?: string | null
+          created_at?: string
+          endereco?: string | null
+          id?: number
+          inscricao_estadual?: string | null
+          nome: string
+          observacoes?: string | null
+          owner_id?: string
+          telefone?: string | null
+          telefone2?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cnpj?: string | null
+          commercial_profile?: Database["public"]["Enums"]["commercial_profile"]
+          cpf?: string | null
+          created_at?: string
+          endereco?: string | null
+          id?: number
+          inscricao_estadual?: string | null
+          nome?: string
+          observacoes?: string | null
+          owner_id?: string
+          telefone?: string | null
+          telefone2?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      empresa_dados: {
+        Row: {
+          bairro: string | null
+          celular: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj_cpf: string | null
+          created_at: string
+          email: string | null
+          empresa: string | null
+          endereco: string | null
+          estado: string | null
+          id: number
+          logo_url: string | null
+          nome: string | null
+          numero: string | null
+          owner_id: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj_cpf?: string | null
+          created_at?: string
+          email?: string | null
+          empresa?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: number
+          logo_url?: string | null
+          nome?: string | null
+          numero?: string | null
+          owner_id?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj_cpf?: string | null
+          created_at?: string
+          email?: string | null
+          empresa?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: number
+          logo_url?: string | null
+          nome?: string | null
+          numero?: string | null
+          owner_id?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pedido_cartuchos: {
+        Row: {
+          cartucho_id: number | null
+          codigo: string | null
+          created_at: string
+          id: number
+          observacoes: string | null
+          owner_id: string
+          pedido_id: number
+          peso_chegada: string | null
+          peso_saida: string | null
+          protegido: number
+          status: Database["public"]["Enums"]["pedido_cartucho_status"]
+          updated_at: string
+        }
+        Insert: {
+          cartucho_id?: number | null
+          codigo?: string | null
+          created_at?: string
+          id?: number
+          observacoes?: string | null
+          owner_id?: string
+          pedido_id: number
+          peso_chegada?: string | null
+          peso_saida?: string | null
+          protegido?: number
+          status?: Database["public"]["Enums"]["pedido_cartucho_status"]
+          updated_at?: string
+        }
+        Update: {
+          cartucho_id?: number | null
+          codigo?: string | null
+          created_at?: string
+          id?: number
+          observacoes?: string | null
+          owner_id?: string
+          pedido_id?: number
+          peso_chegada?: string | null
+          peso_saida?: string | null
+          protegido?: number
+          status?: Database["public"]["Enums"]["pedido_cartucho_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_cartuchos_cartucho_id_fkey"
+            columns: ["cartucho_id"]
+            isOneToOne: false
+            referencedRelation: "cartuchos_cadastro"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_cartuchos_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          cliente_id: number
+          created_at: string
+          data_finalizacao: string | null
+          id: number
+          numero: string
+          owner_id: string
+          status: Database["public"]["Enums"]["pedido_status"]
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: number
+          created_at?: string
+          data_finalizacao?: string | null
+          id?: number
+          numero: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["pedido_status"]
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: number
+          created_at?: string
+          data_finalizacao?: string | null
+          id?: number
+          numero?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["pedido_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reman_order_items: {
+        Row: {
+          cartucho_id: number
+          created_at: string
+          description_snapshot: string | null
+          id: number
+          line_total: number
+          model_code_snapshot: string | null
+          order_id: number
+          owner_id: string
+          price_source: Database["public"]["Enums"]["commercial_profile"]
+          quantity: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          cartucho_id: number
+          created_at?: string
+          description_snapshot?: string | null
+          id?: number
+          line_total: number
+          model_code_snapshot?: string | null
+          order_id: number
+          owner_id?: string
+          price_source: Database["public"]["Enums"]["commercial_profile"]
+          quantity: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          cartucho_id?: number
+          created_at?: string
+          description_snapshot?: string | null
+          id?: number
+          line_total?: number
+          model_code_snapshot?: string | null
+          order_id?: number
+          owner_id?: string
+          price_source?: Database["public"]["Enums"]["commercial_profile"]
+          quantity?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reman_order_items_cartucho_id_fkey"
+            columns: ["cartucho_id"]
+            isOneToOne: false
+            referencedRelation: "cartuchos_cadastro"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reman_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "reman_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reman_order_units: {
+        Row: {
+          cartucho_id: number
+          created_at: string
+          defect_type: string | null
+          id: number
+          notes: string | null
+          order_item_id: number
+          output_weight: number | null
+          owner_id: string
+          status: Database["public"]["Enums"]["reman_unit_status"]
+          unit_code: string
+          updated_at: string
+        }
+        Insert: {
+          cartucho_id: number
+          created_at?: string
+          defect_type?: string | null
+          id?: number
+          notes?: string | null
+          order_item_id: number
+          output_weight?: number | null
+          owner_id?: string
+          status: Database["public"]["Enums"]["reman_unit_status"]
+          unit_code: string
+          updated_at?: string
+        }
+        Update: {
+          cartucho_id?: number
+          created_at?: string
+          defect_type?: string | null
+          id?: number
+          notes?: string | null
+          order_item_id?: number
+          output_weight?: number | null
+          owner_id?: string
+          status?: Database["public"]["Enums"]["reman_unit_status"]
+          unit_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reman_order_units_cartucho_id_fkey"
+            columns: ["cartucho_id"]
+            isOneToOne: false
+            referencedRelation: "cartuchos_cadastro"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reman_order_units_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "reman_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reman_orders: {
+        Row: {
+          cliente_id: number
+          commercial_profile_snapshot: string
+          created_at: string
+          discount: number
+          id: number
+          notes: string | null
+          order_number: string
+          owner_id: string
+          status: Database["public"]["Enums"]["reman_order_status"]
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: number
+          commercial_profile_snapshot: string
+          created_at?: string
+          discount?: number
+          id?: number
+          notes?: string | null
+          order_number: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["reman_order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: number
+          commercial_profile_snapshot?: string
+          created_at?: string
+          discount?: number
+          id?: number
+          notes?: string | null
+          order_number?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["reman_order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reman_orders_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +434,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      commercial_profile: "CLIENTE_FINAL" | "REVENDA"
+      pedido_cartucho_status:
+        | "em_espera"
+        | "em_andamento"
+        | "processo"
+        | "funcionando"
+        | "circuito_queimado"
+        | "defeito_cabeca"
+      pedido_status: "aberto" | "finalizado"
+      reman_order_status:
+        | "aberto"
+        | "em_processamento"
+        | "finalizado"
+        | "cancelado"
+      reman_unit_status: "FUNCIONANDO" | "COM_PROBLEMA"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +575,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      commercial_profile: ["CLIENTE_FINAL", "REVENDA"],
+      pedido_cartucho_status: [
+        "em_espera",
+        "em_andamento",
+        "processo",
+        "funcionando",
+        "circuito_queimado",
+        "defeito_cabeca",
+      ],
+      pedido_status: ["aberto", "finalizado"],
+      reman_order_status: [
+        "aberto",
+        "em_processamento",
+        "finalizado",
+        "cancelado",
+      ],
+      reman_unit_status: ["FUNCIONANDO", "COM_PROBLEMA"],
+    },
   },
 } as const
