@@ -1,9 +1,22 @@
 // Hybrid tRPC facade: real Supabase-backed namespaces mixed with mock hooks
 // for legacy endpoints that haven't been migrated yet.
+import { useQueryClient } from "@tanstack/react-query";
 import { clientesApi } from "./trpc-real/clientes";
+import { cartuchosApi } from "./trpc-real/cartuchos";
+import { empresaApi } from "./trpc-real/empresa";
+import { pedidosApi } from "./trpc-real/pedidos";
+import { pedidoCartuchosApi } from "./trpc-real/pedidoCartuchos";
+import { remanOrdersApi, remanOrderItemsApi, remanOrderUnitsApi } from "./trpc-real/reman";
 
 const REAL_NAMESPACES: Record<string, any> = {
   clientes: clientesApi,
+  cartuchos: cartuchosApi,
+  empresa: empresaApi,
+  pedidos: pedidosApi,
+  pedidoCartuchos: pedidoCartuchosApi,
+  remanOrders: remanOrdersApi,
+  remanOrderItems: remanOrderItemsApi,
+  remanOrderUnits: remanOrderUnitsApi,
 };
 
 const noop = () => {};
@@ -11,7 +24,7 @@ const noopAsync = async () => ({});
 
 function createHookProxy(): any {
   return new Proxy(() => {}, {
-    get(_target, prop) {
+    get(_t, prop) {
       if (prop === "useQuery") {
         return () => ({
           data: undefined,
@@ -45,25 +58,44 @@ function createHookProxy(): any {
           reset: noop,
         });
       }
-      if (prop === "useContext" || prop === "useUtils") {
-        return () => ({
-          invalidate: noop,
-          refetch: noop,
-          reset: noop,
-        });
-      }
       return createHookProxy();
     },
-    apply(_target, _thisArg, _args) {
+    apply() {
       return createHookProxy();
     },
   });
 }
 
+function useUtilsReal() {
+  const qc = useQueryClient();
+  return new Proxy(
+    {},
+    {
+      get(_t, ns) {
+        return new Proxy(
+          {},
+          {
+            get(_t2, method) {
+              return {
+                invalidate: () =>
+                  qc.invalidateQueries({ queryKey: [String(ns), String(method)] }),
+                refetch: () =>
+                  qc.refetchQueries({ queryKey: [String(ns), String(method)] }),
+                reset: () => qc.resetQueries({ queryKey: [String(ns), String(method)] }),
+              };
+            },
+          },
+        );
+      },
+    },
+  );
+}
+
 export const trpc: any = new Proxy(
   {},
   {
-    get(_target, prop: string) {
+    get(_t, prop: string) {
+      if (prop === "useUtils" || prop === "useContext") return useUtilsReal;
       if (typeof prop === "string" && prop in REAL_NAMESPACES) return REAL_NAMESPACES[prop];
       return createHookProxy();
     },
