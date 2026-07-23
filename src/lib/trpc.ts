@@ -1,8 +1,10 @@
-// Mock tRPC client for the browser bundle.
-// The original project used @trpc/server on a Node backend; in this
-// Lovable port that package cannot run in the client, so we provide a
-// runtime-safe proxy that returns empty/successful query and mutation
-// hooks so the UI can render without a real backend.
+// Hybrid tRPC facade: real Supabase-backed namespaces mixed with mock hooks
+// for legacy endpoints that haven't been migrated yet.
+import { clientesApi } from "./trpc-real/clientes";
+
+const REAL_NAMESPACES: Record<string, any> = {
+  clientes: clientesApi,
+};
 
 const noop = () => {};
 const noopAsync = async () => ({});
@@ -58,7 +60,15 @@ function createHookProxy(): any {
   });
 }
 
-export const trpc = createHookProxy();
+export const trpc: any = new Proxy(
+  {},
+  {
+    get(_target, prop: string) {
+      if (typeof prop === "string" && prop in REAL_NAMESPACES) return REAL_NAMESPACES[prop];
+      return createHookProxy();
+    },
+  },
+);
 
 export function createMockTRPCClient() {
   return {} as any;
