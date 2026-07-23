@@ -1,0 +1,125 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+async function getOwnerId() {
+  const { data } = await supabase.auth.getUser();
+  const id = data.user?.id;
+  if (!id) throw new Error("Usuário não autenticado");
+  return id;
+}
+
+function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null) {
+  return {
+    id: r.id,
+    pedidoId: r.pedido_id,
+    cartuchodId: r.cartucho_id,
+    codigo: r.codigo,
+    pesoCheagada: r.peso_chegada,
+    pesoSaida: r.peso_saida,
+    protegido: r.protegido,
+    status: r.status,
+    observacoes: r.observacoes,
+    dataInclusao: r.created_at,
+    modelo01: modelo?.modelo_01 ?? null,
+    modelo02: modelo?.modelo_02 ?? null,
+  };
+}
+
+function toDb(i: any) {
+  const o: any = {};
+  if ("cartuchodId" in i) o.cartucho_id = i.cartuchodId ?? null;
+  if ("codigo" in i) o.codigo = i.codigo || null;
+  if ("pesoCheagada" in i)
+    o.peso_chegada = i.pesoCheagada != null && i.pesoCheagada !== "" ? String(i.pesoCheagada).replace(",", ".") : null;
+  if ("pesoSaida" in i)
+    o.peso_saida = i.pesoSaida != null && i.pesoSaida !== "" ? String(i.pesoSaida).replace(",", ".") : null;
+  if ("protegido" in i) o.protegido = i.protegido ? 1 : 0;
+  if ("status" in i) o.status = i.status;
+  if ("observacoes" in i) o.observacoes = i.observacoes || null;
+  return o;
+}
+
+export const pedidoCartuchosApi = {
+  listar: {
+    useQuery: (pedidoId: number) =>
+      useQuery({
+        queryKey: ["pedidoCartuchos", "listar", pedidoId],
+        enabled: Number.isFinite(pedidoId) && pedidoId > 0,
+        queryFn: async () => {
+          const { data, error } = await supabase
+            .from("pedido_cartuchos")
+            .select("*")
+            .eq("pedido_id", pedidoId)
+            .order("id", { ascending: true });
+          if (error) throw error;
+          const ids = Array.from(new Set((data ?? []).map((r: any) => r.cartucho_id).filter(Boolean))) as number[];
+          let mapModelos = new Map<number, any>();
+          if (ids.length) {
+            const { data: mods, error: e2 } = await supabase
+              .from("cartuchos_cadastro")
+              .select("id, modelo_01, modelo_02")
+              .in("id", ids);
+            if (e2) throw e2;
+            mapModelos = new Map((mods ?? []).map((m: any) => [m.id, m]));
+          }
+          return (data ?? []).map((r: any) => toApp(r, r.cartucho_id ? mapModelos.get(r.cartucho_id) : null));
+        },
+      }),
+  },
+  adicionar: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (input: any) => {
+          const owner_id = await getOwnerId();
+          const { data, error } = await supabase
+            .from("pedido_cartuchos")
+            .insert({
+              owner_id,
+              pedido_id: input.pedidoId,
+              ...toDb(input),
+              status: input.status || "em_espera",
+              protegido: input.protegido ? 1 : 0,
+            })
+            .select("*")
+            .single();
+          if (error) throw error;
+          return toApp(data);
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),
+      });
+    },
+  },
+  atualizar: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (input: any) => {
+          const { id, ...rest } = input;
+          const { data, error } = await supabase
+            .from("pedido_cartuchos")
+            .update(toDb(rest))
+            .eq("id", id)
+            .select("*")
+            .single();
+          if (error) throw error;
+          return toApp(data);
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),
+      });
+    },
+  },
+  remover: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (id: number) => {
+          const { error } = await supabase.from("pedido_cartuchos").delete().eq("id", id);
+          if (error) throw error;
+          return { id };
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),
+      });
+    },
+  },
+};
