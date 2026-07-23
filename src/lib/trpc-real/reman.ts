@@ -78,7 +78,7 @@ async function recomputeTotals(orderId: number) {
   const total = Math.max(0, subtotal - discount);
   await supabase
     .from("reman_orders")
-    .update({ subtotal: subtotal.toFixed(2), total: total.toFixed(2) })
+    .update({ subtotal: subtotal.toFixed(2), total: total.toFixed(2) } as any)
     .eq("id", orderId);
 }
 
@@ -288,7 +288,7 @@ export const remanOrderItemsApi = {
               unit_price: unitPrice.toFixed(2),
               price_source: priceSource,
               line_total: lineTotal.toFixed(2),
-            })
+            } as any)
             .select("*")
             .single();
           if (error) throw error;
@@ -361,7 +361,7 @@ export const remanOrderUnitsApi = {
                   ? String(input.outputWeight).replace(",", ".")
                   : null,
               notes: input.notes || null,
-            })
+            } as any)
             .select("*")
             .single();
           if (error) throw error;
