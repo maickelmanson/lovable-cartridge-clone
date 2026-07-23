@@ -58,7 +58,7 @@ async function copiarCartuchosDoPedido(origemId: number, destinoId: number, owne
     status: "em_espera",
     observacoes: c.observacoes,
   }));
-  const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows);
+  const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows as any);
   if (e2) throw e2;
 }
 
