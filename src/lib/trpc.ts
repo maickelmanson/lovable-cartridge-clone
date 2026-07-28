@@ -7,6 +7,7 @@ import { empresaApi } from "./trpc-real/empresa";
 import { pedidosApi } from "./trpc-real/pedidos";
 import { pedidoCartuchosApi } from "./trpc-real/pedidoCartuchos";
 import { remanOrdersApi, remanOrderItemsApi, remanOrderUnitsApi } from "./trpc-real/reman";
+import { aiApi } from "./trpc-real/ai";
 
 const REAL_NAMESPACES: Record<string, any> = {
   clientes: clientesApi,
@@ -17,6 +18,7 @@ const REAL_NAMESPACES: Record<string, any> = {
   remanOrders: remanOrdersApi,
   remanOrderItems: remanOrderItemsApi,
   remanOrderUnits: remanOrderUnitsApi,
+  ai: aiApi,
 };
 
 const noop = () => {};
