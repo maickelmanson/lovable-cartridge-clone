@@ -155,6 +155,54 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          context: Json | null
+          created_at: string
+          error_message: string
+          error_stack: string | null
+          error_type: string
+          id: number
+          notes: string | null
+          owner_id: string
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["error_severity"]
+          updated_at: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          error_message: string
+          error_stack?: string | null
+          error_type: string
+          id?: number
+          notes?: string | null
+          owner_id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["error_severity"]
+          updated_at?: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          error_message?: string
+          error_stack?: string | null
+          error_type?: string
+          id?: number
+          notes?: string | null
+          owner_id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["error_severity"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pedido_cartuchos: {
         Row: {
           cartucho_id: number | null
@@ -435,6 +483,7 @@ export type Database = {
     }
     Enums: {
       commercial_profile: "CLIENTE_FINAL" | "REVENDA"
+      error_severity: "baixa" | "media" | "alta" | "critica"
       pedido_cartucho_status:
         | "em_espera"
         | "em_andamento"
@@ -577,6 +626,7 @@ export const Constants = {
   public: {
     Enums: {
       commercial_profile: ["CLIENTE_FINAL", "REVENDA"],
+      error_severity: ["baixa", "media", "alta", "critica"],
       pedido_cartucho_status: [
         "em_espera",
         "em_andamento",

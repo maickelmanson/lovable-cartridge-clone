@@ -8,6 +8,11 @@ import { pedidosApi } from "./trpc-real/pedidos";
 import { pedidoCartuchosApi } from "./trpc-real/pedidoCartuchos";
 import { remanOrdersApi, remanOrderItemsApi, remanOrderUnitsApi } from "./trpc-real/reman";
 import { aiApi } from "./trpc-real/ai";
+import { buscaApi } from "./trpc-real/busca";
+import { analiseApi } from "./trpc-real/analise";
+import { errosApi } from "./trpc-real/erros";
+import { systemApi } from "./trpc-real/system";
+import { buscadorCartuchosApi } from "./trpc-real/buscadorCartuchos";
 
 const REAL_NAMESPACES: Record<string, any> = {
   clientes: clientesApi,
@@ -19,6 +24,11 @@ const REAL_NAMESPACES: Record<string, any> = {
   remanOrderItems: remanOrderItemsApi,
   remanOrderUnits: remanOrderUnitsApi,
   ai: aiApi,
+  busca: buscaApi,
+  analise: analiseApi,
+  erros: errosApi,
+  system: systemApi,
+  buscadorCartuchos: buscadorCartuchosApi,
 };
 
 const noop = () => {};
