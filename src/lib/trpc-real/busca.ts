@@ -82,8 +82,8 @@ async function cartuchosPorCodigoOuModelo(termo: string, apenasCodigo: boolean) 
     nomes = new Map((cs ?? []).map((c: any) => [c.id, c.nome]));
   }
 
-  const mapMod = new Map((mods ?? []).map((m: any) => [m.id, m]));
-  const mapPed = new Map((peds ?? []).map((p: any) => [p.id, p]));
+  const mapMod = new Map<number, any>((mods ?? []).map((m: any) => [m.id, m]));
+  const mapPed = new Map<number, any>((peds ?? []).map((p: any) => [p.id, p]));
 
   return rows.map((r: any) => {
     const ped = mapPed.get(r.pedido_id);
