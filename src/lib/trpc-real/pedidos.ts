@@ -335,9 +335,13 @@ export const pedidosApi = {
           if (error) throw error;
           const reman = await gerarRemanAPartirDoPedido(id);
           return { ...toApp(data), remanOrderId: reman.remanOrderId, remanOrderNumber: reman.orderNumber };
-
         },
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["pedidos"] });
+          qc.invalidateQueries({ queryKey: ["remanOrders"] });
+          qc.invalidateQueries({ queryKey: ["remanOrderItems"] });
+        },
+
       });
     },
   },
