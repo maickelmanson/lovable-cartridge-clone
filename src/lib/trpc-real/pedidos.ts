@@ -62,7 +62,177 @@ async function copiarCartuchosDoPedido(origemId: number, destinoId: number, owne
   if (e2) throw e2;
 }
 
+const DEFEITO_STATUS = ["circuito_queimado", "defeito_cabeca"] as const;
+
+function defeitoLabel(status: string) {
+  return status === "circuito_queimado" ? "CIRCUITO QUEIMADO" : "DEFEITO NA CABEÇA";
+}
+
+/**
+ * Gera (ou regenera) o pedido de remanufatura a partir de um pedido normal finalizado.
+ * Mantém o mesmo número (REM-<numero do pedido>) para não duplicar pedidos ao reabrir/finalizar.
+ */
+async function gerarRemanAPartirDoPedido(pedidoId: number) {
+  const owner_id = await getOwnerId();
+
+  const { data: pedido, error: ePed } = await supabase
+    .from("pedidos")
+    .select("id, numero, cliente_id")
+    .eq("id", pedidoId)
+    .single();
+  if (ePed) throw ePed;
+
+  const { data: cliente, error: eCli } = await supabase
+    .from("clientes")
+    .select("id, commercial_profile")
+    .eq("id", pedido.cliente_id)
+    .single();
+  if (eCli) throw eCli;
+
+  const profile = cliente.commercial_profile || "CLIENTE_FINAL";
+  const orderNumber = `REM-${pedido.numero}`;
+
+  // Reaproveitar pedido reman existente (evita criar novo ao reabrir/finalizar de novo)
+  const { data: existente } = await supabase
+    .from("reman_orders")
+    .select("id, order_number")
+    .eq("order_number", orderNumber)
+    .maybeSingle();
+
+  let remanOrderId: number;
+  if (existente) {
+    remanOrderId = existente.id;
+    const { data: oldItems } = await supabase
+      .from("reman_order_items")
+      .select("id")
+      .eq("order_id", remanOrderId);
+    const oldIds = (oldItems ?? []).map((i: any) => i.id);
+    if (oldIds.length) await supabase.from("reman_order_units").delete().in("order_item_id", oldIds);
+    await supabase.from("reman_order_items").delete().eq("order_id", remanOrderId);
+  } else {
+    const { data: novo, error: eNovo } = await supabase
+      .from("reman_orders")
+      .insert({
+        owner_id,
+        order_number: orderNumber,
+        cliente_id: pedido.cliente_id,
+        commercial_profile_snapshot: profile,
+        status: "finalizado",
+        subtotal: "0",
+        discount: "0",
+        total: "0",
+        notes: `Gerado automaticamente a partir do Pedido #${pedido.numero}`,
+      } as any)
+      .select("id")
+      .single();
+    if (eNovo) throw eNovo;
+    remanOrderId = novo.id;
+  }
+
+  const { data: cartuchos, error: eCart } = await supabase
+    .from("pedido_cartuchos")
+    .select("*")
+    .eq("pedido_id", pedidoId);
+  if (eCart) throw eCart;
+
+  const modeloIds = Array.from(
+    new Set((cartuchos ?? []).map((c: any) => c.cartucho_id).filter(Boolean)),
+  ) as number[];
+  const { data: modelos } = modeloIds.length
+    ? await supabase
+        .from("cartuchos_cadastro")
+        .select("id, modelo_01, modelo_02, price_final_customer, price_reseller")
+        .in("id", modeloIds)
+    : { data: [] as any[] };
+  const mapModelo = new Map<number, any>((modelos ?? []).map((m: any) => [m.id, m]));
+
+  type Grupo = {
+    cartuchoId: number;
+    modelo: any;
+    unidades: { codigo: string | null; pesoSaida: string | null; garantia: boolean; defeito: string | null }[];
+  };
+  const grupos = new Map<number, Grupo>();
+
+  for (const c of cartuchos ?? []) {
+    const isDefeito = (DEFEITO_STATUS as readonly string[]).includes(c.status);
+    if (c.status !== "funcionando" && !isDefeito) continue;
+    const key = c.cartucho_id || 0;
+    if (!grupos.has(key)) {
+      grupos.set(key, { cartuchoId: key, modelo: mapModelo.get(key) ?? null, unidades: [] });
+    }
+    grupos.get(key)!.unidades.push({
+      codigo: c.codigo,
+      pesoSaida: c.peso_saida,
+      garantia: Number(c.protegido) === 1,
+      defeito: isDefeito ? defeitoLabel(c.status) : null,
+    });
+  }
+
+  let subtotal = 0;
+
+  for (const grupo of Array.from(grupos.values())) {
+    const unitPrice = Number(
+      profile === "REVENDA"
+        ? grupo.modelo?.price_reseller || 0
+        : grupo.modelo?.price_final_customer || 0,
+    );
+    // Cobrança apenas de cartuchos funcionando e fora de garantia
+    const cobraveis = grupo.unidades.filter((u) => !u.defeito && !u.garantia).length;
+    const lineTotal = unitPrice * cobraveis;
+    subtotal += lineTotal;
+
+    const { data: item, error: eItem } = await supabase
+      .from("reman_order_items")
+      .insert({
+        owner_id,
+        order_id: remanOrderId,
+        cartucho_id: grupo.cartuchoId,
+        description_snapshot: grupo.modelo?.modelo_01 || "SEM MODELO",
+        model_code_snapshot: grupo.modelo?.modelo_02 || null,
+        quantity: cobraveis,
+        unit_price: unitPrice.toFixed(2),
+        price_source: profile,
+        line_total: lineTotal.toFixed(2),
+      } as any)
+      .select("id")
+      .single();
+    if (eItem) throw eItem;
+
+    const rows = grupo.unidades.map((u) => ({
+      owner_id,
+      order_item_id: item.id,
+      cartucho_id: grupo.cartuchoId,
+      unit_code: u.codigo || "SEM-CODIGO",
+      status: u.defeito ? "COM_PROBLEMA" : "FUNCIONANDO",
+      defect_type: u.defeito,
+      output_weight: u.defeito ? null : u.pesoSaida,
+      is_warranty: u.garantia && !u.defeito,
+    }));
+    if (rows.length) {
+      const { error: eUnits } = await supabase.from("reman_order_units").insert(rows as any);
+      if (eUnits) throw eUnits;
+    }
+  }
+
+  const { data: atual } = await supabase
+    .from("reman_orders")
+    .select("discount")
+    .eq("id", remanOrderId)
+    .maybeSingle();
+  const discount = Number(atual?.discount || 0);
+  await supabase
+    .from("reman_orders")
+    .update({
+      subtotal: subtotal.toFixed(2),
+      total: Math.max(0, subtotal - discount).toFixed(2),
+    } as any)
+    .eq("id", remanOrderId);
+
+  return { remanOrderId, orderNumber };
+}
+
 const LIST_KEY = ["pedidos", "listar"] as const;
+
 
 export const pedidosApi = {
   listar: {
@@ -163,9 +333,15 @@ export const pedidosApi = {
             .select("*")
             .single();
           if (error) throw error;
-          return { ...toApp(data), remanOrderId: null };
+          const reman = await gerarRemanAPartirDoPedido(id);
+          return { ...toApp(data), remanOrderId: reman.remanOrderId, remanOrderNumber: reman.orderNumber };
         },
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["pedidos"] });
+          qc.invalidateQueries({ queryKey: ["remanOrders"] });
+          qc.invalidateQueries({ queryKey: ["remanOrderItems"] });
+        },
+
       });
     },
   },

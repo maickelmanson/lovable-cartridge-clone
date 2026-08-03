@@ -370,6 +370,7 @@ export type Database = {
           created_at: string
           defect_type: string | null
           id: number
+          is_warranty: boolean
           notes: string | null
           order_item_id: number
           output_weight: number | null
@@ -383,6 +384,7 @@ export type Database = {
           created_at?: string
           defect_type?: string | null
           id?: number
+          is_warranty?: boolean
           notes?: string | null
           order_item_id: number
           output_weight?: number | null
@@ -396,6 +398,7 @@ export type Database = {
           created_at?: string
           defect_type?: string | null
           id?: number
+          is_warranty?: boolean
           notes?: string | null
           order_item_id?: number
           output_weight?: number | null
