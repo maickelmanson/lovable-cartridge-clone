@@ -344,7 +344,7 @@ export const remanOrderUnitsApi = {
             .eq("order_item_id", orderItemId)
             .order("id", { ascending: true });
           if (error) throw error;
-          return (data ?? []).map(unitToApp);
+          return (data ?? []).map((u: any) => unitToApp(u));
         },
       }),
   },
