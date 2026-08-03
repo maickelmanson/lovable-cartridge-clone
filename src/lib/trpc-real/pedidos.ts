@@ -333,7 +333,9 @@ export const pedidosApi = {
             .select("*")
             .single();
           if (error) throw error;
-          return { ...toApp(data), remanOrderId: null };
+          const reman = await gerarRemanAPartirDoPedido(id);
+          return { ...toApp(data), remanOrderId: reman.remanOrderId, remanOrderNumber: reman.orderNumber };
+
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
       });
