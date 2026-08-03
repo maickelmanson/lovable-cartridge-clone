@@ -398,6 +398,8 @@ export const remanOrderUnitsApi = {
                   ? String(input.outputWeight).replace(",", ".")
                   : null,
               notes: input.notes || null,
+              is_warranty: !!input.isGarantia,
+
             } as any)
             .select("*")
             .single();
