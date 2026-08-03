@@ -3,7 +3,23 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Tipo = "geral" | "codigo" | "cliente" | "telefone" | "cpf" | "cnpj" | "pedido";
 
-const CLIENTE_COLS = "id, nome, telefone, cpf, cnpj, commercial_profile";
+/** Normaliza texto removendo acentos e caixa, para busca insensível a acentuação */
+function norm(v: unknown) {
+  return String(v ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function matches(termo: string, ...campos: unknown[]) {
+  const t = norm(termo);
+  if (!t) return false;
+  return campos.some((c) => norm(c).includes(t));
+}
+
+const CLIENTE_COLS = "id, nome, telefone, telefone2, cpf, cnpj, commercial_profile";
+
 
 function clienteToApp(c: any) {
   return {
