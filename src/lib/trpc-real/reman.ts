@@ -124,10 +124,14 @@ export const remanOrdersApi = {
           if (!data) return null;
           const { data: cli } = await supabase
             .from("clientes")
-            .select("nome")
+            .select("nome, endereco, telefone")
             .eq("id", data.cliente_id)
             .maybeSingle();
-          return orderToApp(data, cli?.nome ?? null);
+          return {
+            ...orderToApp(data, cli?.nome ?? null),
+            clienteEndereco: cli?.endereco ?? null,
+            clienteTelefone: cli?.telefone ?? null,
+          };
         },
       }),
   },
@@ -143,15 +147,41 @@ export const remanOrdersApi = {
             .eq("order_id", id);
           const itemIds = (items ?? []).map((i: any) => i.id);
           const { data: units } = itemIds.length
-            ? await supabase.from("reman_order_units").select("*").in("order_item_id", itemIds)
+            ? await supabase
+                .from("reman_order_units")
+                .select("*")
+                .in("order_item_id", itemIds)
+                .order("id", { ascending: true })
             : { data: [] as any[] };
-          const totalUnidades = units?.length || 0;
-          const funcionando = (units || []).filter((u: any) => u.status === "FUNCIONANDO").length;
-          const comProblema = totalUnidades - funcionando;
-          return { totalItens: items?.length || 0, totalUnidades, funcionando, comProblema };
+
+          // Buscar modelos (modelo01/modelo02) das unidades
+          const cartuchoIds = Array.from(
+            new Set((units ?? []).map((u: any) => u.cartucho_id).filter(Boolean)),
+          ) as number[];
+          const { data: mods } = cartuchoIds.length
+            ? await supabase
+                .from("cartuchos_cadastro")
+                .select("id, modelo_01, modelo_02")
+                .in("id", cartuchoIds)
+            : { data: [] as any[] };
+          const mapMod = new Map<number, any>((mods ?? []).map((m: any) => [m.id, m]));
+
+          const todas = (units ?? []).map((u: any) => unitToApp(u, mapMod.get(u.cartucho_id) ?? null));
+          const funcionando = todas.filter((u) => u.status === "FUNCIONANDO" && !u.isGarantia);
+          const garantia = todas.filter((u) => u.status === "FUNCIONANDO" && u.isGarantia);
+          const comProblema = todas.filter((u) => u.status === "COM_PROBLEMA");
+
+          return {
+            totalItens: items?.length || 0,
+            totalUnidades: todas.length,
+            funcionando,
+            garantia,
+            comProblema,
+          };
         },
       }),
   },
+
   criar: {
     useMutation: () => {
       const qc = useQueryClient();
