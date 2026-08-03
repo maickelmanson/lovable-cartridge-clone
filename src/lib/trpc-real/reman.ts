@@ -32,6 +32,9 @@ function itemToApp(r: any) {
     cartuchoId: r.cartucho_id,
     descriptionSnapshot: r.description_snapshot,
     modelCodeSnapshot: r.model_code_snapshot,
+    // modelo01 = descrição completa, modelo02 = código abreviado
+    modelo01: r.description_snapshot,
+    modelo02: r.model_code_snapshot,
     quantity: r.quantity,
     unitPrice: r.unit_price,
     priceSource: r.price_source,
@@ -40,7 +43,7 @@ function itemToApp(r: any) {
   };
 }
 
-function unitToApp(r: any) {
+function unitToApp(r: any, modelo?: { modelo_01?: string | null; modelo_02?: string | null } | null) {
   return {
     id: r.id,
     orderItemId: r.order_item_id,
@@ -49,10 +52,14 @@ function unitToApp(r: any) {
     status: r.status,
     defectType: r.defect_type,
     outputWeight: r.output_weight,
+    isGarantia: !!r.is_warranty,
+    modelo01: modelo?.modelo_01 ?? null,
+    modelo02: modelo?.modelo_02 ?? null,
     notes: r.notes,
     criadoEm: r.created_at,
   };
 }
+
 
 async function proximoOrderNumber() {
   const { data, error } = await supabase
