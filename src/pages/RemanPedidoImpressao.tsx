@@ -236,6 +236,35 @@ export default function RemanPedidoImpressao() {
           </div>
         )}
 
+        {/* ===== CARTUCHOS EM GARANTIA ===== */}
+        {relatorio?.garantia && relatorio.garantia.length > 0 && (
+          <div className="mb-6">
+            <table className="w-full text-sm border-collapse border border-black">
+              <thead>
+                <tr className="bg-yellow-100">
+                  <th className="text-left py-2 px-3 border border-black">Modelo 02</th>
+                  <th colSpan={2} className="text-center py-2 px-3 border border-black">Cartuchos Garantia</th>
+                </tr>
+                <tr className="bg-yellow-50">
+                  <th className="text-left py-2 px-3 border border-black"></th>
+                  <th className="text-left py-2 px-3 border border-black">Código</th>
+                  <th className="text-right py-2 px-3 border border-black w-32">Peso de Saída</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatorio.garantia.map((unit: any) => (
+                  <tr key={unit.id}>
+                    <td className="py-1.5 px-3 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                    <td className="py-1.5 px-3 border border-black uppercase">{unit.unitCode}</td>
+                    <td className="py-1.5 px-3 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+
         {/* ===== CARTUCHOS COM PROBLEMA ===== */}
         {relatorio?.comProblema && relatorio.comProblema.length > 0 && (
           <div className="mb-6">
