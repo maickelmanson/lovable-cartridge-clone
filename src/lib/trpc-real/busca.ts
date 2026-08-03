@@ -55,41 +55,33 @@ async function pedidosPorFiltro(filter: (q: any) => any) {
   }));
 }
 
+/** Busca cartuchos de pedidos por código ou modelo, ignorando acentos e caixa */
 async function cartuchosPorCodigoOuModelo(termo: string, apenasCodigo: boolean) {
-  const like = `%${termo}%`;
-  let modeloIds: number[] = [];
-  if (!apenasCodigo) {
-    const { data: mods } = await supabase
-      .from("cartuchos_cadastro")
-      .select("id")
-      .or(`modelo_01.ilike.${like},modelo_02.ilike.${like}`);
-    modeloIds = (mods ?? []).map((m: any) => m.id);
-  }
-
-  const filtro = apenasCodigo || modeloIds.length === 0
-    ? `codigo.ilike.${like}`
-    : `codigo.ilike.${like},cartucho_id.in.(${modeloIds.join(",")})`;
+  const { data: mods } = await supabase
+    .from("cartuchos_cadastro")
+    .select("id, modelo_01, modelo_02");
+  const mapMod = new Map<number, any>((mods ?? []).map((m: any) => [m.id, m]));
+  const modeloIds = apenasCodigo
+    ? []
+    : (mods ?? [])
+        .filter((m: any) => matches(termo, m.modelo_01, m.modelo_02))
+        .map((m: any) => m.id);
 
   const { data, error } = await supabase
     .from("pedido_cartuchos")
     .select("*")
-    .or(filtro)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  const rows = data ?? [];
+
+  const rows = (data ?? []).filter(
+    (r: any) => matches(termo, r.codigo) || modeloIds.includes(r.cartucho_id),
+  );
   if (!rows.length) return [];
 
-  const cartuchoIds = Array.from(new Set(rows.map((r: any) => r.cartucho_id).filter(Boolean)));
   const pedidoIds = Array.from(new Set(rows.map((r: any) => r.pedido_id).filter(Boolean)));
-
-  const [{ data: mods }, { data: peds }] = await Promise.all([
-    cartuchoIds.length
-      ? supabase.from("cartuchos_cadastro").select("id, modelo_01, modelo_02").in("id", cartuchoIds as number[])
-      : Promise.resolve({ data: [] as any[] } as any),
-    pedidoIds.length
-      ? supabase.from("pedidos").select("id, numero, cliente_id").in("id", pedidoIds as number[])
-      : Promise.resolve({ data: [] as any[] } as any),
-  ]);
+  const { data: peds } = pedidoIds.length
+    ? await supabase.from("pedidos").select("id, numero, cliente_id").in("id", pedidoIds as number[])
+    : { data: [] as any[] };
 
   const clienteIds = Array.from(new Set((peds ?? []).map((p: any) => p.cliente_id).filter(Boolean)));
   let nomes = new Map<number, string>();
@@ -97,8 +89,6 @@ async function cartuchosPorCodigoOuModelo(termo: string, apenasCodigo: boolean) 
     const { data: cs } = await supabase.from("clientes").select("id, nome").in("id", clienteIds as number[]);
     nomes = new Map((cs ?? []).map((c: any) => [c.id, c.nome]));
   }
-
-  const mapMod = new Map<number, any>((mods ?? []).map((m: any) => [m.id, m]));
   const mapPed = new Map<number, any>((peds ?? []).map((p: any) => [p.id, p]));
 
   return rows.map((r: any) => {
@@ -117,55 +107,52 @@ async function cartuchosPorCodigoOuModelo(termo: string, apenasCodigo: boolean) 
   });
 }
 
+async function clientesFiltrados(termo: string, campos: string[]) {
+  const { data, error } = await supabase.from("clientes").select(CLIENTE_COLS).order("nome");
+  if (error) throw error;
+  return (data ?? [])
+    .filter((c: any) => matches(termo, ...campos.map((f) => c[f])))
+    .map(clienteToApp);
+}
+
 async function buscar(tipo: Tipo, termo: string) {
   const t = termo.trim();
   if (!t) return { pedidos: [], cartuchos: [], clientes: [] };
-  const like = `%${t}%`;
 
   if (tipo === "codigo") {
     return { pedidos: [], cartuchos: await cartuchosPorCodigoOuModelo(t, true), clientes: [] };
   }
 
-  const colunaCliente: Record<string, string> = {
-    cliente: "nome",
-    telefone: "telefone",
-    cpf: "cpf",
-    cnpj: "cnpj",
+  const camposCliente: Record<string, string[]> = {
+    cliente: ["nome"],
+    telefone: ["telefone", "telefone2"],
+    cpf: ["cpf"],
+    cnpj: ["cnpj"],
   };
-  if (colunaCliente[tipo]) {
-    const { data, error } = await supabase
-      .from("clientes")
-      .select(CLIENTE_COLS)
-      .ilike(colunaCliente[tipo], like)
-      .order("nome");
-    if (error) throw error;
-    return { pedidos: [], cartuchos: [], clientes: (data ?? []).map(clienteToApp) };
+  if (camposCliente[tipo]) {
+    return { pedidos: [], cartuchos: [], clientes: await clientesFiltrados(t, camposCliente[tipo]) };
   }
 
   if (tipo === "pedido") {
-    return { pedidos: await pedidosPorFiltro((q: any) => q.ilike("numero", like)), cartuchos: [], clientes: [] };
+    const pedidos = await pedidosPorFiltro((q: any) => q);
+    return { pedidos: pedidos.filter((p: any) => matches(t, p.numero)), cartuchos: [], clientes: [] };
   }
 
   // geral
-  const { data: cli } = await supabase
-    .from("clientes")
-    .select(CLIENTE_COLS)
-    .or(`nome.ilike.${like},telefone.ilike.${like},cpf.ilike.${like},cnpj.ilike.${like}`)
-    .order("nome");
-  const clientesList = (cli ?? []).map(clienteToApp);
-  const clienteIds = clientesList.map((c: any) => c.id);
+  const clientesList = await clientesFiltrados(t, ["nome", "telefone", "telefone2", "cpf", "cnpj"]);
+  const clienteIds = new Set(clientesList.map((c: any) => c.id));
 
-  const filtroPedidos = clienteIds.length
-    ? `numero.ilike.${like},cliente_id.in.(${clienteIds.join(",")})`
-    : `numero.ilike.${like}`;
-
-  const [pedidosList, cartuchosList] = await Promise.all([
-    pedidosPorFiltro((q: any) => q.or(filtroPedidos)),
+  const [todosPedidos, cartuchosList] = await Promise.all([
+    pedidosPorFiltro((q: any) => q),
     cartuchosPorCodigoOuModelo(t, false),
   ]);
+  const pedidosList = todosPedidos.filter(
+    (p: any) => matches(t, p.numero, p.clienteNome) || clienteIds.has(p.clienteId),
+  );
 
   return { pedidos: pedidosList, cartuchos: cartuchosList, clientes: clientesList };
 }
+
 
 export const buscaApi = {
   avancada: {
