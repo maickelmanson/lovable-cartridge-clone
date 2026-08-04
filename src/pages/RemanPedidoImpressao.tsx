@@ -172,7 +172,7 @@ export default function RemanPedidoImpressao() {
         </div>
 
         {/* ===== TABELA DE PRODUTOS ===== */}
-        <div className="mb-6">
+        <div className="mb-3">
           <table className="w-full text-sm border-collapse border border-black">
             <thead>
               <tr className="bg-gray-200">
@@ -210,7 +210,7 @@ export default function RemanPedidoImpressao() {
 
         {/* ===== CARTUCHOS FUNCIONANDO ===== */}
         {relatorio?.funcionando && relatorio.funcionando.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-3">
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-green-100">
@@ -241,7 +241,7 @@ export default function RemanPedidoImpressao() {
 
         {/* ===== CARTUCHOS EM GARANTIA ===== */}
         {relatorio?.garantia && relatorio.garantia.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-3">
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-yellow-100">
@@ -274,7 +274,7 @@ export default function RemanPedidoImpressao() {
 
         {/* ===== CARTUCHOS COM PROBLEMA ===== */}
         {relatorio?.comProblema && relatorio.comProblema.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-3">
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-red-100">
