@@ -246,12 +246,11 @@ export default function RemanPedidoImpressao() {
               <thead>
                 <tr className="bg-yellow-100">
                   <th className="text-left py-2 px-3 border border-black">Modelo 02</th>
-                  <th colSpan={3} className="text-center py-2 px-3 border border-black">Cartuchos Garantia</th>
+                  <th colSpan={2} className="text-center py-2 px-3 border border-black">Cartuchos Garantia</th>
                 </tr>
                 <tr className="bg-yellow-50">
                   <th className="text-left py-2 px-3 border border-black"></th>
                   <th className="text-left py-2 px-3 border border-black">Código</th>
-                  <th className="text-right py-2 px-3 border border-black w-32">Peso de Chegada</th>
                   <th className="text-right py-2 px-3 border border-black w-32">Peso de Saída</th>
                 </tr>
               </thead>
@@ -263,12 +262,12 @@ export default function RemanPedidoImpressao() {
                       {unit.unitCode}
                       {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
                     </td>
-                    <td className="py-1.5 px-3 border border-black text-right">{formatPeso(unit.inputWeight)}</td>
                     <td className="py-1.5 px-3 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
           </div>
         )}
 
