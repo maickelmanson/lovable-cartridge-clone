@@ -494,6 +494,7 @@ export type Database = {
         | "funcionando"
         | "circuito_queimado"
         | "defeito_cabeca"
+        | "garantia"
       pedido_status: "aberto" | "finalizado"
       reman_order_status:
         | "aberto"
@@ -637,6 +638,7 @@ export const Constants = {
         "funcionando",
         "circuito_queimado",
         "defeito_cabeca",
+        "garantia",
       ],
       pedido_status: ["aberto", "finalizado"],
       reman_order_status: [

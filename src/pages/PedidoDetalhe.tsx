@@ -20,6 +20,7 @@ const STATUS_OPTIONS = [
   { value: "funcionando", label: "Funcionando", color: "bg-emerald-100 text-emerald-800" },
   { value: "circuito_queimado", label: "Circuito Queimado", color: "bg-red-100 text-red-800" },
   { value: "defeito_cabeca", label: "Defeito na Cabeça", color: "bg-red-100 text-red-800" },
+  { value: "garantia", label: "Garantia", color: "bg-yellow-100 text-yellow-800" },
 ];
 
 const formatarPesoComVirgula = (valor: string) => {
@@ -147,7 +148,7 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
-  const handleAtualizarStatus = async (cartucho: any, novoStatus: "em_espera" | "em_andamento" | "processo" | "funcionando" | "circuito_queimado" | "defeito_cabeca") => {
+  const handleAtualizarStatus = async (cartucho: any, novoStatus: "em_espera" | "em_andamento" | "processo" | "funcionando" | "circuito_queimado" | "defeito_cabeca" | "garantia") => {
     try {
       const pesoCheagada = cartucho.pesoCheagada ? parseFloat(String(cartucho.pesoCheagada).replace(",", ".")) : 0;
       const pesoSaida = cartucho.pesoSaida ? parseFloat(String(cartucho.pesoSaida).replace(",", ".")) : 0;

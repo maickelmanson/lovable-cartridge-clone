@@ -155,7 +155,8 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
 
   for (const c of cartuchos ?? []) {
     const isDefeito = (DEFEITO_STATUS as readonly string[]).includes(c.status);
-    if (c.status !== "funcionando" && !isDefeito) continue;
+    const isGarantia = c.status === "garantia";
+    if (c.status !== "funcionando" && !isDefeito && !isGarantia) continue;
     const key = c.cartucho_id || 0;
     if (!grupos.has(key)) {
       grupos.set(key, { cartuchoId: key, modelo: mapModelo.get(key) ?? null, unidades: [] });
@@ -163,7 +164,7 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
     grupos.get(key)!.unidades.push({
       codigo: c.codigo,
       pesoSaida: c.peso_saida,
-      garantia: Number(c.protegido) === 1,
+      garantia: isGarantia,
       defeito: isDefeito ? defeitoLabel(c.status) : null,
     });
   }
