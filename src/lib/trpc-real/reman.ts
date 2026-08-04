@@ -166,7 +166,29 @@ export const remanOrdersApi = {
             : { data: [] as any[] };
           const mapMod = new Map<number, any>((mods ?? []).map((m: any) => [m.id, m]));
 
-          const todas = (units ?? []).map((u: any) => unitToApp(u, mapMod.get(u.cartucho_id) ?? null));
+          // Dados de origem (peso de chegada / protegido) vindos do pedido original
+          const codigos = Array.from(
+            new Set((units ?? []).map((u: any) => u.unit_code).filter(Boolean)),
+          ) as string[];
+          const { data: origem } = codigos.length
+            ? await supabase
+                .from("pedido_cartuchos")
+                .select("codigo, peso_chegada, protegido")
+                .in("codigo", codigos)
+            : { data: [] as any[] };
+          const mapOrigem = new Map<string, any>(
+            (origem ?? []).map((o: any) => [String(o.codigo), o]),
+          );
+
+          const todas = (units ?? []).map((u: any) => {
+            const base = unitToApp(u, mapMod.get(u.cartucho_id) ?? null);
+            const o = mapOrigem.get(String(u.unit_code));
+            return {
+              ...base,
+              inputWeight: o?.peso_chegada ?? null,
+              protegido: !!(o?.protegido),
+            };
+          });
           const funcionando = todas.filter((u) => u.status === "FUNCIONANDO" && !u.isGarantia);
           const garantia = todas.filter((u) => u.status === "FUNCIONANDO" && u.isGarantia);
           const comProblema = todas.filter((u) => u.status === "COM_PROBLEMA");
