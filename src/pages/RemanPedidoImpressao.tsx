@@ -150,22 +150,22 @@ export default function RemanPedidoImpressao() {
 
         {/* ===== DADOS DO CLIENTE ===== */}
         <div className="mb-6 border border-black">
-          <div className="bg-gray-200 px-3 py-1 text-center font-bold text-sm border-b border-black">
+          <div className="bg-gray-200 px-2 py-0.5 text-center font-bold text-sm border-b border-black">
             Dados do Cliente
           </div>
           <table className="w-full text-sm">
             <tbody>
               <tr className="border-b border-gray-300">
-                <td className="px-3 py-1 font-semibold w-40 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
-                <td className="px-3 py-1 uppercase">{order.clienteNome || "-"}</td>
+                <td className="px-2 py-0.5 font-semibold w-40 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
+                <td className="px-2 py-0.5 uppercase">{order.clienteNome || "-"}</td>
               </tr>
               <tr className="border-b border-gray-300">
-                <td className="px-3 py-1 font-semibold bg-gray-50 border-r border-gray-300">Endereço</td>
-                <td className="px-3 py-1 uppercase">{clienteEndereco || "-"}</td>
+                <td className="px-2 py-0.5 font-semibold bg-gray-50 border-r border-gray-300">Endereço</td>
+                <td className="px-2 py-0.5 uppercase">{clienteEndereco || "-"}</td>
               </tr>
               <tr className="border-b border-gray-300">
-                <td className="px-3 py-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
-                <td className="px-3 py-1">{order.clienteTelefone || "-"}</td>
+                <td className="px-2 py-0.5 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
+                <td className="px-2 py-0.5">{order.clienteTelefone || "-"}</td>
               </tr>
             </tbody>
           </table>
@@ -176,24 +176,24 @@ export default function RemanPedidoImpressao() {
           <table className="w-full text-sm border-collapse border border-black">
             <thead>
               <tr className="bg-gray-200">
-                <th className="text-left py-2 px-3 border border-black">Produto</th>
-                <th className="text-center py-2 px-3 border border-black w-16">Qtd.</th>
-                <th className="text-right py-2 px-3 border border-black w-28">Preço</th>
-                <th className="text-right py-2 px-3 border border-black w-32">Total</th>
+                <th className="text-left py-1 px-2 border border-black">Produto</th>
+                <th className="text-center py-1 px-2 border border-black w-16">Qtd.</th>
+                <th className="text-right py-1 px-2 border border-black w-28">Preço</th>
+                <th className="text-right py-1 px-2 border border-black w-32">Total</th>
               </tr>
             </thead>
             <tbody>
               {produtosAgrupados.map((prod: any, idx: any) => (
                 <tr key={idx}>
-                  <td className="py-2 px-3 border border-black uppercase">{prod.modelo}</td>
-                  <td className="py-2 px-3 border border-black text-center">{prod.quantidade}</td>
-                  <td className="py-2 px-3 border border-black text-right">{formatBRL(prod.valorUnit)}</td>
-                  <td className="py-2 px-3 border border-black text-right font-semibold">{formatBRL(prod.total)}</td>
+                  <td className="py-1 px-2 border border-black uppercase">{prod.modelo}</td>
+                  <td className="py-1 px-2 border border-black text-center">{prod.quantidade}</td>
+                  <td className="py-1 px-2 border border-black text-right">{formatBRL(prod.valorUnit)}</td>
+                  <td className="py-1 px-2 border border-black text-right font-semibold">{formatBRL(prod.total)}</td>
                 </tr>
               ))}
               {produtosAgrupados.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-2 px-3 border border-black text-center text-gray-500">
+                  <td colSpan={4} className="py-1 px-2 border border-black text-center text-gray-500">
                     Nenhum produto funcionando
                   </td>
                 </tr>
@@ -214,24 +214,24 @@ export default function RemanPedidoImpressao() {
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-green-100">
-                  <th className="text-left py-2 px-3 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-2 px-3 border border-black">Cartuchos Funcionando</th>
+                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
+                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartuchos Funcionando</th>
                 </tr>
                 <tr className="bg-green-50">
-                  <th className="text-left py-2 px-3 border border-black"></th>
-                  <th className="text-left py-2 px-3 border border-black">Código</th>
-                  <th className="text-right py-2 px-3 border border-black w-32">Peso de Saída</th>
+                  <th className="text-left py-1 px-2 border border-black"></th>
+                  <th className="text-left py-1 px-2 border border-black">Código</th>
+                  <th className="text-right py-1 px-2 border border-black w-32">Peso de Saída</th>
                 </tr>
               </thead>
               <tbody>
                 {relatorio.funcionando.map((unit: any) => (
                   <tr key={unit.id}>
-                    <td className="py-1.5 px-3 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-1.5 px-3 border border-black uppercase">
+                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                    <td className="py-0.5 px-2 border border-black uppercase">
                       {unit.unitCode}
                       {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
                     </td>
-                    <td className="py-1.5 px-3 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
+                    <td className="py-0.5 px-2 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -245,24 +245,24 @@ export default function RemanPedidoImpressao() {
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-yellow-100">
-                  <th className="text-left py-2 px-3 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-2 px-3 border border-black">Cartuchos Garantia</th>
+                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
+                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartuchos Garantia</th>
                 </tr>
                 <tr className="bg-yellow-50">
-                  <th className="text-left py-2 px-3 border border-black"></th>
-                  <th className="text-left py-2 px-3 border border-black">Código</th>
-                  <th className="text-right py-2 px-3 border border-black w-32">Peso de Saída</th>
+                  <th className="text-left py-1 px-2 border border-black"></th>
+                  <th className="text-left py-1 px-2 border border-black">Código</th>
+                  <th className="text-right py-1 px-2 border border-black w-32">Peso de Saída</th>
                 </tr>
               </thead>
               <tbody>
                 {relatorio.garantia.map((unit: any) => (
                   <tr key={unit.id}>
-                    <td className="py-1.5 px-3 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-1.5 px-3 border border-black uppercase">
+                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                    <td className="py-0.5 px-2 border border-black uppercase">
                       {unit.unitCode}
                       {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
                     </td>
-                    <td className="py-1.5 px-3 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
+                    <td className="py-0.5 px-2 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -278,24 +278,24 @@ export default function RemanPedidoImpressao() {
             <table className="w-full text-sm border-collapse border border-black">
               <thead>
                 <tr className="bg-red-100">
-                  <th className="text-left py-2 px-3 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-2 px-3 border border-black">Cartucho(s) com Problema</th>
+                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
+                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartucho(s) com Problema</th>
                 </tr>
                 <tr className="bg-red-50">
-                  <th className="text-left py-2 px-3 border border-black"></th>
-                  <th className="text-left py-2 px-3 border border-black">Código</th>
-                  <th className="text-left py-2 px-3 border border-black">Defeito</th>
+                  <th className="text-left py-1 px-2 border border-black"></th>
+                  <th className="text-left py-1 px-2 border border-black">Código</th>
+                  <th className="text-left py-1 px-2 border border-black">Defeito</th>
                 </tr>
               </thead>
               <tbody>
                 {relatorio.comProblema.map((unit: any) => (
                   <tr key={unit.id}>
-                    <td className="py-1.5 px-3 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-1.5 px-3 border border-black uppercase">
+                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                    <td className="py-0.5 px-2 border border-black uppercase">
                       {unit.unitCode}
                       {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
                     </td>
-                    <td className="py-1.5 px-3 border border-black uppercase">{unit.defectType || "-"}</td>
+                    <td className="py-0.5 px-2 border border-black uppercase">{unit.defectType || "-"}</td>
                   </tr>
                 ))}
               </tbody>
