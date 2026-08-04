@@ -148,7 +148,7 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
-  const handleAtualizarStatus = async (cartucho: any, novoStatus: "em_espera" | "em_andamento" | "processo" | "funcionando" | "circuito_queimado" | "defeito_cabeca") => {
+  const handleAtualizarStatus = async (cartucho: any, novoStatus: "em_espera" | "em_andamento" | "processo" | "funcionando" | "circuito_queimado" | "defeito_cabeca" | "garantia") => {
     try {
       const pesoCheagada = cartucho.pesoCheagada ? parseFloat(String(cartucho.pesoCheagada).replace(",", ".")) : 0;
       const pesoSaida = cartucho.pesoSaida ? parseFloat(String(cartucho.pesoSaida).replace(",", ".")) : 0;
