@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<Props, State> {
             />
 
             <h2 className="text-xl mb-4 text-center font-bold">
-              mEU COLEGA ESTÁ TENTANDO ABRIR O SISTEMA E ESTÁ DANDO ESSE ERRO. Corrigir!
+              Dá esse erro ao tentar logar pelo google, porém para mim ele volta e funciona, mas meu colega não consegue usar.
             </h2>
 
             <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
