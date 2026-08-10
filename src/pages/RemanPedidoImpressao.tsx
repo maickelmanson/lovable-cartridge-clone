@@ -320,6 +320,12 @@ export default function RemanPedidoImpressao() {
           }
           /* Remove header and footer (including the URL) from the printed page */
           header, footer, .no-print { display: none !important; }
+          
+          /* Hide default browser headers and footers (date, title, URL, page numbers) */
+          @page {
+            margin-top: 10mm;
+            margin-bottom: 10mm;
+          }
         }
       `}</style>
     </div>
