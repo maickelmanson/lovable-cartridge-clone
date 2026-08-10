@@ -314,7 +314,12 @@ export default function RemanPedidoImpressao() {
         @media print {
           body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .print\\:hidden { display: none !important; }
-          @page { margin: 10mm; size: A4; }
+          @page { 
+            margin: 10mm; 
+            size: A4; 
+          }
+          /* Remove header and footer (including the URL) from the printed page */
+          header, footer, .no-print { display: none !important; }
         }
       `}</style>
     </div>
