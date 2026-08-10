@@ -116,7 +116,7 @@ function DashboardLayoutContent({
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -200,12 +200,9 @@ function DashboardLayoutContent({
                       onClick={() => {
                         // Navegar primeiro
                         setLocation(item.path);
-                        // Fechar sidebar apenas em mobile (evita conflito de timing com portals Radix)
-                        if (isMobile && !isCollapsed) {
-                          // Usar setTimeout para separar navegação do colapso (evita removeChild error)
-                          setTimeout(() => {
-                            toggleSidebar();
-                          }, 0);
+                        // Fechar sidebar apenas em mobile
+                        if (isMobile) {
+                          setOpenMobile(false);
                         }
                       }}
                       tooltip={item.label}
