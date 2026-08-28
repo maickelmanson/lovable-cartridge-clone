@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft, Loader2, FileDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useRef, useState } from "react";
+import { auditar } from "@/lib/audit";
 
 function formatBRL(value: string | number | null | undefined): string {
   const num = typeof value === "string" ? parseFloat(value) : (value || 0);
