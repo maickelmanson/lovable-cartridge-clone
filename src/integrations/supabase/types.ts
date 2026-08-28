@@ -20,30 +20,45 @@ export type Database = {
           created_at: string
           details: Json | null
           entity_id: string | null
+          entity_label: string | null
           entity_type: string | null
           id: number
           ip_address: string | null
+          session_id: string | null
+          user_email: string | null
           user_id: string | null
+          user_name: string | null
+          user_role: string | null
         }
         Insert: {
           action: string
           created_at?: string
           details?: Json | null
           entity_id?: string | null
+          entity_label?: string | null
           entity_type?: string | null
           id?: number
           ip_address?: string | null
+          session_id?: string | null
+          user_email?: string | null
           user_id?: string | null
+          user_name?: string | null
+          user_role?: string | null
         }
         Update: {
           action?: string
           created_at?: string
           details?: Json | null
           entity_id?: string | null
+          entity_label?: string | null
           entity_type?: string | null
           id?: number
           ip_address?: string | null
+          session_id?: string | null
+          user_email?: string | null
           user_id?: string | null
+          user_name?: string | null
+          user_role?: string | null
         }
         Relationships: []
       }

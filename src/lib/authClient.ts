@@ -1,6 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
-
 export const TOKEN_KEY = "auth_token";
+export const USER_KEY = "auth_user";
+export const SESSION_KEY = "auth_session_id";
 
 export type SessionUser = {
   id: string;
@@ -29,6 +29,46 @@ export function setToken(token: string) {
 export function clearToken() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem(USER_KEY);
+}
+
+/** Usuário logado guardado localmente (usado por auditoria e permissões). */
+export function getCurrentUser(): SessionUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as SessionUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setCurrentUser(user: SessionUser | null) {
+  if (typeof window === "undefined") return;
+  if (user) window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  else window.localStorage.removeItem(USER_KEY);
+}
+
+/** Identificador da sessão do navegador (para agrupar ações na auditoria). */
+export function getSessionId(): string {
+  if (typeof window === "undefined") return "server";
+  let id = window.sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    window.sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
+export function redirectToLogin() {
+  if (typeof window === "undefined") return;
+  if (window.location.pathname !== "/login") window.location.replace("/login");
+}
+
+/** Trata 401 vindo de qualquer requisição: limpa o token e volta para o login. */
+export function handleUnauthorized() {
+  clearToken();
+  redirectToLogin();
 }
 
 /** fetch com o token do localStorage no header Authorization. */
@@ -37,41 +77,44 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   const token = getToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  return fetch(input, { ...init, headers });
+  const res = await fetch(input, { ...init, headers });
+  if (res.status === 401) handleUnauthorized();
+  return res;
 }
 
 let interceptorInstalled = false;
 
-/** Garante o header Authorization em todas as requisições para /api. */
+/** Garante o header Authorization em todas as requisições para /api e trata 401. */
 export function installApiAuthInterceptor() {
   if (interceptorInstalled || typeof window === "undefined") return;
   interceptorInstalled = true;
   const originalFetch = window.fetch.bind(window);
-  window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    let isApi = false;
+    let call = () => originalFetch(input as RequestInfo, init);
     try {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      isApi = url.startsWith("/api");
       const token = getToken();
-      if (token && url.startsWith("/api")) {
+      if (token && isApi) {
         const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
         if (!headers.has("Authorization")) headers.set("Authorization", `Bearer ${token}`);
-        return originalFetch(input, { ...init, headers });
+        call = () => originalFetch(input, { ...init, headers });
       }
     } catch {
       /* ignora e segue com o fetch padrão */
     }
-    return originalFetch(input as RequestInfo, init);
+    const res = await call();
+    if (isApi && res.status === 401 && !String((input as any)?.url ?? input).includes("/api/auth/login")) {
+      handleUnauthorized();
+    }
+    return res;
   };
 }
 
-/** Abre a sessão de dados (necessária para leitura/gravação protegida). */
-async function openDataSession(tokenHash: string | null | undefined) {
-  if (!tokenHash) return;
-  const { data } = await supabase.auth.getSession();
-  if (data.session) return;
-  await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-}
+export type LoginResult = { user: SessionUser; dataSessionToken: string | null };
 
-export async function login(email: string, password: string): Promise<SessionUser> {
+export async function login(email: string, password: string): Promise<LoginResult> {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -87,11 +130,11 @@ export async function login(email: string, password: string): Promise<SessionUse
     throw new Error(payload.error ?? "Não foi possível entrar");
   }
   setToken(payload.token);
-  await openDataSession(payload.dataSessionToken);
-  return payload.user;
+  setCurrentUser(payload.user);
+  return { user: payload.user, dataSessionToken: payload.dataSessionToken ?? null };
 }
 
-export async function fetchMe(): Promise<SessionUser | null> {
+export async function fetchMe(): Promise<LoginResult | null> {
   if (!getToken()) return null;
   const res = await apiFetch("/api/auth/me");
   if (!res.ok) {
@@ -99,8 +142,8 @@ export async function fetchMe(): Promise<SessionUser | null> {
     return null;
   }
   const payload = (await res.json()) as { user: SessionUser; dataSessionToken?: string | null };
-  await openDataSession(payload.dataSessionToken);
-  return payload.user;
+  setCurrentUser(payload.user);
+  return { user: payload.user, dataSessionToken: payload.dataSessionToken ?? null };
 }
 
 export async function logout() {
@@ -110,10 +153,5 @@ export async function logout() {
     /* segue com a limpeza local */
   }
   clearToken();
-  try {
-    await supabase.auth.signOut();
-  } catch {
-    /* ignora */
-  }
-  if (typeof window !== "undefined") window.location.replace("/login");
+  redirectToLogin();
 }

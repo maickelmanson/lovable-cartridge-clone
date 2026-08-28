@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requirePermission } from "@/lib/guard";
+import { registrarAuditoria, diff } from "@/lib/audit";
 
 function toApp(r: any) {
   return {
@@ -62,6 +64,7 @@ export const empresaApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          requirePermission("empresa.editar");
           const { data: userData } = await supabase.auth.getUser();
           const owner_id = userData.user?.id;
           if (!owner_id) throw new Error("Usuário não autenticado");
@@ -78,6 +81,13 @@ export const empresaApi = {
               .select("*")
               .single();
             if (error) throw error;
+            await registrarAuditoria({
+              action: input?.logoUrl !== undefined ? "empresa.logo" : "empresa.alterar",
+              entityType: "empresa_dados",
+              entityId: data.id,
+              entityLabel: data.empresa,
+              details: { depois: { ...data, logo_url: data.logo_url ? "[imagem]" : null } },
+            });
             return toApp(data);
           }
           const { data, error } = await supabase
@@ -86,6 +96,13 @@ export const empresaApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "empresa.salvar",
+            entityType: "empresa_dados",
+            entityId: data.id,
+            entityLabel: data.empresa,
+            details: { depois: data },
+          });
           return toApp(data);
         },
         onSuccess: () => {
