@@ -133,7 +133,7 @@ export default function RemanPedidoImpressao() {
         <table className="w-full">
           <tbody>
             <tr className="border-b border-gray-300">
-              <td className="px-1 font-semibold w-24 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
+              <td className="px-1 font-semibold w-24 bg-gray-50 border-r border-gray-300">Nome/<br />Razão Social</td>
               <td className="px-1 uppercase">{order.clienteNome || "-"}</td>
             </tr>
             <tr className="border-b border-gray-300">
@@ -163,7 +163,7 @@ export default function RemanPedidoImpressao() {
           <thead>
             <tr className="bg-gray-200">
               <th className="text-left px-1 border border-black">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PRODUTO</th>
-              <th className="text-center px-1 border border-black w-12">QTD..</th>
+               <th className="text-center px-1 border border-black w-12">QTD.</th>
               <th className="text-right px-1 border border-black w-20">PREÇO&nbsp; &nbsp;</th>
               <th className="text-right px-1 border border-black w-24">TOTAL</th>
             </tr>
