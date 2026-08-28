@@ -98,7 +98,6 @@ export default function RemanPedidoImpressao() {
           <img src={empresa.logoUrl} alt="Logo" className="h-16 w-auto object-contain flex-shrink-0" />
         )}
         <div className="flex-1 text-center leading-tight">
-          <h1 className="font-bold uppercase text-[13px] print:text-[14px]">{empresa?.empresa || "EMPRESA"}</h1>
           <div className="leading-tight text-[11px] uppercase">
             {empresa?.endereco && (
               <div>
