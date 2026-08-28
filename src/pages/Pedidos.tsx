@@ -32,10 +32,10 @@ export default function Pedidos() {
 
   const criarPedidoMutation = trpc.pedidos.criar.useMutation();
 
-  const handleNovoPedido = async (clienteId: number, cartuchos?: any[]) => {
+  const handleNovoPedido = async (clienteId: number, cartuchos?: any[], observacaoGeral?: string) => {
     try {
       // Pedido + itens são gravados em uma única operação atômica no backend
-      await criarPedidoMutation.mutateAsync({ clienteId, cartuchos: cartuchos ?? [] });
+      await criarPedidoMutation.mutateAsync({ clienteId, cartuchos: cartuchos ?? [], observacaoGeral });
       setModalAberto(false);
       pedidosQuery.refetch();
     } catch (error) {

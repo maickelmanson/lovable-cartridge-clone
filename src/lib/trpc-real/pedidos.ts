@@ -18,6 +18,7 @@ function toApp(r: any, clienteNome?: string | null) {
     status: r.status,
     dataCriacao: r.created_at,
     dataFinalizacao: r.data_finalizacao,
+    observacaoGeral: r.observacao_geral ?? null,
   };
 }
 
@@ -298,7 +299,13 @@ export const pedidosApi = {
           const numero = input.numero || (await proximoNumero());
           const { data, error } = await supabase
             .from("pedidos")
-            .insert({ owner_id, numero, cliente_id: input.clienteId, status: "aberto" })
+            .insert({
+              owner_id,
+              numero,
+              cliente_id: input.clienteId,
+              status: "aberto",
+              observacao_geral: input.observacaoGeral || null,
+            })
             .select("*")
             .single();
           if (error) throw error;
