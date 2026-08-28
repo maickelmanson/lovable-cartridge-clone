@@ -21,6 +21,8 @@ import PainelErros from "./pages/PainelErros";
 import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
 import Login from "./pages/Login";
+import Auditoria from "./pages/Auditoria";
+import Usuarios from "./pages/Usuarios";
 import { Redirect } from "wouter";
 import { getToken, installApiAuthInterceptor } from "@/lib/authClient";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -69,6 +71,8 @@ function DashboardRoutes() {
         <Route path={"/modelos"} component={ModeloCartucho} />
         <Route path={"/analise"} component={DashboardAnalise} />
         <Route path={"/erros"} component={PainelErros} />
+        <Route path={"/auditoria"} component={Auditoria} />
+        <Route path={"/usuarios"} component={Usuarios} />
         <Route path={"/busca"} component={BuscaAvancada} />
         <Route path={"/buscador-cartuchos"} component={BuscadorCartuchos} />
         <Route path={"/teste/buscador-cartuchos"} component={TestBuscadorCartuchos} />
