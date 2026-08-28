@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAuditIndexRouteImport } from './routes/api/audit/index'
 import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
@@ -25,6 +26,11 @@ const SplatRoute = SplatRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuditIndexRoute = ApiAuditIndexRouteImport.update({
+  id: '/api/audit/',
+  path: '/api/audit/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthUsersRoute = ApiAuthUsersRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/audit/': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/audit': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/audit/': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/audit/'
     | '/api/auth/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/audit'
     | '/api/auth/users/$id'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/audit/'
     | '/api/auth/users/$id'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiAuthUsersRoute: typeof ApiAuthUsersRouteWithChildren
+  ApiAuditIndexRoute: typeof ApiAuditIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -134,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/audit/': {
+      id: '/api/audit/'
+      path: '/api/audit'
+      fullPath: '/api/audit/'
+      preLoaderRoute: typeof ApiAuditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/users': {
@@ -193,6 +213,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiAuthUsersRoute: ApiAuthUsersRouteWithChildren,
+  ApiAuditIndexRoute: ApiAuditIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
