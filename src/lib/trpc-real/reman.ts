@@ -124,13 +124,15 @@ export const remanOrdersApi = {
           if (!data) return null;
           const { data: cli } = await supabase
             .from("clientes")
-            .select("nome, endereco, telefone")
+            .select("nome, endereco, telefone, telefone2")
             .eq("id", data.cliente_id)
             .maybeSingle();
           return {
             ...orderToApp(data, cli?.nome ?? null),
             clienteEndereco: cli?.endereco ?? null,
             clienteTelefone: cli?.telefone ?? null,
+            clienteTelefone2: cli?.telefone2 ?? null,
+            observacaoGeral: (data as any).observacao_geral ?? null,
           };
         },
       }),
