@@ -297,7 +297,7 @@ export default function RemanPedidoImpressao() {
       {/* Rodapé */}
       <div className="mt-2 pt-1 border-t border-gray-300 text-center text-gray-500">
         <p>
-          {empresa?.empresa || "EMPRESA"} — documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
+          documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
           {new Date().toLocaleTimeString("pt-BR")}
         </p>
       </div>
