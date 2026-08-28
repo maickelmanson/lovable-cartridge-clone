@@ -232,7 +232,7 @@ function DashboardLayoutContent({
                       {user?.name || "-"}
                     </p>
                     <p className="text-xs text-muted-foreground truncate mt-1.5">
-                      {user?.email || "-"}
+                      {user?.role ? user.role.toUpperCase() : "-"} · {user?.email || "-"}
                     </p>
                   </div>
                 </button>
@@ -271,6 +271,19 @@ function DashboardLayoutContent({
                   </span>
                 </div>
               </div>
+            </div>
+            <div className="flex items-center gap-2 pr-1">
+              <div className="text-right leading-tight">
+                <p className="text-xs font-medium truncate max-w-[130px]">{user?.name || "-"}</p>
+                <p className="text-[10px] text-muted-foreground">{user?.role?.toUpperCase() || "-"}</p>
+              </div>
+              <button
+                onClick={() => void logout()}
+                className="p-2 rounded-lg text-destructive hover:bg-accent/50"
+                aria-label="Sair"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
           </div>
         )}

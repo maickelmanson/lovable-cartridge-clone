@@ -20,9 +20,44 @@ import DashboardAnalise from "./pages/DashboardAnalise";
 import PainelErros from "./pages/PainelErros";
 import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
+import Login from "./pages/Login";
+import { Redirect } from "wouter";
+import { getToken, installApiAuthInterceptor } from "@/lib/authClient";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  installApiAuthInterceptor();
+  const { loading, isAuthenticated, user, logout } = useAuth();
+
+  if (!getToken()) return <Redirect to="/login" />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  if (!isAuthenticated) return <Redirect to="/login" />;
+  if (user && !user.active) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-4 text-center">
+        <h1 className="text-xl font-bold">Acesso desativado</h1>
+        <p className="text-sm text-muted-foreground">
+          Sua conta está inativa. Fale com um administrador para reativar o acesso.
+        </p>
+        <button className="underline text-sm" onClick={() => void logout()}>
+          Sair
+        </button>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
 
 function DashboardRoutes() {
   return (
+    <RequireAuth>
     <DashboardLayout>
       <Switch>
         <Route path={"/"} component={Dashboard} />
@@ -43,14 +78,20 @@ function DashboardRoutes() {
         <Route component={NotFound} />
       </Switch>
     </DashboardLayout>
+    </RequireAuth>
   );
 }
 
 function Router() {
   return (
     <Switch>
+      <Route path={"/login"} component={Login} />
       {/* Página de impressão - sem DashboardLayout */}
-      <Route path={"/reman/pedidos/:id/imprimir"} component={RemanPedidoImpressao} />
+      <Route path={"/reman/pedidos/:id/imprimir"}>
+        <RequireAuth>
+          <RemanPedidoImpressao />
+        </RequireAuth>
+      </Route>
       {/* Todas as outras rotas com DashboardLayout */}
       <Route component={DashboardRoutes} />
     </Switch>

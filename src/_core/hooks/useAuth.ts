@@ -1,45 +1,92 @@
-import { supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
+import {
+  clearToken,
+  fetchMe,
+  getToken,
+  installApiAuthInterceptor,
+  logout as doLogout,
+  type SessionUser,
+} from "@/lib/authClient";
 
 type AuthUser = {
   id: string;
   email: string | null;
   name: string | null;
+  role: SessionUser["role"];
+  active: boolean;
   avatarUrl: string | null;
 };
 
-function mapUser(user: User | null): AuthUser | null {
+let cachedUser: AuthUser | null = null;
+let inflight: Promise<AuthUser | null> | null = null;
+const listeners = new Set<(u: AuthUser | null) => void>();
+
+function mapUser(user: SessionUser | null): AuthUser | null {
   if (!user) return null;
-  const meta = (user.user_metadata ?? {}) as Record<string, any>;
   return {
     id: user.id,
-    email: user.email ?? null,
-    name: meta.full_name ?? meta.name ?? user.email ?? null,
-    avatarUrl: meta.avatar_url ?? meta.picture ?? null,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    active: user.active,
+    avatarUrl: null,
   };
 }
 
-export function useAuth(_options?: { redirectOnUnauthenticated?: boolean; redirectPath?: string }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+function broadcast(user: AuthUser | null) {
+  cachedUser = user;
+  listeners.forEach((fn) => fn(user));
+}
+
+async function loadUser(force = false): Promise<AuthUser | null> {
+  if (!force && cachedUser) return cachedUser;
+  if (!inflight || force) {
+    inflight = fetchMe()
+      .then((u) => {
+        const mapped = mapUser(u);
+        broadcast(mapped);
+        return mapped;
+      })
+      .catch(() => {
+        broadcast(null);
+        return null;
+      })
+      .finally(() => {
+        inflight = null;
+      });
+  }
+  return inflight;
+}
+
+export function useAuth() {
+  const [user, setUser] = useState<AuthUser | null>(cachedUser);
+  const [loading, setLoading] = useState(!cachedUser);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    installApiAuthInterceptor();
+    listeners.add(setUser);
+    if (!getToken()) {
       setLoading(false);
+      broadcast(null);
+      return () => {
+        listeners.delete(setUser);
+      };
+    }
+    let alive = true;
+    loadUser().finally(() => {
+      if (alive) setLoading(false);
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      alive = false;
+      listeners.delete(setUser);
+    };
   }, []);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    broadcast(null);
+    clearToken();
+    await doLogout();
   }, []);
-
-  const user = mapUser(session?.user ?? null);
 
   return {
     user,
@@ -47,8 +94,7 @@ export function useAuth(_options?: { redirectOnUnauthenticated?: boolean; redire
     error: null as Error | null,
     isAuthenticated: Boolean(user),
     refresh: async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
+      await loadUser(true);
     },
     logout,
   };
