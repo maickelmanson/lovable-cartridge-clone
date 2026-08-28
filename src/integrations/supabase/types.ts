@@ -612,6 +612,39 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          last_login: string | null
+          name: string
+          password: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          last_login?: string | null
+          name: string
+          password: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          last_login?: string | null
+          name?: string
+          password?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
