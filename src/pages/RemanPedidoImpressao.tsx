@@ -86,30 +86,35 @@ export default function RemanPedidoImpressao() {
   };
 
   const clienteEndereco = order.clienteEndereco || "";
+  const telefones = [order.clienteTelefone, (order as any).clienteTelefone2]
+    .filter((t: any) => t && String(t).trim())
+    .join("  /  ");
 
   const Via = () => (
     <div className="via text-black">
-      {/* ===== CABEÇALHO: DADOS DA EMPRESA (compacto) ===== */}
-      <div className="flex items-center gap-3 mb-1.5 border-b border-black pb-1">
+      {/* ===== CABEÇALHO: LOGO À ESQUERDA + DADOS DA EMPRESA ===== */}
+      <div className="flex items-center gap-2 mb-1.5 border-b border-black pb-1">
         {empresa?.logoUrl && (
-          <img src={empresa.logoUrl} alt="Logo" className="h-12 w-auto object-contain flex-shrink-0" />
+          <img src={empresa.logoUrl} alt="Logo" className="h-16 w-auto object-contain flex-shrink-0" />
         )}
         <div className="flex-1 text-center leading-tight">
-          <h1 className="font-bold uppercase text-[11px] print:text-[10px]">{empresa?.empresa || "EMPRESA"}</h1>
-          <div className="leading-tight">
+          <h1 className="font-bold uppercase text-[13px]">{empresa?.empresa || "EMPRESA"}</h1>
+          <div className="leading-tight text-[11px] uppercase">
             {empresa?.endereco && (
-              <span>
+              <div>
                 {empresa.endereco}
                 {empresa.numero ? `, ${empresa.numero}` : ""}
                 {empresa.bairro ? ` - ${empresa.bairro}` : ""}
-                {empresa.cidade ? ` - ${empresa.cidade}` : ""}
-                {empresa.estado ? `/${empresa.estado}` : ""}
-              </span>
+              </div>
             )}
             <div>
-              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
-              {empresa?.cnpjCpf && <span className="ml-2">CNPJ: {empresa.cnpjCpf}</span>}
+              {empresa?.cidade ? empresa.cidade : ""}
+              {empresa?.estado ? `/${empresa.estado}` : ""}
             </div>
+            <div>
+              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
+            </div>
+            <div>{empresa?.cnpjCpf && <span>CNPJ: {empresa.cnpjCpf}</span>}</div>
           </div>
         </div>
       </div>
@@ -118,7 +123,7 @@ export default function RemanPedidoImpressao() {
       <div className="flex justify-between items-center mb-1">
         <h2 className="font-bold">Pedido {order.orderNumber}</h2>
         <span>
-          Data do Pedido: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong>
+          Data: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong>
         </span>
       </div>
 
@@ -128,7 +133,7 @@ export default function RemanPedidoImpressao() {
         <table className="w-full">
           <tbody>
             <tr className="border-b border-gray-300">
-              <td className="px-1 font-semibold w-32 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
+              <td className="px-1 font-semibold w-24 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
               <td className="px-1 uppercase">{order.clienteNome || "-"}</td>
             </tr>
             <tr className="border-b border-gray-300">
@@ -136,12 +141,21 @@ export default function RemanPedidoImpressao() {
               <td className="px-1 uppercase">{clienteEndereco || "-"}</td>
             </tr>
             <tr>
-              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
-              <td className="px-1">{order.clienteTelefone || "-"}</td>
+              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone(s)</td>
+              <td className="px-1">{telefones || "-"}</td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      {/* ===== OBSERVAÇÃO GERAL ===== */}
+      {(order as any).observacaoGeral && (
+        <div className="mb-1.5 border border-black">
+          <div className="bg-gray-200 px-1 text-center font-bold border-b border-black">Observações</div>
+          <div className="px-1 uppercase whitespace-pre-wrap">{(order as any).observacaoGeral}</div>
+        </div>
+      )}
+
 
       {/* ===== TABELA DE PRODUTOS ===== */}
       <div className="mb-1">
