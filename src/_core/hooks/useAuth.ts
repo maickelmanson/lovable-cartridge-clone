@@ -7,6 +7,8 @@ import {
   logout as doLogout,
   type SessionUser,
 } from "@/lib/authClient";
+import { openDataSession, closeDataSession } from "@/lib/dataSession";
+import { registrarAuditoria } from "@/lib/audit";
 
 type AuthUser = {
   id: string;
@@ -42,8 +44,9 @@ async function loadUser(force = false): Promise<AuthUser | null> {
   if (!force && cachedUser) return cachedUser;
   if (!inflight || force) {
     inflight = fetchMe()
-      .then((u) => {
-        const mapped = mapUser(u);
+      .then(async (res) => {
+        if (res) await openDataSession(res.dataSessionToken);
+        const mapped = mapUser(res?.user ?? null);
         broadcast(mapped);
         return mapped;
       })
@@ -83,8 +86,10 @@ export function useAuth() {
   }, []);
 
   const logout = useCallback(async () => {
+    await registrarAuditoria({ action: "auth.logout", entityType: "users" });
     broadcast(null);
     clearToken();
+    await closeDataSession();
     await doLogout();
   }, []);
 
