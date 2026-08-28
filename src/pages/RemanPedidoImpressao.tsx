@@ -322,27 +322,28 @@ export default function RemanPedidoImpressao() {
         </Button>
       </div>
 
-      {/* Conteúdo para impressão — duas vias na mesma folha A4 */}
-      <div ref={contentRef} className="print-doc max-w-[210mm] mx-auto p-6 text-[11px] print:p-0 print:max-w-none print:text-[8px]">
-        <Via />
+      {/* Conteúdo para impressão — duas vias lado a lado na mesma folha A4 */}
+      <div ref={contentRef} className="print-doc mx-auto p-6 text-[11px] print:p-0">
+        <div className="vias flex items-start gap-4">
+          <div className="via-col flex-1 min-w-0">
+            <Via />
+          </div>
 
-        {/* Linha de corte (somente impressão) */}
-        <div className="print-only cut-line">
-          <span>✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span>
-        </div>
+          {/* Linha de corte vertical (somente impressão) */}
+          <div className="cut-line print-only" />
 
-        {/* Segunda via (somente impressão) */}
-        <div className="print-only">
-          <Via />
+          {/* Segunda via (somente impressão) */}
+          <div className="via-col flex-1 min-w-0 print-only">
+            <Via />
+          </div>
         </div>
       </div>
 
       {/* Estilos de impressão */}
       <style>{`
         .print-only { display: none; }
-        .cut-line { text-align: center; color: #888; }
         @media print {
-          @page { size: A4; margin: 0; }
+          @page { size: A4 portrait; margin: 0; }
           html, body {
             margin: 0 !important;
             padding: 0 !important;
@@ -351,26 +352,35 @@ export default function RemanPedidoImpressao() {
           }
           .print-only { display: block !important; }
           .print-doc {
-            padding: 5mm !important;
-            font-size: 8px !important;
+            width: 210mm;
+            padding: 4mm !important;
+            font-size: 11px !important;
             line-height: 1.15;
           }
-          .print-doc .via {
-            max-height: 141mm;
-            overflow: hidden;
+          .print-doc .vias {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start;
+            gap: 3mm;
+          }
+          .print-doc .via-col {
+            width: 99mm;
+            max-width: 99mm;
             page-break-inside: avoid;
             break-inside: avoid;
           }
           .print-doc .cut-line {
-            height: 4mm;
-            line-height: 4mm;
-            overflow: hidden;
+            width: 0;
+            align-self: stretch;
+            min-height: 275mm;
+            border-left: 1px dashed #666;
           }
           .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
           .print\\:hidden { display: none !important; }
           header, footer, .no-print { display: none !important; }
         }
       `}</style>
+
     </div>
   );
 }
