@@ -69,7 +69,7 @@ export default function RemanPedidoImpressao() {
       const filename = `Pedido-${order.orderNumber}-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.pdf`;
       await html2pdf()
         .set({
-          margin: [5, 5, 5, 5],
+          margin: 0,
           filename,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, letterRendering: true },
