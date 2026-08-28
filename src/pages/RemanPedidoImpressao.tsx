@@ -98,7 +98,7 @@ export default function RemanPedidoImpressao() {
           <img src={empresa.logoUrl} alt="Logo" className="h-16 w-auto object-contain flex-shrink-0" />
         )}
         <div className="flex-1 text-center leading-tight">
-          <h1 className="font-bold uppercase text-[13px]">{empresa?.empresa || "EMPRESA"}</h1>
+          <h1 className="font-bold uppercase text-[13px] print:text-[14px]">{empresa?.empresa || "EMPRESA"}</h1>
           <div className="leading-tight text-[11px] uppercase">
             {empresa?.endereco && (
               <div>
@@ -128,7 +128,7 @@ export default function RemanPedidoImpressao() {
       </div>
 
       {/* ===== DADOS DO CLIENTE ===== */}
-      <div className="mb-1.5 border border-black">
+      <div className="mb-1.5 border border-black dados-cliente">
         <div className="bg-gray-200 px-1 text-center font-bold border-b border-black">Dados do Cliente</div>
         <table className="w-full">
           <tbody>
@@ -186,14 +186,14 @@ export default function RemanPedidoImpressao() {
             )}
           </tbody>
         </table>
-        <div className="flex justify-end gap-4 mt-0.5">
+        <div className="total-box flex justify-end gap-4 mt-0.5">
           {parseFloat(order.discount || "0") > 0 && (
             <span>
               Desconto: <strong className="text-red-600">{formatBRL(order.discount)}</strong>
             </span>
           )}
           <span>
-            R$ Total: <strong className="text-[11px] print:text-[10px]">{formatBRL(order.total)}</strong>
+            R$ Total: <strong className="text-[11px] print:text-[12px]">{formatBRL(order.total)}</strong>
           </span>
         </div>
       </div>
