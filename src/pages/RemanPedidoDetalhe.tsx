@@ -293,7 +293,7 @@ function ItemUnidades({ item, onDeletarUnidade, onAbrirModal }: {
                 </td>
                 <td className="px-3 py-2">
                   {u.status === "FUNCIONANDO" ? (
-                    <span className="text-emerald-700">{u.outputWeight ? `${u.outputWeight} kg` : "-"}</span>
+                    <span className="text-emerald-700">{u.outputWeight ? `${u.outputWeight} g` : "-"}</span>
                   ) : (
                     <span className="text-red-700">{u.defectType || "-"}</span>
                   )}
@@ -642,7 +642,7 @@ export default function RemanPedidoDetalhe({ params }: Props) {
                     <div key={u.id} className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/20 rounded px-3 py-2 text-sm">
                       <span className="font-mono">{u.unitCode}</span>
                       <span className="text-muted-foreground">{u.modelo02}</span>
-                      <span className="text-emerald-700 font-medium">{u.outputWeight ? `${u.outputWeight} kg` : "-"}</span>
+                      <span className="text-emerald-700 font-medium">{u.outputWeight ? `${u.outputWeight} g` : "-"}</span>
                     </div>
                   ))}
                 </div>
