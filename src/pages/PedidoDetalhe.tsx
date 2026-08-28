@@ -216,6 +216,16 @@ export default function PedidoDetalhe({ params }: Props) {
             Imprimir
           </Button>
 
+          <Button
+            onClick={handleNotificarCliente}
+            variant="outline"
+            disabled={notificarMutation.isPending}
+            className="border-green-500 text-green-600 hover:bg-green-50"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {notificarMutation.isPending ? "Enviando..." : "Notificar cliente"}
+          </Button>
+
           <Button onClick={handleDuplicarPedido} variant="outline" disabled={duplicarMutation.isPending}>
             <Copy className="h-4 w-4 mr-2" />
             {duplicarMutation.isPending ? "Duplicando..." : "Duplicar Pedido"}
