@@ -97,7 +97,9 @@ function Router() {
         </RequireAuth>
       </Route>
       {/* Todas as outras rotas com DashboardLayout */}
-      <Route component={DashboardRoutes} />
+      <Route>
+        {getToken() ? <DashboardRoutes /> : <Redirect to="/login" />}
+      </Route>
     </Switch>
   );
 }
