@@ -82,7 +82,10 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
     }
     const cartuchodComId = {
       ...novoCartucho,
-      id: `cartucho-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id:
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `cartucho-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     };
     setCartuchos([...cartuchos, cartuchodComId]);
     setNovoCartucho({
