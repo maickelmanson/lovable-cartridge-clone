@@ -193,7 +193,9 @@ function DashboardLayoutContent({
 
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
+              {menuItems
+                .filter(item => !("permission" in item) || can(user?.role as any, item.permission as Permission))
+                .map(item => {
                 const isActive = item.path === '/' ? location === '/' : location.startsWith(item.path);
                 return (
                   <SidebarMenuItem key={item.path}>
