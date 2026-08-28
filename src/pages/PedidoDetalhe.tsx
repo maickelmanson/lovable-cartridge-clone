@@ -104,6 +104,21 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
+  const handleNotificarCliente = async () => {
+    try {
+      const result = await notificarMutation.mutateAsync({
+        pedidoId: id,
+        clienteId: pedido.clienteId,
+        channel: "whatsapp",
+      });
+      toast.success(`Mensagem enviada! ID: ${result.externalId || result.id}`);
+    } catch (error) {
+      console.error("Erro ao notificar cliente:", error);
+      const msg = error instanceof Error ? error.message : "Erro ao enviar notificação.";
+      toast.error(msg);
+    }
+  };
+
   const handleRemoverCartucho = async (cartuchoId: number) => {
     if (!confirm("Deseja remover este cartucho do pedido?")) return;
     try {
