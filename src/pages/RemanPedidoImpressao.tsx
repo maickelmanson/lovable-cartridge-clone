@@ -27,7 +27,6 @@ export default function RemanPedidoImpressao() {
   const { data: relatorio, isLoading: loadingRelatorio } = trpc.remanOrders.relatorio.useQuery(orderId, { enabled: orderId > 0 });
   const { data: empresa } = trpc.empresa.obter.useQuery();
 
-  // Todos os hooks DEVEM vir antes de qualquer return condicional (Regras dos Hooks)
   const contentRef = useRef<HTMLDivElement>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
 
@@ -49,7 +48,6 @@ export default function RemanPedidoImpressao() {
     );
   }
 
-  // Agrupar produtos: apenas itens com quantidade > 0 (funcionando)
   const produtosAgrupados = (items || [])
     .filter((item: any) => item.quantity > 0)
     .map((item: any) => ({
@@ -67,12 +65,11 @@ export default function RemanPedidoImpressao() {
     if (!contentRef.current || !order) return;
     setExportingPdf(true);
     try {
-      // Importação dinâmica para não aumentar o bundle inicial
       const html2pdf = (await import("html2pdf.js")).default;
       const filename = `Pedido-${order.orderNumber}-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.pdf`;
       await html2pdf()
         .set({
-          margin: [10, 10, 10, 10],
+          margin: [5, 5, 5, 5],
           filename,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, letterRendering: true },
@@ -88,11 +85,213 @@ export default function RemanPedidoImpressao() {
     }
   };
 
-  // Extrair bairro e cidade do endereço do cliente (pode vir como campo único)
   const clienteEndereco = order.clienteEndereco || "";
 
+  const Via = () => (
+    <div className="via text-black">
+      {/* ===== CABEÇALHO: DADOS DA EMPRESA (compacto) ===== */}
+      <div className="flex items-center gap-3 mb-1.5 border-b border-black pb-1">
+        {empresa?.logoUrl && (
+          <img src={empresa.logoUrl} alt="Logo" className="h-12 w-auto object-contain flex-shrink-0" />
+        )}
+        <div className="flex-1 text-center leading-tight">
+          <h1 className="font-bold uppercase text-[11px] print:text-[10px]">{empresa?.empresa || "EMPRESA"}</h1>
+          <div className="leading-tight">
+            {empresa?.endereco && (
+              <span>
+                {empresa.endereco}
+                {empresa.numero ? `, ${empresa.numero}` : ""}
+                {empresa.bairro ? ` - ${empresa.bairro}` : ""}
+                {empresa.cidade ? ` - ${empresa.cidade}` : ""}
+                {empresa.estado ? `/${empresa.estado}` : ""}
+              </span>
+            )}
+            <div>
+              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
+              {empresa?.cnpjCpf && <span className="ml-2">CNPJ: {empresa.cnpjCpf}</span>}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== PEDIDO + DATA ===== */}
+      <div className="flex justify-between items-center mb-1">
+        <h2 className="font-bold">Pedido {order.orderNumber}</h2>
+        <span>
+          Data do Pedido: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong>
+        </span>
+      </div>
+
+      {/* ===== DADOS DO CLIENTE ===== */}
+      <div className="mb-1.5 border border-black">
+        <div className="bg-gray-200 px-1 text-center font-bold border-b border-black">Dados do Cliente</div>
+        <table className="w-full">
+          <tbody>
+            <tr className="border-b border-gray-300">
+              <td className="px-1 font-semibold w-32 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
+              <td className="px-1 uppercase">{order.clienteNome || "-"}</td>
+            </tr>
+            <tr className="border-b border-gray-300">
+              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Endereço</td>
+              <td className="px-1 uppercase">{clienteEndereco || "-"}</td>
+            </tr>
+            <tr>
+              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
+              <td className="px-1">{order.clienteTelefone || "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ===== TABELA DE PRODUTOS ===== */}
+      <div className="mb-1">
+        <table className="w-full border-collapse border border-black">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="text-left px-1 border border-black">Produto</th>
+              <th className="text-center px-1 border border-black w-12">Qtd.</th>
+              <th className="text-right px-1 border border-black w-20">Preço</th>
+              <th className="text-right px-1 border border-black w-24">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {produtosAgrupados.map((prod: any, idx: any) => (
+              <tr key={idx}>
+                <td className="px-1 border border-black uppercase">{prod.modelo}</td>
+                <td className="px-1 border border-black text-center">{prod.quantidade}</td>
+                <td className="px-1 border border-black text-right">{formatBRL(prod.valorUnit)}</td>
+                <td className="px-1 border border-black text-right font-semibold">{formatBRL(prod.total)}</td>
+              </tr>
+            ))}
+            {produtosAgrupados.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-1 border border-black text-center text-gray-500">
+                  Nenhum produto funcionando
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <div className="flex justify-end gap-4 mt-0.5">
+          {parseFloat(order.discount || "0") > 0 && (
+            <span>
+              Desconto: <strong className="text-red-600">{formatBRL(order.discount)}</strong>
+            </span>
+          )}
+          <span>
+            R$ Total: <strong className="text-[11px] print:text-[10px]">{formatBRL(order.total)}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* ===== CARTUCHOS FUNCIONANDO ===== */}
+      {relatorio?.funcionando && relatorio.funcionando.length > 0 && (
+        <div className="mb-1">
+          <table className="w-full border-collapse border border-black">
+            <thead>
+              <tr className="bg-green-100">
+                <th colSpan={3} className="text-center px-1 border border-black font-bold">
+                  CARTUCHOS FUNCIONANDO
+                </th>
+              </tr>
+              <tr className="bg-green-50">
+                <th className="text-left px-1 border border-black">Modelo</th>
+                <th className="text-left px-1 border border-black">Código</th>
+                <th className="text-right px-1 border border-black w-24">Peso de Saída</th>
+              </tr>
+            </thead>
+            <tbody>
+              {relatorio.funcionando.map((unit: any) => (
+                <tr key={unit.id}>
+                  <td className="px-1 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                  <td className="px-1 border border-black uppercase">
+                    {unit.unitCode}
+                    {unit.protegido && <span className="ml-1 font-semibold">PROTEGIDO</span>}
+                  </td>
+                  <td className="px-1 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ===== CARTUCHOS GARANTIA ===== */}
+      {relatorio?.garantia && relatorio.garantia.length > 0 && (
+        <div className="mb-1">
+          <table className="w-full border-collapse border border-black">
+            <thead>
+              <tr className="bg-yellow-100">
+                <th colSpan={3} className="text-center px-1 border border-black font-bold">
+                  CARTUCHOS GARANTIA
+                </th>
+              </tr>
+              <tr className="bg-yellow-50">
+                <th className="text-left px-1 border border-black">Modelo</th>
+                <th className="text-left px-1 border border-black">Código</th>
+                <th className="text-right px-1 border border-black w-24">Peso de Saída</th>
+              </tr>
+            </thead>
+            <tbody>
+              {relatorio.garantia.map((unit: any) => (
+                <tr key={unit.id}>
+                  <td className="px-1 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                  <td className="px-1 border border-black uppercase">
+                    {unit.unitCode}
+                    {unit.protegido && <span className="ml-1 font-semibold">PROTEGIDO</span>}
+                  </td>
+                  <td className="px-1 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ===== CARTUCHOS COM PROBLEMA ===== */}
+      {relatorio?.comProblema && relatorio.comProblema.length > 0 && (
+        <div className="mb-1">
+          <table className="w-full border-collapse border border-black">
+            <thead>
+              <tr className="bg-red-100">
+                <th colSpan={3} className="text-center px-1 border border-black font-bold">
+                  CARTUCHOS COM PROBLEMA
+                </th>
+              </tr>
+              <tr className="bg-red-50">
+                <th className="text-left px-1 border border-black">Modelo</th>
+                <th className="text-left px-1 border border-black">Código</th>
+                <th className="text-left px-1 border border-black">Defeito</th>
+              </tr>
+            </thead>
+            <tbody>
+              {relatorio.comProblema.map((unit: any) => (
+                <tr key={unit.id}>
+                  <td className="px-1 border border-black uppercase">{unit.modelo02 || "-"}</td>
+                  <td className="px-1 border border-black uppercase">
+                    {unit.unitCode}
+                    {unit.protegido && <span className="ml-1 font-semibold">PROTEGIDO</span>}
+                  </td>
+                  <td className="px-1 border border-black uppercase">{unit.defectType || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Rodapé */}
+      <div className="mt-2 pt-1 border-t border-gray-300 text-center text-gray-500">
+        <p>
+          {empresa?.empresa || "EMPRESA"} — documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
+          {new Date().toLocaleTimeString("pt-BR")}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-0 bg-white">
       {/* Barra de ações (não imprime) */}
       <div className="print:hidden flex items-center gap-3 p-4 border-b bg-muted/30">
         <Button variant="outline" size="sm" onClick={() => navigate(`/reman/pedidos/${orderId}`)}>
@@ -101,218 +300,34 @@ export default function RemanPedidoImpressao() {
         </Button>
         <Button variant="outline" size="sm" onClick={handlePrint}>
           <Printer className="h-4 w-4 mr-2" />
-          Imprimir
+          Imprimir (2 vias)
         </Button>
         <Button size="sm" onClick={handleExportPdf} disabled={exportingPdf}>
-          {exportingPdf ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <FileDown className="h-4 w-4 mr-2" />
-          )}
+          {exportingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileDown className="h-4 w-4 mr-2" />}
           {exportingPdf ? "Gerando PDF..." : "Exportar PDF"}
         </Button>
       </div>
 
-      {/* Conteúdo para impressão */}
-      <div ref={contentRef} className="max-w-[210mm] mx-auto p-8 print:p-6 print:max-w-none text-black">
+      {/* Conteúdo para impressão — duas vias na mesma folha A4 */}
+      <div ref={contentRef} className="print-doc max-w-[210mm] mx-auto p-6 text-[11px] print:p-0 print:max-w-none print:text-[8px]">
+        <Via />
 
-        {/* ===== CABEÇALHO: DADOS DA EMPRESA ===== */}
-        <div className="flex items-start gap-6 mb-6 border-b-2 border-black pb-4">
-          {empresa?.logoUrl && (
-            <div className="flex-shrink-0">
-              <img
-                src={empresa.logoUrl}
-                alt="Logo"
-                className="h-20 w-auto object-contain"
-              />
-            </div>
-          )}
-          <div className="flex-1 text-center">
-            <h1 className="text-xl font-bold uppercase">{empresa?.empresa || "EMPRESA"}</h1>
-            <div className="text-sm mt-1 space-y-0.5">
-              {empresa?.endereco && (
-                <p>{empresa.endereco}{empresa.numero ? `, ${empresa.numero}` : ""}{empresa.bairro ? ` - ${empresa.bairro}` : ""}</p>
-              )}
-              {(empresa?.cidade || empresa?.estado) && (
-                <p>{empresa.cidade}{empresa.estado ? ` - ${empresa.estado}` : ""}</p>
-              )}
-              {empresa?.celular && <p>WhatsApp: {empresa.celular}</p>}
-              {empresa?.cnpjCpf && <p>CNPJ: {empresa.cnpjCpf}</p>}
-            </div>
-          </div>
+        {/* Linha de corte (somente impressão) */}
+        <div className="print-only cut-line">
+          <span>✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span>
         </div>
 
-        {/* ===== PEDIDO + DATA ===== */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Pedido {order.orderNumber}</h2>
-          <p className="text-sm">Data do Pedido: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong></p>
-        </div>
-
-        {/* ===== DADOS DO CLIENTE ===== */}
-        <div className="mb-6 border border-black">
-          <div className="bg-gray-200 px-2 py-0.5 text-center font-bold text-sm border-b border-black">
-            Dados do Cliente
-          </div>
-          <table className="w-full text-sm">
-            <tbody>
-              <tr className="border-b border-gray-300">
-                <td className="px-2 py-0.5 font-semibold w-40 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
-                <td className="px-2 py-0.5 uppercase">{order.clienteNome || "-"}</td>
-              </tr>
-              <tr className="border-b border-gray-300">
-                <td className="px-2 py-0.5 font-semibold bg-gray-50 border-r border-gray-300">Endereço</td>
-                <td className="px-2 py-0.5 uppercase">{clienteEndereco || "-"}</td>
-              </tr>
-              <tr className="border-b border-gray-300">
-                <td className="px-2 py-0.5 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
-                <td className="px-2 py-0.5">{order.clienteTelefone || "-"}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* ===== TABELA DE PRODUTOS ===== */}
-        <div className="mb-3">
-          <table className="w-full text-sm border-collapse border border-black">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="text-left py-1 px-2 border border-black">Produto</th>
-                <th className="text-center py-1 px-2 border border-black w-16">Qtd.</th>
-                <th className="text-right py-1 px-2 border border-black w-28">Preço</th>
-                <th className="text-right py-1 px-2 border border-black w-32">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {produtosAgrupados.map((prod: any, idx: any) => (
-                <tr key={idx}>
-                  <td className="py-1 px-2 border border-black uppercase">{prod.modelo}</td>
-                  <td className="py-1 px-2 border border-black text-center">{prod.quantidade}</td>
-                  <td className="py-1 px-2 border border-black text-right">{formatBRL(prod.valorUnit)}</td>
-                  <td className="py-1 px-2 border border-black text-right font-semibold">{formatBRL(prod.total)}</td>
-                </tr>
-              ))}
-              {produtosAgrupados.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-1 px-2 border border-black text-center text-gray-500">
-                    Nenhum produto funcionando
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="flex justify-end gap-6 mt-2 text-sm">
-            {parseFloat(order.discount || "0") > 0 && (
-              <span>Desconto: <strong className="text-red-600">{formatBRL(order.discount)}</strong></span>
-            )}
-            <span>R$ Total: <strong className="text-lg">{formatBRL(order.total)}</strong></span>
-          </div>
-        </div>
-
-        {/* ===== CARTUCHOS FUNCIONANDO ===== */}
-        {relatorio?.funcionando && relatorio.funcionando.length > 0 && (
-          <div className="mb-3">
-            <table className="w-full text-sm border-collapse border border-black">
-              <thead>
-                <tr className="bg-green-100">
-                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartuchos Funcionando</th>
-                </tr>
-                <tr className="bg-green-50">
-                  <th className="text-left py-1 px-2 border border-black"></th>
-                  <th className="text-left py-1 px-2 border border-black">Código</th>
-                  <th className="text-right py-1 px-2 border border-black w-32">Peso de Saída</th>
-                </tr>
-              </thead>
-              <tbody>
-                {relatorio.funcionando.map((unit: any) => (
-                  <tr key={unit.id}>
-                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-0.5 px-2 border border-black uppercase">
-                      {unit.unitCode}
-                      {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
-                    </td>
-                    <td className="py-0.5 px-2 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* ===== CARTUCHOS EM GARANTIA ===== */}
-        {relatorio?.garantia && relatorio.garantia.length > 0 && (
-          <div className="mb-3">
-            <table className="w-full text-sm border-collapse border border-black">
-              <thead>
-                <tr className="bg-yellow-100">
-                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartuchos Garantia</th>
-                </tr>
-                <tr className="bg-yellow-50">
-                  <th className="text-left py-1 px-2 border border-black"></th>
-                  <th className="text-left py-1 px-2 border border-black">Código</th>
-                  <th className="text-right py-1 px-2 border border-black w-32">Peso de Saída</th>
-                </tr>
-              </thead>
-              <tbody>
-                {relatorio.garantia.map((unit: any) => (
-                  <tr key={unit.id}>
-                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-0.5 px-2 border border-black uppercase">
-                      {unit.unitCode}
-                      {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
-                    </td>
-                    <td className="py-0.5 px-2 border border-black text-right">{formatPeso(unit.outputWeight)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-          </div>
-        )}
-
-
-        {/* ===== CARTUCHOS COM PROBLEMA ===== */}
-        {relatorio?.comProblema && relatorio.comProblema.length > 0 && (
-          <div className="mb-3">
-            <table className="w-full text-sm border-collapse border border-black">
-              <thead>
-                <tr className="bg-red-100">
-                  <th className="text-left py-1 px-2 border border-black">Modelo 02</th>
-                  <th colSpan={2} className="text-center py-1 px-2 border border-black">Cartucho(s) com Problema</th>
-                </tr>
-                <tr className="bg-red-50">
-                  <th className="text-left py-1 px-2 border border-black"></th>
-                  <th className="text-left py-1 px-2 border border-black">Código</th>
-                  <th className="text-left py-1 px-2 border border-black">Defeito</th>
-                </tr>
-              </thead>
-              <tbody>
-                {relatorio.comProblema.map((unit: any) => (
-                  <tr key={unit.id}>
-                    <td className="py-0.5 px-2 border border-black uppercase">{unit.modelo02 || "-"}</td>
-                    <td className="py-0.5 px-2 border border-black uppercase">
-                      {unit.unitCode}
-                      {unit.protegido && <span className="ml-2 font-semibold">PROTEGIDO</span>}
-                    </td>
-                    <td className="py-0.5 px-2 border border-black uppercase">{unit.defectType || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Rodapé */}
-        <div className="mt-12 pt-4 border-t border-gray-300 text-center text-xs text-gray-400 print:mt-8">
-          <p>Documento gerado em {new Date().toLocaleDateString("pt-BR")} às {new Date().toLocaleTimeString("pt-BR")}</p>
+        {/* Segunda via (somente impressão) */}
+        <div className="print-only">
+          <Via />
         </div>
       </div>
 
       {/* Estilos de impressão */}
       <style>{`
+        .print-only { display: none; }
+        .cut-line { text-align: center; color: #888; }
         @media print {
-          /* margin: 0 remove cabeçalho/rodapé do navegador (URL, data, título, páginas) */
           @page { size: A4; margin: 0; }
           html, body {
             margin: 0 !important;
@@ -320,13 +335,28 @@ export default function RemanPedidoImpressao() {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          /* Margens do documento aplicadas pelo conteúdo, não pela página */
-          body > * { padding: 10mm; }
+          .print-only { display: block !important; }
+          .print-doc {
+            padding: 5mm !important;
+            font-size: 8px !important;
+            line-height: 1.15;
+          }
+          .print-doc .via {
+            max-height: 141mm;
+            overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          .print-doc .cut-line {
+            height: 4mm;
+            line-height: 4mm;
+            overflow: hidden;
+          }
+          .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
           .print\\:hidden { display: none !important; }
           header, footer, .no-print { display: none !important; }
         }
       `}</style>
-
     </div>
   );
 }
