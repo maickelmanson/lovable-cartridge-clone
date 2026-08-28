@@ -243,7 +243,7 @@ export default function RemanPedidoImpressao() {
               <tr className="bg-yellow-50">
                 <th className="text-left px-1 border border-black">Modelo</th>
                 <th className="text-left px-1 border border-black">Código</th>
-                <th className="text-right px-1 border border-black w-24">Peso de Saída</th>
+                <th className="text-right px-1 border border-black w-24">Peso de Saída&nbsp;</th>
               </tr>
             </thead>
             <tbody>
