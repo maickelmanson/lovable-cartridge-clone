@@ -18,28 +18,35 @@ export const Route = createFileRoute("/api/auth/users/$id")({
           return Response.json({ error: "Requisição inválida" }, { status: 400 });
         }
 
-        const patch: Record<string, unknown> = {};
-        if (body.email !== undefined) patch["email"] = body.email.trim().toLowerCase();
-        if (body.name !== undefined) patch["name"] = body.name.trim();
-        if (body.active !== undefined) patch["active"] = body.active;
+        type UserPatch = {
+          email?: string;
+          name?: string;
+          active?: boolean;
+          role?: AppRole;
+          password?: string;
+        };
+        const patch: UserPatch = {};
+        if (body.email !== undefined) patch.email = body.email.trim().toLowerCase();
+        if (body.name !== undefined) patch.name = body.name.trim();
+        if (body.active !== undefined) patch.active = body.active;
         if (body.role !== undefined) {
           if (!ROLES.includes(body.role as AppRole)) {
             return Response.json({ error: "Papel inválido" }, { status: 400 });
           }
-          patch["role"] = body.role;
+          patch.role = body.role as AppRole;
         }
         if (body.password) {
           if (body.password.length < 6) {
             return Response.json({ error: "A senha precisa ter ao menos 6 caracteres" }, { status: 400 });
           }
-          patch["password"] = await hashPassword(body.password);
+          patch.password = await hashPassword(body.password);
         }
 
         if (Object.keys(patch).length === 0) {
           return Response.json({ error: "Nada para atualizar" }, { status: 400 });
         }
 
-        if (patch["active"] === false && params.id === guard.user.id) {
+        if (patch.active === false && params.id === guard.user.id) {
           return Response.json({ error: "Você não pode desativar a própria conta" }, { status: 400 });
         }
 

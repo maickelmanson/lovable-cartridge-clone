@@ -15,6 +15,7 @@ import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthUsersIdRouteImport } from './routes/api/auth/users.$id'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -46,6 +47,11 @@ const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
   path: '/api/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthUsersIdRoute = ApiAuthUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiAuthUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,7 +59,8 @@ export interface FileRoutesByFullPath {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/users': typeof ApiAuthUsersRoute
+  '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +68,8 @@ export interface FileRoutesByTo {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/users': typeof ApiAuthUsersRoute
+  '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,7 +78,8 @@ export interface FileRoutesById {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/users': typeof ApiAuthUsersRoute
+  '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/auth/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/auth/users/$id'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/me'
     | '/api/auth/users'
+    | '/api/auth/users/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,7 +117,7 @@ export interface RootRouteChildren {
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
-  ApiAuthUsersRoute: typeof ApiAuthUsersRoute
+  ApiAuthUsersRoute: typeof ApiAuthUsersRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -152,8 +164,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/users/$id': {
+      id: '/api/auth/users/$id'
+      path: '/$id'
+      fullPath: '/api/auth/users/$id'
+      preLoaderRoute: typeof ApiAuthUsersIdRouteImport
+      parentRoute: typeof ApiAuthUsersRoute
+    }
   }
 }
+
+interface ApiAuthUsersRouteChildren {
+  ApiAuthUsersIdRoute: typeof ApiAuthUsersIdRoute
+}
+
+const ApiAuthUsersRouteChildren: ApiAuthUsersRouteChildren = {
+  ApiAuthUsersIdRoute: ApiAuthUsersIdRoute,
+}
+
+const ApiAuthUsersRouteWithChildren = ApiAuthUsersRoute._addFileChildren(
+  ApiAuthUsersRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -161,7 +192,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
-  ApiAuthUsersRoute: ApiAuthUsersRoute,
+  ApiAuthUsersRoute: ApiAuthUsersRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
