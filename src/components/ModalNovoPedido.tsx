@@ -20,9 +20,9 @@ interface Props {
 
 interface CartuchodoFormulario {
   id: string;
-  cartuchodId: string;
+  cartuchoId: string;
   codigo: string;
-  pesoCheagada: string;
+  pesoChegada: string;
   pesoSaida: string;
   protegido: boolean;
   observacoes: string;
@@ -54,9 +54,9 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
   const [cartuchos, setCartuchos] = useState<CartuchodoFormulario[]>([]);
   const [novoCartucho, setNovoCartucho] = useState<CartuchodoFormulario>({
     id: "",
-    cartuchodId: "",
+    cartuchoId: "",
     codigo: "",
-    pesoCheagada: "",
+    pesoChegada: "",
     pesoSaida: "",
     protegido: false,
     observacoes: "",
@@ -87,9 +87,9 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
     setCartuchos([...cartuchos, cartuchodComId]);
     setNovoCartucho({
       id: "",
-      cartuchodId: "",
+      cartuchoId: "",
       codigo: "",
-      pesoCheagada: "",
+      pesoChegada: "",
       pesoSaida: "",
       protegido: false,
       observacoes: "",
@@ -103,7 +103,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
   const handleChangePeso = (tipo: "chegada" | "saida", valor: string) => {
     const formatado = formatarPeso(valor);
     if (tipo === "chegada") {
-      setNovoCartucho(c => ({ ...c, pesoCheagada: formatado }));
+      setNovoCartucho(c => ({ ...c, pesoChegada: formatado }));
     } else {
       setNovoCartucho(c => ({ ...c, pesoSaida: formatado }));
     }
@@ -174,7 +174,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
             <div className="bg-muted p-4 rounded-lg space-y-3 mb-4">
               <div>
                 <label className="text-sm font-medium">Modelo</label>
-                <Select value={novoCartucho.cartuchodId} onValueChange={(v) => handleChangeCartucho("cartuchodId", v)}>
+                <Select value={novoCartucho.cartuchoId} onValueChange={(v) => handleChangeCartucho("cartuchoId", v)}>
                   <SelectTrigger className="h-8 w-full truncate">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
@@ -202,7 +202,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
                 <div>
                   <label className="text-sm font-medium">Peso Chegada (kg)</label>
                   <Input
-                    value={novoCartucho.pesoCheagada}
+                    value={novoCartucho.pesoChegada}
                     onChange={(e) => handleChangePeso("chegada", e.target.value)}
                     placeholder="0,00"
                     className="h-8"
@@ -259,7 +259,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
                     <div>
                       <div className="font-medium">{c.codigo}</div>
                       <div className="text-xs text-muted-foreground">
-                        Chegada: {c.pesoCheagada || "-"} | Saída: {c.pesoSaida || "-"}
+                        Chegada: {c.pesoChegada || "-"} | Saída: {c.pesoSaida || "-"}
                       </div>
                     </div>
                     <Button

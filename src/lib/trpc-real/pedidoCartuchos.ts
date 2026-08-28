@@ -12,9 +12,9 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
   return {
     id: r.id,
     pedidoId: r.pedido_id,
-    cartuchodId: r.cartucho_id,
+    cartuchoId: r.cartucho_id,
     codigo: r.codigo,
-    pesoCheagada: r.peso_chegada,
+    pesoChegada: r.peso_chegada,
     pesoSaida: r.peso_saida,
     protegido: r.protegido,
     status: r.status,
@@ -27,10 +27,10 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
 
 function toDb(i: any) {
   const o: any = {};
-  if ("cartuchodId" in i) o.cartucho_id = i.cartuchodId ?? null;
+  if ("cartuchoId" in i) o.cartucho_id = i.cartuchoId ?? null;
   if ("codigo" in i) o.codigo = i.codigo || null;
-  if ("pesoCheagada" in i)
-    o.peso_chegada = i.pesoCheagada != null && i.pesoCheagada !== "" ? String(i.pesoCheagada).replace(",", ".") : null;
+  if ("pesoChegada" in i)
+    o.peso_chegada = i.pesoChegada != null && i.pesoChegada !== "" ? String(i.pesoChegada).replace(",", ".") : null;
   if ("pesoSaida" in i)
     o.peso_saida = i.pesoSaida != null && i.pesoSaida !== "" ? String(i.pesoSaida).replace(",", ".") : null;
   if ("protegido" in i) o.protegido = i.protegido ? 1 : 0;

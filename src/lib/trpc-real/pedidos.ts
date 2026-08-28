@@ -305,9 +305,9 @@ export const pedidosApi = {
             const rows = input.cartuchos.map((c: any) => ({
               owner_id,
               pedido_id: data.id,
-              cartucho_id: c.cartuchodId ? Number(c.cartuchodId) : null,
+              cartucho_id: c.cartuchoId ? Number(c.cartuchoId) : null,
               codigo: c.codigo || null,
-              peso_chegada: c.pesoCheagada != null ? String(c.pesoCheagada).replace(",", ".") : null,
+              peso_chegada: c.pesoChegada != null ? String(c.pesoChegada).replace(",", ".") : null,
               peso_saida: c.pesoSaida != null ? String(c.pesoSaida).replace(",", ".") : null,
               protegido: c.protegido ? 1 : 0,
               status: c.status || "em_espera",

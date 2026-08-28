@@ -43,9 +43,9 @@ export default function Pedidos() {
           try {
             await adicionarCartuchodoPedidoMutation.mutateAsync({
               pedidoId: novoPedido.id,
-              cartuchodId: c.cartuchodId ? parseInt(c.cartuchodId) : null,
+              cartuchoId: c.cartuchoId ? parseInt(c.cartuchoId) : null,
               codigo: c.codigo,
-              pesoCheagada: c.pesoCheagada ? parseFloat(c.pesoCheagada.replace(",", ".")) : undefined,
+              pesoChegada: c.pesoChegada ? parseFloat(c.pesoChegada.replace(",", ".")) : undefined,
               pesoSaida: c.pesoSaida ? parseFloat(c.pesoSaida.replace(",", ".")) : undefined,
               protegido: c.protegido,
               observacoes: c.observacoes,
