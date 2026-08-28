@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,12 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 
 interface Props {
-  onSalvar: (clienteId: number, cartuchos?: any[]) => void;
+  onSalvar: (clienteId: number, cartuchos?: any[], observacaoGeral?: string) => void;
   onFechar: () => void;
+  clienteId?: number;
+  clienteNome?: string;
 }
 
 interface CartuchodoFormulario {
@@ -30,27 +31,33 @@ interface CartuchodoFormulario {
 
 const formatarPeso = (valor: string) => {
   const apenasNumeros = valor.replace(/\D/g, "");
-  
+
   if (apenasNumeros.length <= 2) {
     return apenasNumeros;
   }
-  
+
   const parte1 = apenasNumeros.slice(0, -2);
   const parte2 = apenasNumeros.slice(-2);
   return `${parte1},${parte2}`;
 };
 
-const converterPesoParaNumero = (peso: string): number | undefined => {
-  if (!peso) return undefined;
-  const numerico = peso.replace(",", ".");
-  const valor = parseFloat(numerico);
-  return isNaN(valor) ? undefined : valor;
-};
+/** Normaliza texto (sem acentos, minúsculo, sem separadores) para busca fuzzy */
+function norm(v: unknown) {
+  return String(v ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\s\-_.]/g, "");
+}
 
-export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
-  const [clienteId, setClienteId] = useState<string>("");
-  const [buscaCliente, setBuscaCliente] = useState<string>("");
-  const [clienteSelecionado, setClienteSelecionado] = useState<any>(null);
+export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: clienteIdInicial, clienteNome }: Props) {
+  const [clienteId, setClienteId] = useState<string>(clienteIdInicial ? String(clienteIdInicial) : "");
+  const [buscaCliente, setBuscaCliente] = useState<string>(clienteNome || "");
+  const [clienteSelecionado, setClienteSelecionado] = useState<any>(
+    clienteIdInicial ? { id: clienteIdInicial, nome: clienteNome } : null,
+  );
+  const [observacaoGeral, setObservacaoGeral] = useState<string>("");
+  const [buscaCartucho, setBuscaCartucho] = useState<string>("");
   const [cartuchos, setCartuchos] = useState<CartuchodoFormulario[]>([]);
   const [novoCartucho, setNovoCartucho] = useState<CartuchodoFormulario>({
     id: "",
@@ -65,9 +72,34 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
   const clientesQuery = trpc.clientes.listar.useQuery();
   const cartuchosQuery = trpc.cartuchos.listar.useQuery();
 
-  const clientesFiltrados = clientesQuery.data?.filter((c: any) => 
-    c.nome.toUpperCase().includes(buscaCliente.toUpperCase())
+  const clientesFiltrados = clientesQuery.data?.filter((c: any) =>
+    norm(c.nome).includes(norm(buscaCliente))
   ) || [];
+
+  const modeloSelecionado = useMemo(
+    () => cartuchosQuery.data?.find((c: any) => String(c.id) === novoCartucho.cartuchoId),
+    [cartuchosQuery.data, novoCartucho.cartuchoId],
+  );
+
+  /** Busca por qualquer parte do modelo 01/02, inclusive apenas números */
+  const modelosFiltrados = useMemo(() => {
+    const termo = norm(buscaCartucho);
+    const lista = cartuchosQuery.data ?? [];
+    if (!termo) return lista.slice(0, 15);
+    return lista
+      .filter((c: any) => {
+        const alvo = norm(`${c.modelo02} ${c.modelo01}`);
+        if (alvo.includes(termo)) return true;
+        // fuzzy: caracteres na ordem
+        let i = 0;
+        for (const ch of alvo) {
+          if (ch === termo[i]) i++;
+          if (i === termo.length) return true;
+        }
+        return false;
+      })
+      .slice(0, 15);
+  }, [cartuchosQuery.data, buscaCartucho]);
 
   const handleSelecionarCliente = (cliente: any) => {
     setClienteId(cliente.id.toString());
@@ -97,6 +129,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
       protegido: false,
       observacoes: "",
     });
+    setBuscaCartucho("");
   };
 
   const handleRemoverCartucho = (id: string) => {
@@ -126,7 +159,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
       alert("Selecione um cliente.");
       return;
     }
-    onSalvar(parseInt(clienteId), cartuchos);
+    onSalvar(parseInt(clienteId), cartuchos, observacaoGeral);
   };
 
   return (
@@ -142,11 +175,15 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
             <Input
               placeholder="Digite o nome do cliente para buscar..."
               value={buscaCliente}
-              onChange={(e) => setBuscaCliente(e.target.value)}
+              onChange={(e) => {
+                setBuscaCliente(e.target.value);
+                setClienteId("");
+                setClienteSelecionado(null);
+              }}
               className="mb-2"
             />
-            {buscaCliente && clientesFiltrados.length > 0 && (
-              <div className="border rounded-md max-h-40 overflow-y-auto bg-white">
+            {buscaCliente && !clienteId && clientesFiltrados.length > 0 && (
+              <div className="border rounded-md max-h-40 overflow-y-auto bg-background">
                 {clientesFiltrados.slice(0, 10).map((c: any) => (
                   <div
                     key={c.id}
@@ -159,14 +196,26 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
                 ))}
               </div>
             )}
-            {buscaCliente && clientesFiltrados.length === 0 && (
+            {buscaCliente && !clienteId && clientesFiltrados.length === 0 && (
               <div className="text-sm text-muted-foreground p-2">Nenhum cliente encontrado</div>
             )}
             {clienteId && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm text-emerald-600 mt-2">
                 ✓ Cliente selecionado: {clienteSelecionado?.nome}
               </div>
             )}
+          </div>
+
+          {/* Observação geral do pedido */}
+          <div>
+            <label className="text-sm font-medium">Observação geral do pedido</label>
+            <Textarea
+              value={observacaoGeral}
+              onChange={(e) => setObservacaoGeral(e.target.value)}
+              placeholder="Observações gerais sobre este pedido..."
+              rows={4}
+              className="resize-y"
+            />
           </div>
 
           {/* Seção de Cartuchos */}
@@ -177,18 +226,39 @@ export default function ModalNovoPedido({ onSalvar, onFechar }: Props) {
             <div className="bg-muted p-4 rounded-lg space-y-3 mb-4">
               <div>
                 <label className="text-sm font-medium">Modelo</label>
-                <Select value={novoCartucho.cartuchoId} onValueChange={(v) => handleChangeCartucho("cartuchoId", v)}>
-                  <SelectTrigger className="h-8 w-full truncate">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent className="max-w-md">
-                    {cartuchosQuery.data?.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id.toString()}>
+                <Input
+                  value={buscaCartucho}
+                  onChange={(e) => {
+                    setBuscaCartucho(e.target.value);
+                    handleChangeCartucho("cartuchoId", "");
+                  }}
+                  placeholder="Digite parte do nome ou número do modelo..."
+                  className="h-8"
+                />
+                {!novoCartucho.cartuchoId && buscaCartucho && (
+                  <div className="border rounded-md max-h-40 overflow-y-auto bg-background mt-1">
+                    {modelosFiltrados.map((c: any) => (
+                      <div
+                        key={c.id}
+                        className="p-2 text-sm hover:bg-muted cursor-pointer border-b last:border-b-0"
+                        onClick={() => {
+                          handleChangeCartucho("cartuchoId", String(c.id));
+                          setBuscaCartucho(`${c.modelo02} - ${c.modelo01}`);
+                        }}
+                      >
                         {c.modelo02} - {c.modelo01}
-                      </SelectItem>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                    {modelosFiltrados.length === 0 && (
+                      <div className="p-2 text-sm text-muted-foreground">Nenhum modelo encontrado</div>
+                    )}
+                  </div>
+                )}
+                {modeloSelecionado && (
+                  <div className="text-xs text-emerald-600 mt-1">
+                    ✓ {modeloSelecionado.modelo02} - {modeloSelecionado.modelo01}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

@@ -86,30 +86,35 @@ export default function RemanPedidoImpressao() {
   };
 
   const clienteEndereco = order.clienteEndereco || "";
+  const telefones = [order.clienteTelefone, (order as any).clienteTelefone2]
+    .filter((t: any) => t && String(t).trim())
+    .join("  /  ");
 
   const Via = () => (
     <div className="via text-black">
-      {/* ===== CABEÇALHO: DADOS DA EMPRESA (compacto) ===== */}
-      <div className="flex items-center gap-3 mb-1.5 border-b border-black pb-1">
+      {/* ===== CABEÇALHO: LOGO À ESQUERDA + DADOS DA EMPRESA ===== */}
+      <div className="flex items-center gap-2 mb-1.5 border-b border-black pb-1">
         {empresa?.logoUrl && (
-          <img src={empresa.logoUrl} alt="Logo" className="h-12 w-auto object-contain flex-shrink-0" />
+          <img src={empresa.logoUrl} alt="Logo" className="h-16 w-auto object-contain flex-shrink-0" />
         )}
         <div className="flex-1 text-center leading-tight">
-          <h1 className="font-bold uppercase text-[11px] print:text-[10px]">{empresa?.empresa || "EMPRESA"}</h1>
-          <div className="leading-tight">
+          <h1 className="font-bold uppercase text-[13px]">{empresa?.empresa || "EMPRESA"}</h1>
+          <div className="leading-tight text-[11px] uppercase">
             {empresa?.endereco && (
-              <span>
+              <div>
                 {empresa.endereco}
                 {empresa.numero ? `, ${empresa.numero}` : ""}
                 {empresa.bairro ? ` - ${empresa.bairro}` : ""}
-                {empresa.cidade ? ` - ${empresa.cidade}` : ""}
-                {empresa.estado ? `/${empresa.estado}` : ""}
-              </span>
+              </div>
             )}
             <div>
-              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
-              {empresa?.cnpjCpf && <span className="ml-2">CNPJ: {empresa.cnpjCpf}</span>}
+              {empresa?.cidade ? empresa.cidade : ""}
+              {empresa?.estado ? `/${empresa.estado}` : ""}
             </div>
+            <div>
+              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
+            </div>
+            <div>{empresa?.cnpjCpf && <span>CNPJ: {empresa.cnpjCpf}</span>}</div>
           </div>
         </div>
       </div>
@@ -118,7 +123,7 @@ export default function RemanPedidoImpressao() {
       <div className="flex justify-between items-center mb-1">
         <h2 className="font-bold">Pedido {order.orderNumber}</h2>
         <span>
-          Data do Pedido: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong>
+          Data: <strong>{new Date(order.criadoEm).toLocaleDateString("pt-BR")}</strong>
         </span>
       </div>
 
@@ -128,7 +133,7 @@ export default function RemanPedidoImpressao() {
         <table className="w-full">
           <tbody>
             <tr className="border-b border-gray-300">
-              <td className="px-1 font-semibold w-32 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
+              <td className="px-1 font-semibold w-24 bg-gray-50 border-r border-gray-300">Nome/Razão Social</td>
               <td className="px-1 uppercase">{order.clienteNome || "-"}</td>
             </tr>
             <tr className="border-b border-gray-300">
@@ -136,12 +141,21 @@ export default function RemanPedidoImpressao() {
               <td className="px-1 uppercase">{clienteEndereco || "-"}</td>
             </tr>
             <tr>
-              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone</td>
-              <td className="px-1">{order.clienteTelefone || "-"}</td>
+              <td className="px-1 font-semibold bg-gray-50 border-r border-gray-300">Telefone(s)</td>
+              <td className="px-1">{telefones || "-"}</td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      {/* ===== OBSERVAÇÃO GERAL ===== */}
+      {(order as any).observacaoGeral && (
+        <div className="mb-1.5 border border-black">
+          <div className="bg-gray-200 px-1 text-center font-bold border-b border-black">Observações</div>
+          <div className="px-1 uppercase whitespace-pre-wrap">{(order as any).observacaoGeral}</div>
+        </div>
+      )}
+
 
       {/* ===== TABELA DE PRODUTOS ===== */}
       <div className="mb-1">
@@ -308,27 +322,28 @@ export default function RemanPedidoImpressao() {
         </Button>
       </div>
 
-      {/* Conteúdo para impressão — duas vias na mesma folha A4 */}
-      <div ref={contentRef} className="print-doc max-w-[210mm] mx-auto p-6 text-[11px] print:p-0 print:max-w-none print:text-[8px]">
-        <Via />
+      {/* Conteúdo para impressão — duas vias lado a lado na mesma folha A4 */}
+      <div ref={contentRef} className="print-doc mx-auto p-6 text-[11px] print:p-0">
+        <div className="vias flex items-start gap-4">
+          <div className="via-col flex-1 min-w-0">
+            <Via />
+          </div>
 
-        {/* Linha de corte (somente impressão) */}
-        <div className="print-only cut-line">
-          <span>✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span>
-        </div>
+          {/* Linha de corte vertical (somente impressão) */}
+          <div className="cut-line print-only" />
 
-        {/* Segunda via (somente impressão) */}
-        <div className="print-only">
-          <Via />
+          {/* Segunda via (somente impressão) */}
+          <div className="via-col flex-1 min-w-0 print-only">
+            <Via />
+          </div>
         </div>
       </div>
 
       {/* Estilos de impressão */}
       <style>{`
         .print-only { display: none; }
-        .cut-line { text-align: center; color: #888; }
         @media print {
-          @page { size: A4; margin: 0; }
+          @page { size: A4 portrait; margin: 0; }
           html, body {
             margin: 0 !important;
             padding: 0 !important;
@@ -337,26 +352,35 @@ export default function RemanPedidoImpressao() {
           }
           .print-only { display: block !important; }
           .print-doc {
-            padding: 5mm !important;
-            font-size: 8px !important;
+            width: 210mm;
+            padding: 4mm !important;
+            font-size: 11px !important;
             line-height: 1.15;
           }
-          .print-doc .via {
-            max-height: 141mm;
-            overflow: hidden;
+          .print-doc .vias {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start;
+            gap: 3mm;
+          }
+          .print-doc .via-col {
+            width: 99mm;
+            max-width: 99mm;
             page-break-inside: avoid;
             break-inside: avoid;
           }
           .print-doc .cut-line {
-            height: 4mm;
-            line-height: 4mm;
-            overflow: hidden;
+            width: 0;
+            align-self: stretch;
+            min-height: 275mm;
+            border-left: 1px dashed #666;
           }
           .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
           .print\\:hidden { display: none !important; }
           header, footer, .no-print { display: none !important; }
         }
       `}</style>
+
     </div>
   );
 }

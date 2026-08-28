@@ -18,6 +18,7 @@ function toApp(r: any, clienteNome?: string | null) {
     status: r.status,
     dataCriacao: r.created_at,
     dataFinalizacao: r.data_finalizacao,
+    observacaoGeral: r.observacao_geral ?? null,
   };
 }
 
@@ -78,7 +79,7 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
 
   const { data: pedido, error: ePed } = await supabase
     .from("pedidos")
-    .select("id, numero, cliente_id")
+    .select("id, numero, cliente_id, observacao_geral")
     .eq("id", pedidoId)
     .single();
   if (ePed) throw ePed;
@@ -103,6 +104,10 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
   let remanOrderId: number;
   if (existente) {
     remanOrderId = existente.id;
+    await supabase
+      .from("reman_orders")
+      .update({ observacao_geral: (pedido as any).observacao_geral ?? null } as any)
+      .eq("id", remanOrderId);
     const { data: oldItems } = await supabase
       .from("reman_order_items")
       .select("id")
@@ -123,6 +128,7 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
         discount: "0",
         total: "0",
         notes: `Gerado automaticamente a partir do Pedido #${pedido.numero}`,
+        observacao_geral: (pedido as any).observacao_geral ?? null,
       } as any)
       .select("id")
       .single();
@@ -298,7 +304,13 @@ export const pedidosApi = {
           const numero = input.numero || (await proximoNumero());
           const { data, error } = await supabase
             .from("pedidos")
-            .insert({ owner_id, numero, cliente_id: input.clienteId, status: "aberto" })
+            .insert({
+              owner_id,
+              numero,
+              cliente_id: input.clienteId,
+              status: "aberto",
+              observacao_geral: input.observacaoGeral || null,
+            })
             .select("*")
             .single();
           if (error) throw error;

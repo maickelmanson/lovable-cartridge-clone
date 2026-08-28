@@ -83,21 +83,33 @@ export default function DadosEmpresa() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload-logo", {
-        method: "POST",
-        body: formData,
+      // Redimensiona a imagem e salva como data URL no próprio registro da empresa
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Falha ao ler a imagem"));
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Imagem inválida"));
+          img.onload = () => {
+            const max = 400;
+            const escala = Math.min(1, max / Math.max(img.width, img.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * escala);
+            canvas.height = Math.round(img.height * escala);
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return reject(new Error("Canvas indisponível"));
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/png"));
+          };
+          img.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao fazer upload");
-      }
-
-      const data = await response.json();
-      handleChange("logoUrl", data.url);
-      setLogoPreview(data.url);
+      const novoForm = { ...form, logoUrl: dataUrl };
+      setForm(novoForm);
+      setLogoPreview(dataUrl);
+      await salvarMutation.mutateAsync(novoForm);
       toast.success("Logo enviado com sucesso!");
     } catch (error) {
       toast.error("Erro ao fazer upload do logo");

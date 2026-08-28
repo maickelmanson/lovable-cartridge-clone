@@ -26,9 +26,9 @@ export default function ClienteDetalhe({ params }: Props) {
     setModalNovoPedidoAberto(true);
   };
 
-  const handleSalvarPedido = async (clienteId: number, cartuchos?: any[]) => {
+  const handleSalvarPedido = async (clienteId: number, cartuchos?: any[], observacaoGeral?: string) => {
     try {
-      const pedido = await criarPedidoMutation.mutateAsync({ clienteId, cartuchos });
+      const pedido = await criarPedidoMutation.mutateAsync({ clienteId, cartuchos, observacaoGeral });
       setModalNovoPedidoAberto(false);
       // Navegar para o pedido criado
       if (pedido && pedido.id) {
@@ -191,7 +191,9 @@ export default function ClienteDetalhe({ params }: Props) {
 
       {modalNovoPedidoAberto && (
         <ModalNovoPedido
-          onSalvar={(clienteId, cartuchos) => handleSalvarPedido(clienteId || id, cartuchos)}
+          clienteId={id}
+          clienteNome={cliente.nome}
+          onSalvar={(clienteId, cartuchos, obs) => handleSalvarPedido(clienteId || id, cartuchos, obs)}
           onFechar={() => setModalNovoPedidoAberto(false)}
         />
       )}
