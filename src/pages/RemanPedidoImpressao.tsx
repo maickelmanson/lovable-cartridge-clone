@@ -98,6 +98,7 @@ export default function RemanPedidoImpressao() {
           <img src={empresa.logoUrl} alt="Logo" className="h-16 w-auto object-contain flex-shrink-0" />
         )}
         <div className="flex-1 text-center leading-tight">
+          <h1 className="font-bold uppercase text-[13px] print:text-[14px]">{empresa?.empresa || "EMPRESA"}</h1>
           <div className="leading-tight text-[11px] uppercase">
             {empresa?.endereco && (
               <div>
@@ -296,7 +297,7 @@ export default function RemanPedidoImpressao() {
       {/* Rodapé */}
       <div className="mt-2 pt-1 border-t border-gray-300 text-center text-gray-500">
         <p>
-          {empresa?.empresa || "EMPRESA"} — documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
+          documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
           {new Date().toLocaleTimeString("pt-BR")}
         </p>
       </div>
