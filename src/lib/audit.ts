@@ -1,5 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
-import { getCurrentUser, getSessionId } from "@/lib/authClient";
+import { apiFetch, getSessionId } from "@/lib/authClient";
 
 export type AuditEntry = {
   action: string;
@@ -10,45 +9,29 @@ export type AuditEntry = {
   details?: Record<string, unknown> | null;
 };
 
-let cachedIp: string | null = null;
-
-async function getIp(): Promise<string | null> {
-  if (cachedIp !== null) return cachedIp;
-  try {
-    const res = await fetch("https://api.ipify.org?format=json");
-    const json = (await res.json()) as { ip?: string };
-    cachedIp = json.ip ?? "";
-  } catch {
-    cachedIp = "";
-  }
-  return cachedIp || null;
-}
-
 /**
- * Registra uma ação no histórico de auditoria.
+ * Registra uma ação no histórico de auditoria (via servidor, que identifica
+ * o usuário pelo JWT e grava com privilégio de serviço).
  * Nunca lança erro e nunca bloqueia a operação principal.
  */
 export async function registrarAuditoria(entry: AuditEntry): Promise<void> {
   try {
-    const user = getCurrentUser();
-    const ip = await getIp();
-    await supabase.from("audit_logs").insert({
-      user_id: user?.id ?? null,
-      user_name: user?.name ?? null,
-      user_email: user?.email ?? null,
-      user_role: user?.role ?? null,
-      action: entry.action,
-      entity_type: entry.entityType ?? null,
-      entity_id: entry.entityId != null ? String(entry.entityId) : null,
-      entity_label: entry.entityLabel ?? null,
-      details: (entry.details ?? null) as any,
-      ip_address: ip,
-      session_id: getSessionId(),
-    } as any);
+    await apiFetch("/api/audit", {
+      method: "POST",
+      body: JSON.stringify({
+        action: entry.action,
+        entityType: entry.entityType ?? null,
+        entityId: entry.entityId != null ? String(entry.entityId) : null,
+        entityLabel: entry.entityLabel ?? null,
+        details: entry.details ?? null,
+        sessionId: getSessionId(),
+      }),
+    });
   } catch (err) {
     console.warn("Falha ao registrar auditoria", err);
   }
 }
+
 
 /** Dispara a auditoria sem esperar (fire and forget). */
 export function auditar(entry: AuditEntry) {
