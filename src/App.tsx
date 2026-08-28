@@ -21,45 +21,9 @@ import PainelErros from "./pages/PainelErros";
 import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
 import Login from "./pages/Login";
-import Auditoria from "./pages/Auditoria";
-import Usuarios from "./pages/Usuarios";
-import { Redirect } from "wouter";
-import { getToken, installApiAuthInterceptor } from "@/lib/authClient";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Loader2 } from "lucide-react";
-
-function RequireAuth({ children }: { children: React.ReactNode }) {
-  installApiAuthInterceptor();
-  const { loading, isAuthenticated, user, logout } = useAuth();
-
-  if (!getToken()) return <Redirect to="/login" />;
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-  if (!isAuthenticated) return <Redirect to="/login" />;
-  if (user && !user.active) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-4 text-center">
-        <h1 className="text-xl font-bold">Acesso desativado</h1>
-        <p className="text-sm text-muted-foreground">
-          Sua conta está inativa. Fale com um administrador para reativar o acesso.
-        </p>
-        <button className="underline text-sm" onClick={() => void logout()}>
-          Sair
-        </button>
-      </div>
-    );
-  }
-  return <>{children}</>;
-}
 
 function DashboardRoutes() {
   return (
-    <RequireAuth>
     <DashboardLayout>
       <Switch>
         <Route path={"/"} component={Dashboard} />
@@ -71,8 +35,6 @@ function DashboardRoutes() {
         <Route path={"/modelos"} component={ModeloCartucho} />
         <Route path={"/analise"} component={DashboardAnalise} />
         <Route path={"/erros"} component={PainelErros} />
-        <Route path={"/auditoria"} component={Auditoria} />
-        <Route path={"/usuarios"} component={Usuarios} />
         <Route path={"/busca"} component={BuscaAvancada} />
         <Route path={"/buscador-cartuchos"} component={BuscadorCartuchos} />
         <Route path={"/teste/buscador-cartuchos"} component={TestBuscadorCartuchos} />
@@ -82,24 +44,20 @@ function DashboardRoutes() {
         <Route component={NotFound} />
       </Switch>
     </DashboardLayout>
-    </RequireAuth>
   );
 }
 
 function Router() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   return (
     <Switch>
       <Route path={"/login"} component={Login} />
-      {/* Página de impressão - sem DashboardLayout */}
-      <Route path={"/reman/pedidos/:id/imprimir"}>
-        <RequireAuth>
-          <RemanPedidoImpressao />
-        </RequireAuth>
-      </Route>
-      {/* Todas as outras rotas com DashboardLayout */}
-      <Route>
-        {getToken() ? <DashboardRoutes /> : <Redirect to="/login" />}
-      </Route>
+      <Route path={"/reman/pedidos/:id/imprimir"} component={RemanPedidoImpressao} />
+      {!token ? (
+        <Route component={Login} />
+      ) : (
+        <Route component={DashboardRoutes} />
+      )}
     </Switch>
   );
 }
