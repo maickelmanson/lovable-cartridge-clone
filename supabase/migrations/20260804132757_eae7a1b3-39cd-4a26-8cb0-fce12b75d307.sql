@@ -1,1 +1,0 @@
-ALTER TYPE public.pedido_cartucho_status ADD VALUE IF NOT EXISTS 'garantia';
