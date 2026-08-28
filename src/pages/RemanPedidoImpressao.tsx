@@ -14,7 +14,7 @@ function formatPeso(value: string | null | undefined): string {
   if (!value) return "-";
   const num = parseFloat(value);
   if (isNaN(num)) return "-";
-  return num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}g`;
 }
 
 export default function RemanPedidoImpressao() {
