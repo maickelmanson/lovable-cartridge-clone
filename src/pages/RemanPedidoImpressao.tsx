@@ -312,22 +312,21 @@ export default function RemanPedidoImpressao() {
       {/* Estilos de impressão */}
       <style>{`
         @media print {
-          body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          /* margin: 0 remove cabeçalho/rodapé do navegador (URL, data, título, páginas) */
+          @page { size: A4; margin: 0; }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          /* Margens do documento aplicadas pelo conteúdo, não pela página */
+          body > * { padding: 10mm; }
           .print\\:hidden { display: none !important; }
-          @page { 
-            margin: 10mm; 
-            size: A4; 
-          }
-          /* Remove header and footer (including the URL) from the printed page */
           header, footer, .no-print { display: none !important; }
-          
-          /* Hide default browser headers and footers (date, title, URL, page numbers) */
-          @page {
-            margin-top: 10mm;
-            margin-bottom: 10mm;
-          }
         }
       `}</style>
+
     </div>
   );
 }
