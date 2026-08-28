@@ -322,18 +322,19 @@ export default function RemanPedidoImpressao() {
         </Button>
       </div>
 
-      {/* Conteúdo para impressão — duas vias lado a lado na mesma folha A4 */}
-      <div ref={contentRef} className="print-doc mx-auto p-6 text-[11px] print:p-0">
-        <div className="vias flex items-start gap-4">
-          <div className="via-col flex-1 min-w-0">
+      {/* Conteúdo para impressão — A4 retrato, duas vias empilhadas com conteúdo girado 90° */}
+      <div ref={contentRef} className="print-doc mx-auto">
+        <div className="via-half">
+          <div className="via-rot">
             <Via />
           </div>
+        </div>
 
-          {/* Linha de corte vertical (somente impressão) */}
-          <div className="cut-line print-only" />
+        {/* Linha de corte horizontal no centro da folha */}
+        <div className="cut-line" />
 
-          {/* Segunda via (somente impressão) */}
-          <div className="via-col flex-1 min-w-0 print-only">
+        <div className="via-half">
+          <div className="via-rot">
             <Via />
           </div>
         </div>
@@ -341,45 +342,67 @@ export default function RemanPedidoImpressao() {
 
       {/* Estilos de impressão */}
       <style>{`
-        .print-only { display: none; }
+        .print-doc, .print-doc * { box-sizing: border-box; }
+        .print-doc {
+          width: 210mm;
+          height: 297mm;
+          background: #fff;
+          position: relative;
+          overflow: hidden;
+        }
+        .print-doc .via-half {
+          width: 210mm;
+          height: 148.5mm;
+          position: relative;
+          overflow: hidden;
+        }
+        .print-doc .via-rot {
+          width: 148.5mm;
+          height: 210mm;
+          transform: translateY(148.5mm) rotate(-90deg);
+          transform-origin: top left;
+          padding: 4mm 5mm;
+          font-size: 9px;
+          line-height: 1.15;
+          color: #000;
+        }
+        .print-doc .cut-line {
+          position: absolute;
+          top: 148.5mm;
+          left: 0;
+          width: 210mm;
+          border-top: 1px dashed #666;
+        }
+        .print-doc table { width: 100%; }
+        .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
+
+        @media screen {
+          .print-doc {
+            margin-top: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 0 1px #e5e5e5;
+          }
+        }
+
         @media print {
-          @page { size: A4 landscape; margin: 0; }
+          @page { size: A4 portrait; margin: 0; }
           html, body {
             margin: 0 !important;
             padding: 0 !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .print-only { display: block !important; }
           .print-doc {
-            width: 297mm;
-            padding: 4mm 5mm !important;
-            font-size: 11px !important;
-            line-height: 1.15;
+            margin: 0 !important;
+            box-shadow: none !important;
+            page-break-after: avoid;
+            break-after: avoid;
           }
-          .print-doc .vias {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: flex-start;
-            gap: 3mm;
-          }
-          .print-doc .via-col {
-            width: 142mm;
-            max-width: 142mm;
-            page-break-inside: avoid;
-            break-inside: avoid;
-          }
-          .print-doc .cut-line {
-            width: 0;
-            align-self: stretch;
-            min-height: 195mm;
-            border-left: 1px dashed #666;
-          }
-          .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
           .print\\:hidden { display: none !important; }
           header, footer, .no-print { display: none !important; }
         }
       `}</style>
+
 
     </div>
   );
