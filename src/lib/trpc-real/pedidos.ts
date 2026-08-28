@@ -307,15 +307,31 @@ export const pedidosApi = {
               pedido_id: data.id,
               cartucho_id: c.cartuchoId ? Number(c.cartuchoId) : null,
               codigo: c.codigo || null,
-              peso_chegada: c.pesoChegada != null ? String(c.pesoChegada).replace(",", ".") : null,
-              peso_saida: c.pesoSaida != null ? String(c.pesoSaida).replace(",", ".") : null,
+              peso_chegada:
+                c.pesoChegada != null && c.pesoChegada !== ""
+                  ? String(c.pesoChegada).replace(",", ".")
+                  : null,
+              peso_saida:
+                c.pesoSaida != null && c.pesoSaida !== ""
+                  ? String(c.pesoSaida).replace(",", ".")
+                  : null,
               protegido: c.protegido ? 1 : 0,
               status: c.status || "em_espera",
               observacoes: c.observacoes || null,
             }));
+            // Insert único = atômico. Se falhar, desfaz o pedido para não deixar registro órfão.
             const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows);
-            if (e2) throw e2;
+            if (e2) {
+              await supabase.from("pedidos").delete().eq("id", data.id);
+              throw e2;
+            }
           }
+          await registrarAuditoria({
+            action: "pedido.criar",
+            entityType: "pedidos",
+            entityId: String(data.id),
+            details: { numero, clienteId: input.clienteId, itens: input.cartuchos?.length ?? 0 },
+          });
           return toApp(data);
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
