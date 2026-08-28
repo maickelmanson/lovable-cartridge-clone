@@ -58,6 +58,12 @@ export default function RemanPedidoImpressao() {
     }));
 
   const handlePrint = () => {
+    auditar({
+      action: "pedido.imprimir",
+      entityType: "reman_orders",
+      entityId: orderId,
+      entityLabel: order?.orderNumber ?? null,
+    });
     window.print();
   };
 
