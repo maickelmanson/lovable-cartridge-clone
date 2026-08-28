@@ -193,7 +193,7 @@ export default function RemanPedidoImpressao() {
             </span>
           )}
           <span>
-            R$ Total: <strong className="text-[11px] print:text-[12px]">{formatBRL(order.total)}</strong>
+             Total: <strong className="text-[11px] print:text-[12px]">{formatBRL(order.total)}</strong>
           </span>
         </div>
       </div>
