@@ -30,6 +30,7 @@ const REAL_NAMESPACES: Record<string, any> = {
   erros: errosApi,
   system: systemApi,
   buscadorCartuchos: buscadorCartuchosApi,
+  notifications: notificationsApi,
 };
 
 const noop = () => {};

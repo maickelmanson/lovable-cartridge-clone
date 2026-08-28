@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import ModalCartucho from "@/components/ModalCartucho";
 
