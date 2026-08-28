@@ -56,6 +56,7 @@ export default function PedidoDetalhe({ params }: Props) {
   const removerMutation = trpc.pedidoCartuchos.remover.useMutation();
   const atualizarMutation = trpc.pedidoCartuchos.atualizar.useMutation();
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
+  const notificarMutation = trpc.notifications.enviar.useMutation();
 
   const handleFinalizarPedido = async () => {
     if (!confirm("Deseja finalizar este pedido? Um pedido de remanufatura será gerado automaticamente.")) return;
