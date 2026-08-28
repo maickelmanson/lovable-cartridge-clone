@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requirePermission } from "@/lib/guard";
+import { registrarAuditoria, diff } from "@/lib/audit";
+
+function rest_keys(input: any) {
+  const { id, ...rest } = input ?? {};
+  return rest;
+}
 
 async function getOwnerId() {
   const { data } = await supabase.auth.getUser();
@@ -71,6 +78,7 @@ export const pedidoCartuchosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          requirePermission("cartucho.editar");
           const owner_id = await getOwnerId();
           const { data, error } = await supabase
             .from("pedido_cartuchos")
@@ -84,6 +92,13 @@ export const pedidoCartuchosApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "pedidoCartucho.adicionar",
+            entityType: "pedido_cartuchos",
+            entityId: data.id,
+            entityLabel: data.codigo,
+            details: { depois: data },
+          });
           return toApp(data);
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),
@@ -95,7 +110,10 @@ export const pedidoCartuchosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          const somenteStatus = Object.keys(rest_keys(input)).every((k) => k === "status");
+          requirePermission(somenteStatus ? "cartucho.status" : "cartucho.editar");
           const { id, ...rest } = input;
+          const { data: antes } = await supabase.from("pedido_cartuchos").select("*").eq("id", id).maybeSingle();
           const { data, error } = await supabase
             .from("pedido_cartuchos")
             .update(toDb(rest))
@@ -103,6 +121,13 @@ export const pedidoCartuchosApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "pedidoCartucho.alterar",
+            entityType: "pedido_cartuchos",
+            entityId: id,
+            entityLabel: data.codigo,
+            details: diff(antes as any, data as any),
+          });
           return toApp(data);
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),
@@ -114,8 +139,17 @@ export const pedidoCartuchosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("cartucho.editar");
+          const { data: antes } = await supabase.from("pedido_cartuchos").select("*").eq("id", id).maybeSingle();
           const { error } = await supabase.from("pedido_cartuchos").delete().eq("id", id);
           if (error) throw error;
+          await registrarAuditoria({
+            action: "pedidoCartucho.remover",
+            entityType: "pedido_cartuchos",
+            entityId: id,
+            entityLabel: (antes as any)?.codigo ?? null,
+            details: { antes, depois: null },
+          });
           return { id };
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidoCartuchos"] }),

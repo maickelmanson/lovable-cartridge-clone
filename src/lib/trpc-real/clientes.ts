@@ -1,6 +1,8 @@
 // Real Supabase-backed hooks that emulate the tRPC `clientes` namespace surface.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requirePermission } from "@/lib/guard";
+import { registrarAuditoria, diff } from "@/lib/audit";
 
 type ClienteRow = {
   id: number;
@@ -102,6 +104,7 @@ export const clientesApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          requirePermission("cliente.criar");
           const { data: userData } = await supabase.auth.getUser();
           const owner_id = userData.user?.id;
           if (!owner_id) throw new Error("Usuário não autenticado");
@@ -112,6 +115,13 @@ export const clientesApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "cliente.criar",
+            entityType: "clientes",
+            entityId: data.id,
+            entityLabel: data.nome,
+            details: { depois: data },
+          });
           return toApp(data as ClienteRow);
         },
         onSuccess: () => {
@@ -125,7 +135,9 @@ export const clientesApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          requirePermission("cliente.editar");
           const { id, ...rest } = input;
+          const { data: antes } = await supabase.from("clientes").select("*").eq("id", id).maybeSingle();
           const { data, error } = await supabase
             .from("clientes")
             .update(toDb(rest))
@@ -133,6 +145,13 @@ export const clientesApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "cliente.alterar",
+            entityType: "clientes",
+            entityId: id,
+            entityLabel: data.nome,
+            details: diff(antes as any, data as any),
+          });
           return toApp(data as ClienteRow);
         },
         onSuccess: () => {
@@ -146,8 +165,17 @@ export const clientesApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("cliente.deletar");
+          const { data: antes } = await supabase.from("clientes").select("*").eq("id", id).maybeSingle();
           const { error } = await supabase.from("clientes").delete().eq("id", id);
           if (error) throw error;
+          await registrarAuditoria({
+            action: "cliente.deletar",
+            entityType: "clientes",
+            entityId: id,
+            entityLabel: (antes as any)?.nome ?? null,
+            details: { antes, depois: null },
+          });
           return { id };
         },
         onSuccess: () => {
