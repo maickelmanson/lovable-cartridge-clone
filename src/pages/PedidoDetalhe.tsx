@@ -199,6 +199,20 @@ export default function PedidoDetalhe({ params }: Props) {
 
   return (
     <div className="space-y-6 h-full overflow-y-auto overflow-x-hidden pr-4">
+      <style>{`
+        @media print {
+          /* margin: 0 remove cabeçalho/rodapé do navegador (URL, data, título, páginas) */
+          @page { size: A4; margin: 0; }
+          html, body {
+            margin: 0 !important;
+            padding: 10mm !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .print\\:hidden, header, footer, .no-print { display: none !important; }
+        }
+      `}</style>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
