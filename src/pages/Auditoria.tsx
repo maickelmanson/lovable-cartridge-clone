@@ -50,15 +50,13 @@ export default function Auditoria() {
     queryKey: ["auditoria", "listar"],
     enabled: autorizado,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as unknown as LogRow[];
+      const res = await apiFetch("/api/audit");
+      if (!res.ok) throw new Error("Falha ao carregar auditoria");
+      const payload = (await res.json()) as { logs: LogRow[] };
+      return payload.logs ?? [];
     },
   });
+
 
   const logs = data ?? [];
   const usuarios = useMemo(
