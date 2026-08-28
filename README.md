@@ -1,6 +1,9 @@
 # Remix of Cartucho Web
 
-Clonar este repositório https://github.com/maickelmanson/cartuchos-web.git
+> **Repositório oficial atualizado:** https://github.com/maickelmanson/lovable-cartridge-clone.git  
+> O repositório anterior (`cartuchos-web`) foi descontinuado.
+
+Clonar este repositório https://github.com/maickelmanson/lovable-cartridge-clone.git
 
 This project was built with [Lovable](https://lovable.dev).
 
