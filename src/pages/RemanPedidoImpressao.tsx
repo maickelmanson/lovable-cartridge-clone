@@ -73,7 +73,7 @@ export default function RemanPedidoImpressao() {
           filename,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         })
         .from(contentRef.current)
         .save();
