@@ -362,7 +362,7 @@ export default function RemanPedidoImpressao() {
           transform: translateY(148.5mm) rotate(-90deg);
           transform-origin: top left;
           padding: 4mm 5mm;
-          font-size: 9px;
+          font-size: 12px;
           line-height: 1.15;
           color: #000;
         }
@@ -375,6 +375,26 @@ export default function RemanPedidoImpressao() {
         }
         .print-doc table { width: 100%; }
         .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
+
+        /* Fonte 14px nos dados do cliente */
+        .print-doc .dados-cliente td,
+        .print-doc .dados-cliente th {
+          font-size: 14px;
+        }
+
+        /* Uppercase em campos específicos */
+        .print-doc .dados-cliente td:nth-child(2),
+        .print-doc table tbody td.uppercase,
+        .print-doc table thead th.uppercase,
+        .print-doc .via h1,
+        .print-doc .via .uppercase {
+          text-transform: uppercase;
+        }
+
+        /* Espaço após o total */
+        .print-doc .total-box {
+          margin-bottom: 32px;
+        }
 
         @media screen {
           .print-doc {
