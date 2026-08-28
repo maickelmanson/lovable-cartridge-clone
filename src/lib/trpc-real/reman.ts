@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requirePermission } from "@/lib/guard";
+import { registrarAuditoria, diff } from "@/lib/audit";
 
 async function getOwnerId() {
   const { data } = await supabase.auth.getUser();
@@ -256,6 +258,13 @@ export const remanOrdersApi = {
             .single();
           if (error) throw error;
           if ("discount" in rest) await recomputeTotals(id);
+          await registrarAuditoria({
+            action: rest.status === "finalizado" ? "reman.finalizar" : "reman.alterar",
+            entityType: "reman_orders",
+            entityId: id,
+            entityLabel: data.order_number,
+            details: { depois: patch },
+          });
           return orderToApp(data);
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["remanOrders"] }),
@@ -267,8 +276,15 @@ export const remanOrdersApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.reabrir");
           const { error } = await supabase.from("reman_orders").update({ status: "aberto" }).eq("id", id);
           if (error) throw error;
+          await registrarAuditoria({
+            action: "reman.reabrir",
+            entityType: "reman_orders",
+            entityId: id,
+            details: { depois: { status: "aberto" } },
+          });
           return { id };
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["remanOrders"] }),
@@ -286,8 +302,15 @@ export const remanOrdersApi = {
             await supabase.from("reman_order_units").delete().in("order_item_id", itemIds);
           }
           await supabase.from("reman_order_items").delete().eq("order_id", id);
+          requirePermission("pedido.deletar");
           const { error } = await supabase.from("reman_orders").delete().eq("id", id);
           if (error) throw error;
+          await registrarAuditoria({
+            action: "reman.deletar",
+            entityType: "reman_orders",
+            entityId: id,
+            details: { antes: { id }, depois: null },
+          });
           return { id };
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["remanOrders"] }),

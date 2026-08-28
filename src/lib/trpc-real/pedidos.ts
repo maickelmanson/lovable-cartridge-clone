@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { registrarAuditoria } from "@/lib/audit";
+import { registrarAuditoria, diff } from "@/lib/audit";
+import { requirePermission } from "@/lib/guard";
 
 async function getOwnerId() {
   const { data } = await supabase.auth.getUser();
@@ -300,6 +301,7 @@ export const pedidosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (input: any) => {
+          requirePermission("pedido.criar");
           const owner_id = await getOwnerId();
           const numero = input.numero || (await proximoNumero());
           const { data, error } = await supabase
@@ -343,6 +345,7 @@ export const pedidosApi = {
             action: "pedido.criar",
             entityType: "pedidos",
             entityId: String(data.id),
+            entityLabel: `Pedido #${numero}`,
             details: { numero, clienteId: input.clienteId, itens: input.cartuchos?.length ?? 0 },
           });
           return toApp(data);
@@ -356,6 +359,7 @@ export const pedidosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.finalizar");
           const { data, error } = await supabase
             .from("pedidos")
             .update({ status: "finalizado", data_finalizacao: new Date().toISOString() })
@@ -364,6 +368,19 @@ export const pedidosApi = {
             .single();
           if (error) throw error;
           const reman = await gerarRemanAPartirDoPedido(id);
+          await registrarAuditoria({
+            action: "pedido.finalizar",
+            entityType: "pedidos",
+            entityId: id,
+            entityLabel: `Pedido #${data.numero}`,
+            details: { depois: { status: "finalizado", remanOrderNumber: reman.orderNumber } },
+          });
+          await registrarAuditoria({
+            action: "reman.finalizar",
+            entityType: "reman_orders",
+            entityId: reman.remanOrderId,
+            entityLabel: reman.orderNumber,
+          });
           return { ...toApp(data), remanOrderId: reman.remanOrderId, remanOrderNumber: reman.orderNumber };
         },
         onSuccess: () => {
@@ -380,6 +397,7 @@ export const pedidosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.reabrir");
           const { data, error } = await supabase
             .from("pedidos")
             .update({ status: "aberto", data_finalizacao: null })
@@ -387,6 +405,13 @@ export const pedidosApi = {
             .select("*")
             .single();
           if (error) throw error;
+          await registrarAuditoria({
+            action: "pedido.reabrir",
+            entityType: "pedidos",
+            entityId: id,
+            entityLabel: `Pedido #${data.numero}`,
+            details: { antes: { status: "finalizado" }, depois: { status: "aberto" } },
+          });
           return toApp(data);
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
@@ -398,9 +423,18 @@ export const pedidosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.deletar");
+          const { data: antes } = await supabase.from("pedidos").select("*").eq("id", id).maybeSingle();
           await supabase.from("pedido_cartuchos").delete().eq("pedido_id", id);
           const { error } = await supabase.from("pedidos").delete().eq("id", id);
           if (error) throw error;
+          await registrarAuditoria({
+            action: "pedido.deletar",
+            entityType: "pedidos",
+            entityId: id,
+            entityLabel: (antes as any)?.numero ? `Pedido #${(antes as any).numero}` : null,
+            details: { antes, depois: null },
+          });
           return { id };
         },
         onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
@@ -412,6 +446,7 @@ export const pedidosApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.criar");
           const owner_id = await getOwnerId();
           const { data: origem, error } = await supabase
             .from("pedidos")
