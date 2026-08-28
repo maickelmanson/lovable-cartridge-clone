@@ -236,6 +236,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          channel: string
+          cliente_id: number | null
+          created_at: string
+          destination: string
+          error: string | null
+          external_id: string | null
+          id: number
+          message: string
+          owner_id: string
+          pedido_id: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          cliente_id?: number | null
+          created_at?: string
+          destination: string
+          error?: string | null
+          external_id?: string | null
+          id?: number
+          message: string
+          owner_id?: string
+          pedido_id?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          cliente_id?: number | null
+          created_at?: string
+          destination?: string
+          error?: string | null
+          external_id?: string | null
+          id?: number
+          message?: string
+          owner_id?: string
+          pedido_id?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pedido_cartuchos: {
         Row: {
           cartucho_id: number | null
