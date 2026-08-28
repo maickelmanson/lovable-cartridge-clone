@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ShieldAlert } from "lucide-react";
-import { getCurrentUser } from "@/lib/authClient";
+import { apiFetch, getCurrentUser } from "@/lib/authClient";
 import { can } from "@/lib/permissions";
 
 type LogRow = {
