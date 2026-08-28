@@ -45,9 +45,9 @@ interface Props {
 
 export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }: Props) {
   const [form, setForm] = React.useState({
-    cartuchodId: cartucho?.cartuchodId || null,
+    cartuchoId: cartucho?.cartuchoId || null,
     codigo: cartucho?.codigo || "",
-    pesoCheagada: cartucho?.pesoCheagada || "",
+    pesoChegada: cartucho?.pesoChegada || "",
     pesoSaida: cartucho?.pesoSaida || "",
     protegido: cartucho?.protegido === 1,
     observacoes: cartucho?.observacoes || "",
@@ -64,7 +64,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    if (name === "pesoCheagada" || name === "pesoSaida") {
+    if (name === "pesoChegada" || name === "pesoSaida") {
       setForm(prev => ({
         ...prev,
         [name]: formatarPesoComVirgula(value)
@@ -82,7 +82,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
   };
 
   const handleSalvar = async () => {
-    if (!form.cartuchodId) {
+    if (!form.cartuchoId) {
       alert("Selecione um modelo de cartucho");
       return;
     }
@@ -92,15 +92,15 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
     }
 
     try {
-      const pesoCheagada = form.pesoCheagada ? parseFloat(form.pesoCheagada.replace(",", ".")) : 0;
+      const pesoChegada = form.pesoChegada ? parseFloat(form.pesoChegada.replace(",", ".")) : 0;
       const pesoSaida = form.pesoSaida ? parseFloat(form.pesoSaida.replace(",", ".")) : 0;
 
       if (cartucho?.id) {
         await atualizarMutation.mutateAsync({
           id: cartucho.id,
-          cartuchodId: form.cartuchodId,
+          cartuchoId: form.cartuchoId,
           codigo: form.codigo,
-          pesoCheagada,
+          pesoChegada,
           pesoSaida,
           protegido: form.protegido,
           observacoes: form.observacoes,
@@ -108,9 +108,9 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
       } else {
         await criarMutation.mutateAsync({
           pedidoId,
-          cartuchodId: form.cartuchodId,
+          cartuchoId: form.cartuchoId,
           codigo: form.codigo,
-          pesoCheagada,
+          pesoChegada,
           pesoSaida,
           protegido: form.protegido,
           observacoes: form.observacoes,
@@ -136,7 +136,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
         modelo02: novoModelo.modelo02.toUpperCase(),
       });
       
-      setForm(prev => ({ ...prev, cartuchodId: (resultado as any).insertId }));
+      setForm(prev => ({ ...prev, cartuchoId: (resultado as any).insertId }));
       setNovoModelo({ modelo01: "", modelo02: "" });
       setModalCriarAberto(false);
       await modelosQuery.refetch();
@@ -159,8 +159,8 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
               <label className="text-sm font-medium">Modelo Cadastrado</label>
               <div className="flex gap-2">
                 <Select 
-                  value={String(form.cartuchodId || "")} 
-                  onValueChange={(value) => setForm(prev => ({ ...prev, cartuchodId: parseInt(value) }))}
+                  value={String(form.cartuchoId || "")} 
+                  onValueChange={(value) => setForm(prev => ({ ...prev, cartuchoId: parseInt(value) }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um modelo..." />
@@ -196,9 +196,9 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
             <div>
                   <label className="text-sm font-medium">Peso de Chegada (kg)</label>
               <Input
-                name="pesoCheagada"
+                name="pesoChegada"
                 type="text"
-                value={form.pesoCheagada}
+                value={form.pesoChegada}
                 onChange={handleChange}
                 placeholder="00,00"
               />

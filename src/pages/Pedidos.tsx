@@ -31,31 +31,11 @@ export default function Pedidos() {
   };
 
   const criarPedidoMutation = trpc.pedidos.criar.useMutation();
-  const adicionarCartuchodoPedidoMutation = trpc.pedidoCartuchos.adicionar.useMutation();
 
   const handleNovoPedido = async (clienteId: number, cartuchos?: any[]) => {
     try {
-      const novoPedido = await criarPedidoMutation.mutateAsync({ clienteId });
-      
-      // Se houver cartuchos, adiciona cada um
-      if (cartuchos && cartuchos.length > 0) {
-        for (const c of cartuchos) {
-          try {
-            await adicionarCartuchodoPedidoMutation.mutateAsync({
-              pedidoId: novoPedido.id,
-              cartuchodId: c.cartuchodId ? parseInt(c.cartuchodId) : null,
-              codigo: c.codigo,
-              pesoCheagada: c.pesoCheagada ? parseFloat(c.pesoCheagada.replace(",", ".")) : undefined,
-              pesoSaida: c.pesoSaida ? parseFloat(c.pesoSaida.replace(",", ".")) : undefined,
-              protegido: c.protegido,
-              observacoes: c.observacoes,
-            });
-          } catch (error) {
-            console.error("Erro ao adicionar cartucho:", error);
-          }
-        }
-      }
-      
+      // Pedido + itens são gravados em uma única operação atômica no backend
+      await criarPedidoMutation.mutateAsync({ clienteId, cartuchos: cartuchos ?? [] });
       setModalAberto(false);
       pedidosQuery.refetch();
     } catch (error) {

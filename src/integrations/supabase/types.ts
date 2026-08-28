@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: number
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: number
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: number
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cartuchos_cadastro: {
         Row: {
           created_at: string
@@ -304,6 +337,39 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          last_login: string | null
+          name: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          id: string
+          last_login?: string | null
+          name?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          last_login?: string | null
+          name?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reman_order_items: {
         Row: {
           cartucho_id: number
@@ -509,7 +575,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "gerente" | "vendedor" | "tecnico"
       commercial_profile: "CLIENTE_FINAL" | "REVENDA"
       error_severity: "baixa" | "media" | "alta" | "critica"
       pedido_cartucho_status:
@@ -654,7 +720,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "gerente", "vendedor", "tecnico"],
       commercial_profile: ["CLIENTE_FINAL", "REVENDA"],
       error_severity: ["baixa", "media", "alta", "critica"],
       pedido_cartucho_status: [

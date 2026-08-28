@@ -69,7 +69,7 @@ async function modelosMaisSolicitados(limite = 10) {
   }
   return (mods ?? [])
     .map((m: any) => ({
-      cartuchodId: m.id,
+      cartuchoId: m.id,
       modelo01: m.modelo_01,
       modelo02: m.modelo_02,
       totalSolicitacoes: counts.get(m.id) ?? 0,

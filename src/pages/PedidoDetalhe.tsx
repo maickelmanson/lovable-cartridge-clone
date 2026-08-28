@@ -103,10 +103,10 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
-  const handleRemoverCartucho = async (cartuchodId: number) => {
+  const handleRemoverCartucho = async (cartuchoId: number) => {
     if (!confirm("Deseja remover este cartucho do pedido?")) return;
     try {
-      await removerMutation.mutateAsync(cartuchodId);
+      await removerMutation.mutateAsync(cartuchoId);
       cartuchosQuery.refetch();
       toast.success("Cartucho removido.");
     } catch (error) {
@@ -126,14 +126,14 @@ export default function PedidoDetalhe({ params }: Props) {
       return;
     }
     try {
-      const pesoCheagadaAtual = tipo === "chegada" ? pesoNumerico : (cartucho.pesoCheagada ? parseFloat(String(cartucho.pesoCheagada).replace(",", ".")) : 0);
+      const pesoChegadaAtual = tipo === "chegada" ? pesoNumerico : (cartucho.pesoChegada ? parseFloat(String(cartucho.pesoChegada).replace(",", ".")) : 0);
       const pesoSaidaAtual = tipo === "saida" ? pesoNumerico : (cartucho.pesoSaida ? parseFloat(String(cartucho.pesoSaida).replace(",", ".")) : 0);
       
       await atualizarMutation.mutateAsync({
         id: cartucho.id,
-        cartuchodId: cartucho.cartuchodId,
+        cartuchoId: cartucho.cartuchoId,
         codigo: cartucho.codigo,
-        pesoCheagada: pesoCheagadaAtual,
+        pesoChegada: pesoChegadaAtual,
         pesoSaida: pesoSaidaAtual,
         protegido: cartucho.protegido === 1,
         observacoes: cartucho.observacoes,
@@ -150,14 +150,14 @@ export default function PedidoDetalhe({ params }: Props) {
 
   const handleAtualizarStatus = async (cartucho: any, novoStatus: "em_espera" | "em_andamento" | "processo" | "funcionando" | "circuito_queimado" | "defeito_cabeca" | "garantia") => {
     try {
-      const pesoCheagada = cartucho.pesoCheagada ? parseFloat(String(cartucho.pesoCheagada).replace(",", ".")) : 0;
+      const pesoChegada = cartucho.pesoChegada ? parseFloat(String(cartucho.pesoChegada).replace(",", ".")) : 0;
       const pesoSaida = cartucho.pesoSaida ? parseFloat(String(cartucho.pesoSaida).replace(",", ".")) : 0;
       
       await atualizarMutation.mutateAsync({
         id: cartucho.id,
-        cartuchodId: cartucho.cartuchodId,
+        cartuchoId: cartucho.cartuchoId,
         codigo: cartucho.codigo,
-        pesoCheagada,
+        pesoChegada,
         pesoSaida,
         protegido: cartucho.protegido === 1,
         observacoes: cartucho.observacoes,
@@ -355,11 +355,11 @@ export default function PedidoDetalhe({ params }: Props) {
                             onClick={() => {
                               if (!isFinalizado) {
                                 setEditandoPeso({ id: c.id, tipo: "chegada" });
-                                setPesoTemp((c.pesoCheagada || 0).toString());
+                                setPesoTemp((c.pesoChegada || 0).toString());
                               }
                             }}
                           >
-                            {c.pesoCheagada || "-"}
+                            {c.pesoChegada || "-"}
                           </span>
                         )}
                       </td>
