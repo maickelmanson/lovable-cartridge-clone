@@ -73,7 +73,7 @@ export default function RemanPedidoImpressao() {
           filename,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
         })
         .from(contentRef.current)
         .save();
@@ -343,7 +343,7 @@ export default function RemanPedidoImpressao() {
       <style>{`
         .print-only { display: none; }
         @media print {
-          @page { size: A4 portrait; margin: 0; }
+          @page { size: A4 landscape; margin: 0; }
           html, body {
             margin: 0 !important;
             padding: 0 !important;
@@ -352,8 +352,8 @@ export default function RemanPedidoImpressao() {
           }
           .print-only { display: block !important; }
           .print-doc {
-            width: 210mm;
-            padding: 4mm !important;
+            width: 297mm;
+            padding: 4mm 5mm !important;
             font-size: 11px !important;
             line-height: 1.15;
           }
@@ -364,15 +364,15 @@ export default function RemanPedidoImpressao() {
             gap: 3mm;
           }
           .print-doc .via-col {
-            width: 99mm;
-            max-width: 99mm;
+            width: 142mm;
+            max-width: 142mm;
             page-break-inside: avoid;
             break-inside: avoid;
           }
           .print-doc .cut-line {
             width: 0;
             align-self: stretch;
-            min-height: 275mm;
+            min-height: 195mm;
             border-left: 1px dashed #666;
           }
           .print-doc td, .print-doc th { padding-top: 0; padding-bottom: 0; }
