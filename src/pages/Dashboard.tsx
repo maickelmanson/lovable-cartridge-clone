@@ -134,25 +134,80 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Visão geral do sistema de cartuchos</p>
         </div>
-        <Button
-          onClick={handleBackup}
-          disabled={backupLoading}
-          className="gap-2"
-          variant="outline"
-        >
-          {backupLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Gerando...
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4" />
-              Backup do Banco
-            </>
-          )}
-        </Button>
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button disabled={backupLoading} className="gap-2" variant="outline">
+                  {backupLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Backup
+                    </>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => void handleBackup("database")} className="cursor-pointer">
+                  <Database className="mr-2 h-4 w-4" />
+                  Backup do Banco de Dados
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void handleBackup("code")} className="cursor-pointer">
+                  <FileCode className="mr-2 h-4 w-4" />
+                  Backup do Código Fonte
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="outline" className="gap-2" onClick={() => setRestoreOpen(true)}>
+              <Upload className="h-4 w-4" />
+              Restaurar Banco
+            </Button>
+          </div>
+        )}
       </div>
+
+      <Dialog open={restoreOpen} onOpenChange={(o) => { if (!restoring) { setRestoreOpen(o); if (!o) setRestoreFile(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Restaurar banco de dados</DialogTitle>
+            <DialogDescription>
+              Selecione um arquivo .sql de backup. Atenção: todos os dados atuais das tabelas
+              presentes no arquivo serão substituídos permanentemente.
+            </DialogDescription>
+          </DialogHeader>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".sql,text/plain"
+            onChange={(e) => setRestoreFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm file:mr-3 file:rounded-md file:border file:bg-muted file:px-3 file:py-1.5 file:text-sm"
+          />
+          {restoreFile && (
+            <p className="text-sm text-muted-foreground">Arquivo: {restoreFile.name}</p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreOpen(false)} disabled={restoring}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={() => void handleRestore()} disabled={!restoreFile || restoring}>
+              {restoring ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Restaurando...
+                </>
+              ) : (
+                "Confirmar e substituir dados"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
