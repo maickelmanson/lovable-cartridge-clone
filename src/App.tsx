@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { useEffect, useState } from "react";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import DashboardLayout from "./components/DashboardLayout";
@@ -20,7 +21,10 @@ import DashboardAnalise from "./pages/DashboardAnalise";
 import PainelErros from "./pages/PainelErros";
 import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
+import Auditoria from "./pages/Auditoria";
+import Usuarios from "./pages/Usuarios";
 import Login from "./pages/Login";
+import { getToken } from "@/lib/authClient";
 
 function DashboardRoutes() {
   return (
@@ -40,6 +44,8 @@ function DashboardRoutes() {
         <Route path={"/teste/buscador-cartuchos"} component={TestBuscadorCartuchos} />
         <Route path={"/reman/pedidos"} component={RemanPedidos} />
         <Route path={"/reman/pedidos/:id"} component={RemanPedidoDetalhe} />
+        <Route path={"/auditoria"} component={Auditoria} />
+        <Route path={"/usuarios"} component={Usuarios} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>
@@ -47,19 +53,30 @@ function DashboardRoutes() {
   );
 }
 
-function Router() {
-  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-  return (
-    <Switch>
-      <Route path={"/login"} component={Login} />
-      <Route path={"/reman/pedidos/:id/imprimir"} component={RemanPedidoImpressao} />
-      {!token ? (
-        <Route component={Login} />
-      ) : (
-        <Route component={DashboardRoutes} />
-      )}
-    </Switch>
-  );
+function AuthGuard() {
+  const [location] = useLocation();
+  const [token, setTokenState] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setTokenState(getToken());
+    setReady(true);
+  }, [location]);
+
+  if (!ready) return null;
+
+  // Rota pública de impressão
+  if (/^\/reman\/pedidos\/[^/]+\/imprimir$/.test(location)) {
+    return (
+      <Switch>
+        <Route path={"/reman/pedidos/:id/imprimir"} component={RemanPedidoImpressao} />
+      </Switch>
+    );
+  }
+
+  if (!token) return <Login />;
+
+  return <DashboardRoutes />;
 }
 
 function App() {
@@ -68,7 +85,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AuthGuard />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
