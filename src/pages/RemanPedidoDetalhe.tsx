@@ -195,7 +195,7 @@ function ModalAdicionarUnidade({ item, onSalvo, onFechar }: { item: any; onSalvo
           </div>
           {form.status === "FUNCIONANDO" && (
             <div>
-              <label className="text-sm font-medium">Peso de Saída (kg) *</label>
+              <label className="text-sm font-medium">Peso de Saída (g) *</label>
               <Input
                 name="outputWeight"
                 value={form.outputWeight}

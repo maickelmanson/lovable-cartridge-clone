@@ -273,7 +273,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Peso Chegada (kg)</label>
+                  <label className="text-sm font-medium">Peso Chegada (g)</label>
                   <Input
                     value={novoCartucho.pesoChegada}
                     onChange={(e) => handleChangePeso("chegada", e.target.value)}
@@ -285,7 +285,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">Peso Saída (kg)</label>
+                  <label className="text-sm font-medium">Peso Saída (g)</label>
                   <Input
                     value={novoCartucho.pesoSaida}
                     onChange={(e) => handleChangePeso("saida", e.target.value)}

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { openWhatsApp } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
 
 interface Props {
@@ -56,7 +57,7 @@ export default function PedidoDetalhe({ params }: Props) {
   const removerMutation = trpc.pedidoCartuchos.remover.useMutation();
   const atualizarMutation = trpc.pedidoCartuchos.atualizar.useMutation();
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
-  const notificarMutation = trpc.notifications.enviar.useMutation();
+  const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
 
   const handleFinalizarPedido = async () => {
     if (!confirm("Deseja finalizar este pedido? Um pedido de remanufatura será gerado automaticamente.")) return;
@@ -104,18 +105,15 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
-  const handleNotificarCliente = async () => {
-    try {
-      const result = await notificarMutation.mutateAsync({
-        pedidoId: id,
-        clienteId: pedido.clienteId,
-        channel: "whatsapp",
-      });
-      toast.success(`Mensagem enviada! ID: ${result.externalId || result.id}`);
-    } catch (error) {
-      console.error("Erro ao notificar cliente:", error);
-      const msg = error instanceof Error ? error.message : "Erro ao enviar notificação.";
-      toast.error(msg);
+  const handleNotificarCliente = () => {
+    const pedido = pedidoQuery.data;
+    const cliente = clienteQuery.data;
+    if (!pedido) return;
+    const telefone = cliente?.telefone || cliente?.telefone2;
+    const statusTexto = pedido.status === "finalizado" ? "finalizado" : "em andamento";
+    const mensagem = `Olá${cliente?.nome ? ` ${cliente.nome}` : ""}, seu pedido #${pedido.numero} está ${statusTexto}. Qualquer dúvida estamos à disposição.`;
+    if (!openWhatsApp(telefone, mensagem)) {
+      toast.error("Cliente não possui telefone válido para WhatsApp.");
     }
   };
 
@@ -233,11 +231,10 @@ export default function PedidoDetalhe({ params }: Props) {
           <Button
             onClick={handleNotificarCliente}
             variant="outline"
-            disabled={notificarMutation.isPending}
             className="border-green-500 text-green-600 hover:bg-green-50"
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            {notificarMutation.isPending ? "Enviando..." : "Notificar cliente"}
+            Notificar cliente
           </Button>
 
           <Button onClick={handleDuplicarPedido} variant="outline" disabled={duplicarMutation.isPending}>
@@ -332,8 +329,8 @@ export default function PedidoDetalhe({ params }: Props) {
                   <th className="px-4 py-2 text-left">Modelo</th>
                   <th className="px-4 py-2 text-left">Código</th>
                   <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Peso Chegada</th>
-                  <th className="px-4 py-2 text-left">Peso Saída</th>
+                  <th className="px-4 py-2 text-left">Peso Chegada (g)</th>
+                  <th className="px-4 py-2 text-left">Peso Saída (g)</th>
                   <th className="px-4 py-2 text-left">Protegido</th>
                   <th className="px-4 py-2 text-left">Observações</th>
                   <th className="px-4 py-2 text-right">Ações</th>
@@ -399,7 +396,7 @@ export default function PedidoDetalhe({ params }: Props) {
                               }
                             }}
                           >
-                            {c.pesoChegada || "-"}
+                            {c.pesoChegada ? `${c.pesoChegada}g` : "-"}
                           </span>
                         )}
                       </td>
@@ -428,7 +425,7 @@ export default function PedidoDetalhe({ params }: Props) {
                               }
                             }}
                           >
-                            {c.pesoSaida || "-"}
+                            {c.pesoSaida ? `${c.pesoSaida}g` : "-"}
                           </span>
                         )}
                       </td>

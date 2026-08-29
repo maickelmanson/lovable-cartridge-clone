@@ -194,7 +194,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
             </div>
 
             <div>
-                  <label className="text-sm font-medium">Peso de Chegada (kg)</label>
+                  <label className="text-sm font-medium">Peso de Chegada (g)</label>
               <Input
                 name="pesoChegada"
                 type="text"
@@ -205,7 +205,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
             </div>
 
             <div>
-                  <label className="text-sm font-medium">Peso de Saída (kg)</label>
+                  <label className="text-sm font-medium">Peso de Saída (g)</label>
               <Input
                 name="pesoSaida"
                 type="text"
