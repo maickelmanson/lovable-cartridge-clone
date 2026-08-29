@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { login } from "@/lib/authClient";
-import { openDataSession } from "@/lib/dataSession";
 import { registrarAuditoria } from "@/lib/audit";
 
 export default function Login() {
@@ -19,15 +18,14 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      const { user, dataSessionToken } = await login(email, password);
-      await openDataSession(dataSessionToken);
+      const { user } = await login(email, password);
       await registrarAuditoria({
         action: "auth.login",
         entityType: "users",
         entityId: user.id,
         entityLabel: user.email,
       });
-      window.location.replace("/");
+      window.location.href = "/";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível entrar");
       setLoading(false);
