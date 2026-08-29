@@ -1,11 +1,27 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingBag, Users, Package, Search, Download, Loader2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ShoppingBag, Users, Package, Search, Download, Loader2, Database, FileCode, Upload } from "lucide-react";
+import { getToken, getCurrentUser } from "@/lib/authClient";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -13,7 +29,11 @@ export default function Dashboard() {
   const [termoBusca, setTermoBusca] = useState("");
   const [resultados, setResultados] = useState<any>(null);
   const [backupLoading, setBackupLoading] = useState(false);
-  const backupMutation = trpc.system.gerarBackup.useMutation();
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isAdmin = getCurrentUser()?.role === "admin";
 
   const pedidosQuery = trpc.pedidos.listar.useQuery();
   const clientesQuery = trpc.clientes.listar.useQuery();
@@ -29,25 +49,57 @@ export default function Dashboard() {
     }
   };
 
-  const handleBackup = async () => {
+  const baixarArquivo = (blob: Blob, nome: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = nome;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleBackup = async (tipo: "database" | "code") => {
     try {
       setBackupLoading(true);
-      const response = await backupMutation.mutateAsync();
-
-      // Criar blob com o conteúdo SQL
-      const blob = new Blob([response.sql], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `database-backup-${new Date().toISOString().split('T')[0]}.sql`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Erro ao gerar backup:', error);
+      const res = await fetch(`/api/backup/${tipo}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+      });
+      if (!res.ok) {
+        const info = await res.json().catch(() => ({}));
+        throw new Error(info.error || "Falha ao gerar o backup.");
+      }
+      const blob = await res.blob();
+      const data = new Date().toISOString().split("T")[0];
+      baixarArquivo(blob, tipo === "database" ? `database-backup-${data}.sql` : `codigo-fonte-${data}.zip`);
+      toast.success("Backup gerado com sucesso.");
+    } catch (error: any) {
+      toast.error(error?.message ?? "Erro ao gerar backup.");
     } finally {
       setBackupLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!restoreFile) return;
+    try {
+      setRestoring(true);
+      const form = new FormData();
+      form.append("file", restoreFile);
+      const res = await fetch("/api/backup/restore", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+        body: form,
+      });
+      const info = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(info.error || "Falha ao restaurar o banco.");
+      toast.success("Banco restaurado. Recarregando...");
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (error: any) {
+      toast.error(error?.message ?? "Erro ao restaurar.");
+      setRestoring(false);
     }
   };
 

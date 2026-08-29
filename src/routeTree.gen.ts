@@ -13,6 +13,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuditIndexRouteImport } from './routes/api/audit/index'
 import { Route as ApiDbSplatRouteImport } from './routes/api/db/$'
+import { Route as ApiBackupRestoreRouteImport } from './routes/api/backup/restore'
 import { Route as ApiBackupDatabaseRouteImport } from './routes/api/backup/database'
 import { Route as ApiBackupCodeRouteImport } from './routes/api/backup/code'
 import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
@@ -39,6 +40,11 @@ const ApiAuditIndexRoute = ApiAuditIndexRouteImport.update({
 const ApiDbSplatRoute = ApiDbSplatRouteImport.update({
   id: '/api/db/$',
   path: '/api/db/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBackupRestoreRoute = ApiBackupRestoreRouteImport.update({
+  id: '/api/backup/restore',
+  path: '/api/backup/restore',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBackupDatabaseRoute = ApiBackupDatabaseRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
+  '/api/backup/restore': typeof ApiBackupRestoreRoute
   '/api/db/$': typeof ApiDbSplatRoute
   '/api/audit/': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
+  '/api/backup/restore': typeof ApiBackupRestoreRoute
   '/api/db/$': typeof ApiDbSplatRoute
   '/api/audit': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
+  '/api/backup/restore': typeof ApiBackupRestoreRoute
   '/api/db/$': typeof ApiDbSplatRoute
   '/api/audit/': typeof ApiAuditIndexRoute
   '/api/auth/users/$id': typeof ApiAuthUsersIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/api/auth/users'
     | '/api/backup/code'
     | '/api/backup/database'
+    | '/api/backup/restore'
     | '/api/db/$'
     | '/api/audit/'
     | '/api/auth/users/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/api/auth/users'
     | '/api/backup/code'
     | '/api/backup/database'
+    | '/api/backup/restore'
     | '/api/db/$'
     | '/api/audit'
     | '/api/auth/users/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/auth/users'
     | '/api/backup/code'
     | '/api/backup/database'
+    | '/api/backup/restore'
     | '/api/db/$'
     | '/api/audit/'
     | '/api/auth/users/$id'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   ApiAuthUsersRoute: typeof ApiAuthUsersRouteWithChildren
   ApiBackupCodeRoute: typeof ApiBackupCodeRoute
   ApiBackupDatabaseRoute: typeof ApiBackupDatabaseRoute
+  ApiBackupRestoreRoute: typeof ApiBackupRestoreRoute
   ApiDbSplatRoute: typeof ApiDbSplatRoute
   ApiAuditIndexRoute: typeof ApiAuditIndexRoute
 }
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/api/db/$'
       fullPath: '/api/db/$'
       preLoaderRoute: typeof ApiDbSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/backup/restore': {
+      id: '/api/backup/restore'
+      path: '/api/backup/restore'
+      fullPath: '/api/backup/restore'
+      preLoaderRoute: typeof ApiBackupRestoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/backup/database': {
@@ -275,6 +295,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthUsersRoute: ApiAuthUsersRouteWithChildren,
   ApiBackupCodeRoute: ApiBackupCodeRoute,
   ApiBackupDatabaseRoute: ApiBackupDatabaseRoute,
+  ApiBackupRestoreRoute: ApiBackupRestoreRoute,
   ApiDbSplatRoute: ApiDbSplatRoute,
   ApiAuditIndexRoute: ApiAuditIndexRoute,
 }
