@@ -96,10 +96,7 @@ export function installApiAuthInterceptor() {
   };
 }
 
-export async function login(
-  email: string,
-  password: string,
-): Promise<{ user: SessionUser; dataSessionToken: string }> {
+export async function login(email: string, password: string): Promise<{ user: SessionUser }> {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -108,7 +105,6 @@ export async function login(
   const payload = (await res.json().catch(() => ({}))) as {
     token?: string;
     user?: SessionUser;
-    dataSessionToken?: string;
     error?: string;
   };
   if (!res.ok || !payload.token || !payload.user) {
@@ -116,10 +112,10 @@ export async function login(
   }
   setToken(payload.token);
   currentUser = payload.user;
-  return { user: payload.user, dataSessionToken: payload.dataSessionToken ?? "" };
+  return { user: payload.user };
 }
 
-export async function fetchMe(): Promise<{ user: SessionUser; dataSessionToken: string } | null> {
+export async function fetchMe(): Promise<{ user: SessionUser } | null> {
   if (!getToken()) return null;
   const res = await apiFetch("/api/auth/me");
   if (!res.ok) {
@@ -127,17 +123,14 @@ export async function fetchMe(): Promise<{ user: SessionUser; dataSessionToken: 
     currentUser = null;
     return null;
   }
-  const payload = (await res.json()) as { user: SessionUser; dataSessionToken?: string };
+  const payload = (await res.json()) as { user: SessionUser };
   currentUser = payload.user;
-  return { user: payload.user, dataSessionToken: payload.dataSessionToken ?? "" };
+  return { user: payload.user };
 }
 
 export async function logout() {
-  try {
-    await apiFetch("/api/auth/logout", { method: "POST" });
-  } catch {}
   clearToken();
   currentUser = null;
-  if (typeof window !== "undefined") window.location.replace("/login");
+  if (typeof window !== "undefined") window.location.href = "/login";
 }
 
