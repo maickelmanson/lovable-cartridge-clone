@@ -102,6 +102,8 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider
+      open={sidebarOpen}
+      onOpenChange={setSidebarOpen}
       style={
         {
           "--sidebar-width": `${sidebarWidth}px`,
