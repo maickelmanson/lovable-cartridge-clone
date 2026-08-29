@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useQuery } from "@tanstack/react-query";
 
 export type AppRole = "admin" | "gerente" | "vendedor" | "tecnico" | "user";

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { registrarAuditoria, diff } from "@/lib/audit";
 import { requirePermission } from "@/lib/guard";
 
