@@ -13,7 +13,6 @@ import { analiseApi } from "./trpc-real/analise";
 import { errosApi } from "./trpc-real/erros";
 import { systemApi } from "./trpc-real/system";
 import { buscadorCartuchosApi } from "./trpc-real/buscadorCartuchos";
-import { notificationsApi } from "./trpc-real/notifications";
 
 const REAL_NAMESPACES: Record<string, any> = {
   clientes: clientesApi,
@@ -30,7 +29,6 @@ const REAL_NAMESPACES: Record<string, any> = {
   erros: errosApi,
   system: systemApi,
   buscadorCartuchos: buscadorCartuchosApi,
-  notifications: notificationsApi,
 };
 
 const noop = () => {};
