@@ -43,6 +43,7 @@ const menuItems = [
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
+const SIDEBAR_OPEN_KEY = "sidebar-open";
 const DEFAULT_WIDTH = 280;
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 480;
@@ -56,11 +57,18 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => localStorage.getItem(SIDEBAR_OPEN_KEY) !== "false",
+  );
   const { loading, user } = useAuth();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_OPEN_KEY, String(sidebarOpen));
+  }, [sidebarOpen]);
 
   if (loading) {
     return <DashboardLayoutSkeleton />
