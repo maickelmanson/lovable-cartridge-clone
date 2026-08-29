@@ -67,7 +67,11 @@ function AuthGuard() {
 
   // Rota pública de impressão
   if (/^\/reman\/pedidos\/[^/]+\/imprimir$/.test(location)) {
-    return <RemanPedidoImpressao />;
+    return (
+      <Switch>
+        <Route path={"/reman/pedidos/:id/imprimir"} component={RemanPedidoImpressao} />
+      </Switch>
+    );
   }
 
   if (!token) return <Login />;
