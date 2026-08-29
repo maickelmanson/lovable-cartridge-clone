@@ -68,7 +68,7 @@ export type Database = {
           id: number
           modelo_01: string
           modelo_02: string
-          owner_id: string
+          owner_id: string | null
           price_final_customer: number | null
           price_reseller: number | null
           updated_at: string
@@ -78,7 +78,7 @@ export type Database = {
           id?: number
           modelo_01: string
           modelo_02: string
-          owner_id?: string
+          owner_id?: string | null
           price_final_customer?: number | null
           price_reseller?: number | null
           updated_at?: string
@@ -88,7 +88,7 @@ export type Database = {
           id?: number
           modelo_01?: string
           modelo_02?: string
-          owner_id?: string
+          owner_id?: string | null
           price_final_customer?: number | null
           price_reseller?: number | null
           updated_at?: string
@@ -106,7 +106,7 @@ export type Database = {
           inscricao_estadual: string | null
           nome: string
           observacoes: string | null
-          owner_id: string
+          owner_id: string | null
           telefone: string | null
           telefone2: string | null
           updated_at: string
@@ -121,7 +121,7 @@ export type Database = {
           inscricao_estadual?: string | null
           nome: string
           observacoes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           telefone?: string | null
           telefone2?: string | null
           updated_at?: string
@@ -136,7 +136,7 @@ export type Database = {
           inscricao_estadual?: string | null
           nome?: string
           observacoes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           telefone?: string | null
           telefone2?: string | null
           updated_at?: string
@@ -159,7 +159,7 @@ export type Database = {
           logo_url: string | null
           nome: string | null
           numero: string | null
-          owner_id: string
+          owner_id: string | null
           telefone: string | null
           updated_at: string
         }
@@ -178,7 +178,7 @@ export type Database = {
           logo_url?: string | null
           nome?: string | null
           numero?: string | null
-          owner_id?: string
+          owner_id?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -197,7 +197,7 @@ export type Database = {
           logo_url?: string | null
           nome?: string | null
           numero?: string | null
-          owner_id?: string
+          owner_id?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -212,7 +212,7 @@ export type Database = {
           error_type: string
           id: number
           notes: string | null
-          owner_id: string
+          owner_id: string | null
           resolved: boolean
           resolved_at: string | null
           resolved_by: string | null
@@ -227,7 +227,7 @@ export type Database = {
           error_type: string
           id?: number
           notes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           resolved?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
@@ -242,7 +242,7 @@ export type Database = {
           error_type?: string
           id?: number
           notes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           resolved?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
@@ -261,7 +261,7 @@ export type Database = {
           external_id: string | null
           id: number
           message: string
-          owner_id: string
+          owner_id: string | null
           pedido_id: number | null
           status: string
           updated_at: string
@@ -275,7 +275,7 @@ export type Database = {
           external_id?: string | null
           id?: number
           message: string
-          owner_id?: string
+          owner_id?: string | null
           pedido_id?: number | null
           status?: string
           updated_at?: string
@@ -289,7 +289,7 @@ export type Database = {
           external_id?: string | null
           id?: number
           message?: string
-          owner_id?: string
+          owner_id?: string | null
           pedido_id?: number | null
           status?: string
           updated_at?: string
@@ -303,7 +303,7 @@ export type Database = {
           created_at: string
           id: number
           observacoes: string | null
-          owner_id: string
+          owner_id: string | null
           pedido_id: number
           peso_chegada: string | null
           peso_saida: string | null
@@ -317,7 +317,7 @@ export type Database = {
           created_at?: string
           id?: number
           observacoes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           pedido_id: number
           peso_chegada?: string | null
           peso_saida?: string | null
@@ -331,7 +331,7 @@ export type Database = {
           created_at?: string
           id?: number
           observacoes?: string | null
-          owner_id?: string
+          owner_id?: string | null
           pedido_id?: number
           peso_chegada?: string | null
           peso_saida?: string | null
@@ -364,7 +364,7 @@ export type Database = {
           id: number
           numero: string
           observacao_geral: string | null
-          owner_id: string
+          owner_id: string | null
           status: Database["public"]["Enums"]["pedido_status"]
           updated_at: string
         }
@@ -375,7 +375,7 @@ export type Database = {
           id?: number
           numero: string
           observacao_geral?: string | null
-          owner_id?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["pedido_status"]
           updated_at?: string
         }
@@ -386,7 +386,7 @@ export type Database = {
           id?: number
           numero?: string
           observacao_geral?: string | null
-          owner_id?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["pedido_status"]
           updated_at?: string
         }
@@ -442,7 +442,7 @@ export type Database = {
           line_total: number
           model_code_snapshot: string | null
           order_id: number
-          owner_id: string
+          owner_id: string | null
           price_source: Database["public"]["Enums"]["commercial_profile"]
           quantity: number
           unit_price: number
@@ -456,7 +456,7 @@ export type Database = {
           line_total: number
           model_code_snapshot?: string | null
           order_id: number
-          owner_id?: string
+          owner_id?: string | null
           price_source: Database["public"]["Enums"]["commercial_profile"]
           quantity: number
           unit_price: number
@@ -470,7 +470,7 @@ export type Database = {
           line_total?: number
           model_code_snapshot?: string | null
           order_id?: number
-          owner_id?: string
+          owner_id?: string | null
           price_source?: Database["public"]["Enums"]["commercial_profile"]
           quantity?: number
           unit_price?: number
@@ -503,7 +503,7 @@ export type Database = {
           notes: string | null
           order_item_id: number
           output_weight: number | null
-          owner_id: string
+          owner_id: string | null
           status: Database["public"]["Enums"]["reman_unit_status"]
           unit_code: string
           updated_at: string
@@ -517,7 +517,7 @@ export type Database = {
           notes?: string | null
           order_item_id: number
           output_weight?: number | null
-          owner_id?: string
+          owner_id?: string | null
           status: Database["public"]["Enums"]["reman_unit_status"]
           unit_code: string
           updated_at?: string
@@ -531,7 +531,7 @@ export type Database = {
           notes?: string | null
           order_item_id?: number
           output_weight?: number | null
-          owner_id?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["reman_unit_status"]
           unit_code?: string
           updated_at?: string
@@ -563,7 +563,7 @@ export type Database = {
           notes: string | null
           observacao_geral: string | null
           order_number: string
-          owner_id: string
+          owner_id: string | null
           status: Database["public"]["Enums"]["reman_order_status"]
           subtotal: number
           total: number
@@ -578,7 +578,7 @@ export type Database = {
           notes?: string | null
           observacao_geral?: string | null
           order_number: string
-          owner_id?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["reman_order_status"]
           subtotal?: number
           total?: number
@@ -593,7 +593,7 @@ export type Database = {
           notes?: string | null
           observacao_geral?: string | null
           order_number?: string
-          owner_id?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["reman_order_status"]
           subtotal?: number
           total?: number
