@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 
 type Tipo = "geral" | "codigo" | "cliente" | "telefone" | "cpf" | "cnpj" | "pedido";
 
