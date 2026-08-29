@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { formatCEP, formatDoc, formatPhone } from "@/lib/masks";
 import { Building2, Save, Loader2, Upload, X } from "lucide-react";
 
 export default function DadosEmpresa() {
@@ -60,7 +61,11 @@ export default function DadosEmpresa() {
   }, [empresa]);
 
   const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    let valor = value;
+    if (field === "cnpjCpf") valor = formatDoc(value);
+    else if (field === "telefone" || field === "celular") valor = formatPhone(value);
+    else if (field === "cep") valor = formatCEP(value);
+    setForm((prev) => ({ ...prev, [field]: valor }));
   };
 
   const handleSalvar = () => {
@@ -266,7 +271,7 @@ export default function DadosEmpresa() {
                 type="tel"
                 value={form.telefone}
                 onChange={(e) => handleChange("telefone", e.target.value)}
-                placeholder="(00) 0000-0000"
+                placeholder="(00) 00000-0000"
               />
             </div>
             <div className="space-y-2">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { formatDoc, formatPhone } from "@/lib/masks";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +103,7 @@ export default function Clientes() {
                     onClick={() => setLocation(`/clientes/${c.id}`)}
                   >
                     <td className="px-4 py-3">{c.nome}</td>
-                    <td className="px-4 py-3 text-sm">{c.telefone || "-"}</td>
+                    <td className="px-4 py-3 text-sm">{formatPhone(c.telefone) || "-"}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-1 rounded ${
                         (c as any).commercialProfile === "REVENDA"
@@ -112,7 +113,7 @@ export default function Clientes() {
                         {(c as any).commercialProfile === "REVENDA" ? "Revenda" : "Cliente Final"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm font-mono">{c.cpf || c.cnpj || "-"}</td>
+                    <td className="px-4 py-3 text-sm font-mono">{formatDoc(c.cpf || c.cnpj) || "-"}</td>
                     <td className="px-4 py-3 text-sm max-w-xs truncate">{c.endereco || "-"}</td>
                     <td className="px-4 py-3 text-sm">{new Date(c.criadoEm).toLocaleDateString()}</td>
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>

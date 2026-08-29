@@ -5,6 +5,7 @@ import { Printer, ArrowLeft, Loader2, FileDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useRef, useState } from "react";
 import { auditar } from "@/lib/audit";
+import { formatDoc, formatPhone } from "@/lib/masks";
 
 function formatBRL(value: string | number | null | undefined): string {
   const num = typeof value === "string" ? parseFloat(value) : (value || 0);
@@ -95,6 +96,7 @@ export default function RemanPedidoImpressao() {
   const clienteEndereco = order.clienteEndereco || "";
   const telefones = [order.clienteTelefone, (order as any).clienteTelefone2]
     .filter((t: any) => t && String(t).trim())
+    .map((t: any) => formatPhone(String(t)))
     .join("  /  ");
 
   const Via = () => (
@@ -119,9 +121,9 @@ export default function RemanPedidoImpressao() {
               {empresa?.estado ? `/${empresa.estado}` : ""}
             </div>
             <div>
-              {empresa?.celular && <span>WhatsApp: {empresa.celular}</span>}
+              {empresa?.celular && <span>WhatsApp: {formatPhone(empresa.celular)}</span>}
             </div>
-            <div>{empresa?.cnpjCpf && <span>CNPJ: {empresa.cnpjCpf}</span>}</div>
+            <div>{empresa?.cnpjCpf && <span>CNPJ: {formatDoc(empresa.cnpjCpf)}</span>}</div>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { formatCNPJ, formatCPF, formatPhone } from "@/lib/masks";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -96,7 +97,7 @@ export default function ClienteDetalhe({ params }: Props) {
             </div>
             <div>
               <p className="text-muted-foreground">Telefone</p>
-              <p>{cliente.telefone || "-"}</p>
+              <p>{formatPhone(cliente.telefone) || "-"}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Perfil Comercial</p>
@@ -120,11 +121,11 @@ export default function ClienteDetalhe({ params }: Props) {
           <div className="space-y-3 text-sm">
             <div>
               <p className="text-muted-foreground">CPF</p>
-              <p className="font-mono">{cliente.cpf || "-"}</p>
+              <p className="font-mono">{formatCPF(cliente.cpf) || "-"}</p>
             </div>
             <div>
               <p className="text-muted-foreground">CNPJ</p>
-              <p className="font-mono">{cliente.cnpj || "-"}</p>
+              <p className="font-mono">{formatCNPJ(cliente.cnpj) || "-"}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Inscrição Estadual</p>
