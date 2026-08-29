@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { mascaraCPF, mascaraCNPJ, validarCPF, validarCNPJ, mascaraTelefone, validarTelefone } from "@/lib/cpfCnpjValidation";
+import { formatCNPJ, formatPhone } from "@/lib/masks";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface Props {
@@ -54,9 +55,9 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
     if (name === "cpf") {
       valorFormatado = mascaraCPF(value);
     } else if (name === "cnpj") {
-      valorFormatado = mascaraCNPJ(value);
+      valorFormatado = formatCNPJ(value);
     } else if (name === "telefone" || name === "telefone2") {
-      valorFormatado = mascaraTelefone(value);
+      valorFormatado = formatPhone(value);
     } else if (name !== "observacoes") {
       // Maiúsculas para todos os campos exceto observações
       valorFormatado = value.toUpperCase();

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
+import { formatCNPJ, formatPhone } from "@/lib/masks";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -210,9 +211,9 @@ export default function BuscaAvancada() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold truncate">{cliente.nome}</p>
                       <div className="flex gap-4 text-sm text-muted-foreground mt-0.5 flex-wrap">
-                        {cliente.telefone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{cliente.telefone}</span>}
+                        {cliente.telefone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{formatPhone(cliente.telefone)}</span>}
                         {cliente.cpf && <span className="flex items-center gap-1"><CreditCard className="h-3 w-3" />CPF: {cliente.cpf}</span>}
-                        {cliente.cnpj && <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />CNPJ: {cliente.cnpj}</span>}
+                        {cliente.cnpj && <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />CNPJ: {formatCNPJ(cliente.cnpj)}</span>}
                         <span className={`text-xs px-2 py-0.5 rounded-full ${cliente.commercialProfile === "REVENDA" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
                           {cliente.commercialProfile === "REVENDA" ? "Revenda" : "Cliente Final"}
                         </span>
@@ -264,9 +265,9 @@ export default function BuscaAvancada() {
                         {p.dataFinalizacao && (
                           <span>Finalizado em {new Date(p.dataFinalizacao).toLocaleDateString("pt-BR")}</span>
                         )}
-                        {p.telefone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{p.telefone}</span>}
+                        {p.telefone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{formatPhone(p.telefone)}</span>}
                         {p.cpf && <span>CPF: {p.cpf}</span>}
-                        {p.cnpj && <span>CNPJ: {p.cnpj}</span>}
+                        {p.cnpj && <span>CNPJ: {formatCNPJ(p.cnpj)}</span>}
                       </div>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
