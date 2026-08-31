@@ -24,6 +24,7 @@ export const Route = createFileRoute("/api/auth/users/$id")({
           active?: boolean;
           role?: AppRole;
           password?: string;
+          password_changed_at?: string;
         };
         const patch: UserPatch = {};
         if (body.email !== undefined) patch.email = body.email.trim().toLowerCase();
