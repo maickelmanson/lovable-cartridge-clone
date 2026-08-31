@@ -24,6 +24,8 @@ export type DbUser = {
   role: AppRole;
   active: boolean;
   created_at: string;
+  updated_at?: string | null;
+  password_changed_at?: string | null;
   last_login: string | null;
 };
 
