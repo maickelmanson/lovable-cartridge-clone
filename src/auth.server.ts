@@ -102,6 +102,13 @@ export async function authenticateRequest(
 
   const user = data as DbUser | null;
   if (!user || !user.active) return null;
+
+  // Token emitido antes da última troca de senha deixa de valer.
+  if (user.password_changed_at && payload.iat) {
+    const changed = Math.floor(new Date(user.password_changed_at).getTime() / 1000);
+    if (payload.iat < changed) return null;
+  }
+
   return { payload, user };
 }
 
