@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { openWhatsApp } from "@/lib/whatsapp";
+import { openWhatsApp, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
 
 interface Props {
@@ -60,6 +60,8 @@ export default function PedidoDetalhe({ params }: Props) {
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
   const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
+  const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
+  const empresaQuery = trpc.empresa.obter.useQuery();
   const [editandoObs, setEditandoObs] = useState(false);
   const [obsTemp, setObsTemp] = useState("");
 
@@ -127,8 +129,17 @@ export default function PedidoDetalhe({ params }: Props) {
     const cliente = clienteQuery.data;
     if (!pedido) return;
     const telefone = cliente?.telefone || cliente?.telefone2;
-    const statusTexto = pedido.status === "finalizado" ? "finalizado" : "em andamento";
-    const mensagem = `Olá${cliente?.nome ? ` ${cliente.nome}` : ""}, seu pedido #${pedido.numero} está ${statusTexto}. Qualquer dúvida estamos à disposição.`;
+    const finalizado = pedido.status === "finalizado";
+    const statusTexto = finalizado ? "finalizado" : "em andamento";
+    const chave = finalizado ? "pedido_finalizado" : "pedido_em_andamento";
+    const template = (templatesQuery.data as any[] | undefined)?.find((t) => t.chave === chave);
+    const corpo = template?.corpo || TEMPLATE_PADRAO[chave];
+    const mensagem = renderTemplate(corpo, {
+      cliente: cliente?.nome ?? "",
+      pedido: String(pedido.numero),
+      status: statusTexto,
+      empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
+    });
     if (!openWhatsApp(telefone, mensagem)) {
       toast.error("Cliente não possui telefone válido para WhatsApp.");
     }

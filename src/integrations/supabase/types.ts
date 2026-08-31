@@ -666,6 +666,33 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_templates: {
+        Row: {
+          chave: string
+          corpo: string
+          created_at: string
+          id: number
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          chave: string
+          corpo: string
+          created_at?: string
+          id?: number
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          chave?: string
+          corpo?: string
+          created_at?: string
+          id?: number
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

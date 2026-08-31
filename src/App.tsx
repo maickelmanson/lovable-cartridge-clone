@@ -22,6 +22,7 @@ import PainelErros from "./pages/PainelErros";
 import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
 import Auditoria from "./pages/Auditoria";
+import MensagensWhatsApp from "@/pages/MensagensWhatsApp";
 import Usuarios from "./pages/Usuarios";
 import Login from "./pages/Login";
 import { getToken } from "@/lib/authClient";
@@ -46,6 +47,7 @@ function DashboardRoutes() {
         <Route path={"/reman/pedidos/:id"} component={RemanPedidoDetalhe} />
         <Route path={"/auditoria"} component={Auditoria} />
         <Route path={"/usuarios"} component={Usuarios} />
+        <Route path={"/mensagens"} component={MensagensWhatsApp} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>

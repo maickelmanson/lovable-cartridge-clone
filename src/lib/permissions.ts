@@ -15,6 +15,7 @@ export type Permission =
   | "empresa.editar"
   | "reman.finalizar"
   | "usuarios.gerenciar"
+  | "mensagens.editar"
   | "auditoria.ver";
 
 const MATRIX: Record<AppRole, Permission[] | "*"> = {
@@ -32,6 +33,7 @@ const MATRIX: Record<AppRole, Permission[] | "*"> = {
     "empresa.editar",
     "reman.finalizar",
     "auditoria.ver",
+    "mensagens.editar",
   ],
   vendedor: [
     "pedido.criar",
@@ -64,4 +66,5 @@ export const PERMISSION_LABEL: Partial<Record<Permission, string>> = {
   "reman.finalizar": "finalizar remanufatura",
   "usuarios.gerenciar": "gerenciar usuários",
   "auditoria.ver": "ver a auditoria",
+  "mensagens.editar": "editar as mensagens padrão do WhatsApp",
 };
