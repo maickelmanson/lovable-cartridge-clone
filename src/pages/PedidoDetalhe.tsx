@@ -60,6 +60,8 @@ export default function PedidoDetalhe({ params }: Props) {
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
   const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
+  const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
+  const empresaQuery = trpc.empresa.obter.useQuery();
   const [editandoObs, setEditandoObs] = useState(false);
   const [obsTemp, setObsTemp] = useState("");
 
