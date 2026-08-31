@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, getCurrentUser, type SessionUser } from "@/lib/authClient";
+import { apiFetch, getCurrentUser, logout, type SessionUser } from "@/lib/authClient";
 import { can, type AppRole } from "@/lib/permissions";
 import { registrarAuditoria } from "@/lib/audit";
 import { Card } from "@/components/ui/card";
