@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { openWhatsApp } from "@/lib/whatsapp";
+import { openWhatsApp, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
 
 interface Props {
