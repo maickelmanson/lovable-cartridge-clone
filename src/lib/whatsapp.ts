@@ -23,3 +23,31 @@ export function openWhatsApp(phone: string | null | undefined, message: string):
   window.open(link, "_blank", "noopener,noreferrer");
   return true;
 }
+
+/** Variáveis disponíveis nas mensagens padrão. */
+export const TEMPLATE_VARS = [
+  { nome: "cliente", descricao: "Nome do cliente" },
+  { nome: "pedido", descricao: "Número do pedido" },
+  { nome: "status", descricao: "Status do pedido por extenso" },
+  { nome: "empresa", descricao: "Nome da empresa cadastrada" },
+] as const;
+
+/** Textos originais de fábrica, por chave de template. */
+export const TEMPLATE_PADRAO: Record<string, string> = {
+  pedido_em_andamento:
+    "Olá {cliente}, seu pedido #{pedido} está em andamento. Qualquer dúvida estamos à disposição.",
+  pedido_finalizado:
+    "Olá {cliente}, seu pedido #{pedido} está finalizado. Qualquer dúvida estamos à disposição.",
+  mensagem_livre: "Olá {cliente}, aqui é da {empresa}. Podemos falar sobre o pedido #{pedido}?",
+};
+
+/** Substitui {variavel} pelos valores informados, limpando espaços duplicados. */
+export function renderTemplate(corpo: string, vars: Record<string, string | null | undefined>): string {
+  return (corpo ?? "")
+    .replace(/\{(\w+)\}/g, (match, nome: string) => {
+      const valor = vars[nome];
+      return valor == null ? match : String(valor);
+    })
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
