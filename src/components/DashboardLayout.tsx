@@ -16,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -47,6 +48,7 @@ const SIDEBAR_OPEN_KEY = "sidebar-open";
 const DEFAULT_WIDTH = 280;
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 480;
+const HOVER_LEAVE_DELAY = 250;
 
 export default function DashboardLayout({
   children,
@@ -57,9 +59,12 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  const [sidebarOpen, setSidebarOpen] = useState(
-    () => localStorage.getItem(SIDEBAR_OPEN_KEY) !== "false",
-  );
+  // Inicia recolhido por padrão para deixar a tela mais limpa.
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_OPEN_KEY);
+    return saved ? saved === "true" : false;
+  });
+  const [isHovering, setIsHovering] = useState(false);
   const { loading, user } = useAuth();
 
   useEffect(() => {
@@ -100,9 +105,11 @@ export default function DashboardLayout({
     );
   }
 
+  const isOpen = sidebarOpen || isHovering;
+
   return (
     <SidebarProvider
-      open={sidebarOpen}
+      open={isOpen}
       onOpenChange={setSidebarOpen}
       style={
         {
@@ -110,7 +117,11 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent
+        setSidebarWidth={setSidebarWidth}
+        isHovering={isHovering}
+        setIsHovering={setIsHovering}
+      >
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -120,11 +131,15 @@ export default function DashboardLayout({
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
+  isHovering: boolean;
+  setIsHovering: (value: boolean) => void;
 };
 
 function DashboardLayoutContent({
   children,
   setSidebarWidth,
+  isHovering,
+  setIsHovering,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
@@ -132,6 +147,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeMenuItem = menuItems.find(item => {
       if (item.path === '/') return location === '/';
       return location.startsWith(item.path);
@@ -174,11 +190,30 @@ function DashboardLayoutContent({
     };
   }, [isResizing, setSidebarWidth]);
 
+  const handleMouseEnter = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    leaveTimeoutRef.current = setTimeout(() => {
+      setIsHovering(false);
+    }, HOVER_LEAVE_DELAY);
+  };
+
   return (
     <>
-      <div className="relative" ref={sidebarRef}>
+      <div
+        className="relative"
+        ref={sidebarRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <Sidebar
-          collapsible="icon"
+          collapsible="offcanvas"
           className="border-r-0"
           disableTransition={true}
         >
@@ -264,13 +299,18 @@ function DashboardLayoutContent({
             </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
+        <SidebarRail
+          className="z-50"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        />
         <div
           className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
           onMouseDown={() => {
             if (isCollapsed) return;
             setIsResizing(true);
           }}
-          style={{ zIndex: 50 }}
+          style={{ zIndex: 60 }}
         />
       </div>
 
