@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ShieldAlert, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldAlert, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 const ROLES: AppRole[] = ["admin", "gerente", "vendedor", "tecnico"];
