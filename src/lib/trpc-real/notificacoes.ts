@@ -51,7 +51,7 @@ export const notificacoesApi = {
         queryFn: async () => {
           let q = supabase
             .from("notifications")
-            .select("*, clientes(nome), pedidos(numero)", { count: "exact" })
+            .select("*", { count: "exact" })
             .order("created_at", { ascending: false });
 
           if (input?.status && input.status !== "todos") q = q.eq("status", input.status);
