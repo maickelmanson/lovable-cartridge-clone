@@ -14,6 +14,7 @@ type AuthUser = {
   email: string | null;
   name: string | null;
   role: SessionUser["role"];
+  permissions: string[] | null;
   active: boolean;
   avatarUrl: string | null;
 };
@@ -29,6 +30,7 @@ function mapUser(user: SessionUser | null): AuthUser | null {
     email: user.email,
     name: user.name,
     role: user.role,
+    permissions: user.permissions ?? null,
     active: user.active,
     avatarUrl: null,
   };

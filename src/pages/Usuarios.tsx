@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, getCurrentUser, logout, type SessionUser } from "@/lib/authClient";
-import { can, type AppRole } from "@/lib/permissions";
+import {
+  can,
+  permissionsForRole,
+  resolvePermissions,
+  PERMISSION_GROUPS,
+  PERMISSION_LABEL,
+  type AppRole,
+  type Permission,
+} from "@/lib/permissions";
+import { Checkbox } from "@/components/ui/checkbox";
 import { registrarAuditoria } from "@/lib/audit";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +43,7 @@ type FormState = {
   password: string;
   role: AppRole;
   active: boolean;
+  permissions: Permission[];
 };
 
 const EMPTY: FormState = {
@@ -43,6 +53,7 @@ const EMPTY: FormState = {
   password: "",
   role: "vendedor",
   active: true,
+  permissions: permissionsForRole("vendedor"),
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,7 +76,7 @@ function formatarData(valor: string | null | undefined) {
 
 export default function Usuarios() {
   const atual = getCurrentUser();
-  const autorizado = can(atual?.role, "usuarios.gerenciar");
+  const autorizado = can(atual, "usuarios.gerenciar");
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [erroForm, setErroForm] = useState<string | null>(null);
@@ -89,6 +100,7 @@ export default function Usuarios() {
         email: values.email.trim().toLowerCase(),
         role: values.role,
         active: values.active,
+        permissions: values.permissions,
       };
       if (values.password) body["password"] = values.password;
       const res = await apiFetch(values.id ? `/api/auth/users/${values.id}` : "/api/auth/users", {
@@ -117,7 +129,13 @@ export default function Usuarios() {
         entityId: json.user.id,
         entityLabel: values.email,
         details: {
-          depois: { name: values.name, email: values.email, role: values.role, active: values.active },
+          depois: {
+            name: values.name,
+            email: values.email,
+            role: values.role,
+            active: values.active,
+            permissions: values.permissions,
+          },
         },
       });
       if (values.password) {
@@ -243,6 +261,7 @@ export default function Usuarios() {
                           password: "",
                           role: u.role,
                           active: u.active,
+                          permissions: resolvePermissions(u.role, u.permissions ?? null),
                         })
                       }
                     >
@@ -326,7 +345,16 @@ export default function Usuarios() {
               </div>
               <div className="space-y-1">
                 <Label>Papel</Label>
-                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as AppRole })}>
+                <Select
+                  value={form.role}
+                  onValueChange={(v) =>
+                    setForm({
+                      ...form,
+                      role: v as AppRole,
+                      permissions: permissionsForRole(v as AppRole),
+                    })
+                  }
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {ROLES.map((r) => (
@@ -347,6 +375,62 @@ export default function Usuarios() {
                     <SelectItem value="inativo">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <Label>Permissões</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setForm({ ...form, permissions: permissionsForRole(form.role) })}
+                  >
+                    Restaurar padrão do papel
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Marque o que este usuário pode fazer no sistema.
+                </p>
+                <div className="max-h-64 overflow-y-auto space-y-3 pr-1">
+                  {PERMISSION_GROUPS.map((grupo) => (
+                    <div key={grupo.grupo} className="space-y-1">
+                      <div className="text-xs font-semibold uppercase text-muted-foreground">
+                        {grupo.grupo}
+                      </div>
+                      <div className="grid gap-1 sm:grid-cols-2">
+                        {grupo.permissions.map((perm) => {
+                          const marcado = form.permissions.includes(perm);
+                          const travado =
+                            form.role === "admin" && perm === "usuarios.gerenciar";
+                          return (
+                            <label
+                              key={perm}
+                              className="flex items-center gap-2 text-sm cursor-pointer"
+                            >
+                              <Checkbox
+                                checked={marcado}
+                                disabled={travado}
+                                onCheckedChange={(v) => {
+                                  const on = v === true;
+                                  setForm({
+                                    ...form,
+                                    permissions: on
+                                      ? [...form.permissions, perm]
+                                      : form.permissions.filter((p) => p !== perm),
+                                  });
+                                }}
+                              />
+                              <span className="capitalize">
+                                {PERMISSION_LABEL[perm] ?? perm}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ) : null}

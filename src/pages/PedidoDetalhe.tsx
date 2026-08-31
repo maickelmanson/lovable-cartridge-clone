@@ -130,6 +130,8 @@ export default function PedidoDetalhe({ params }: Props) {
     }
   };
 
+  const registrarNotificacao = trpc.notificacoes.registrar.useMutation();
+
   const handleNotificarCliente = () => {
     const pedido = pedidoQuery.data;
     const cliente = clienteQuery.data;
@@ -146,7 +148,16 @@ export default function PedidoDetalhe({ params }: Props) {
       status: statusTexto,
       empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
     });
-    if (!openWhatsApp(telefone, mensagem)) {
+    const enviado = openWhatsApp(telefone, mensagem);
+    registrarNotificacao.mutate({
+      clienteId: cliente?.id ?? null,
+      pedidoId: pedido.id ?? null,
+      destino: telefone || "—",
+      mensagem,
+      status: enviado ? "enviada" : "falha",
+      erro: enviado ? null : "Cliente sem telefone válido",
+    });
+    if (!enviado) {
       toast.error("Cliente não possui telefone válido para WhatsApp.");
     }
   };

@@ -37,7 +37,7 @@ function formatDate(value: string) {
 
 export default function Auditoria() {
   const user = getCurrentUser();
-  const autorizado = can(user?.role, "auditoria.ver");
+  const autorizado = can(user, "auditoria.ver");
 
   const [usuario, setUsuario] = useState("todos");
   const [acao, setAcao] = useState("todas");

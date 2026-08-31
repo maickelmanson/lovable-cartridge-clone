@@ -5,6 +5,7 @@ export type SessionUser = {
   email: string;
   name: string;
   role: "admin" | "gerente" | "vendedor" | "tecnico";
+  permissions?: string[] | null;
   active: boolean;
   createdAt: string;
   updatedAt?: string | null;
