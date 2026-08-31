@@ -21,7 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, ClipboardList, Package, Search, ShoppingCart, Building2, BarChart3, AlertCircle, History, UserCog, MessageCircle } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, ClipboardList, Package, Search, ShoppingCart, Building2, BarChart3, AlertCircle, History, UserCog, MessageCircle, Send } from "lucide-react";
 import { can, type Permission } from "@/lib/permissions";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
