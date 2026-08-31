@@ -69,6 +69,7 @@ export default function Usuarios() {
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [erroForm, setErroForm] = useState<string | null>(null);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["usuarios", "listar"],
