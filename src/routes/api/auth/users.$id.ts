@@ -62,7 +62,10 @@ export const Route = createFileRoute("/api/auth/users/$id")({
 
         if (error) return Response.json({ error: error.message }, { status: 500 });
         if (!data) return Response.json({ error: "Usuário não encontrado" }, { status: 404 });
-        return Response.json({ user: publicUser(data as DbUser) });
+        return Response.json(
+          { user: publicUser(data as DbUser), passwordChanged: Boolean(patch.password) },
+          { headers: { "Cache-Control": "no-store" } },
+        );
       },
 
       DELETE: async ({ request, params }) => {
