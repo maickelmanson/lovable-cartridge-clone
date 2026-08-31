@@ -23,6 +23,7 @@ import BuscadorCartuchos from "./pages/BuscadorCartuchos";
 import TestBuscadorCartuchos from "./pages/TestBuscadorCartuchos";
 import Auditoria from "./pages/Auditoria";
 import MensagensWhatsApp from "@/pages/MensagensWhatsApp";
+import MensagensEnviadas from "@/pages/MensagensEnviadas";
 import Usuarios from "./pages/Usuarios";
 import Login from "./pages/Login";
 import { getToken } from "@/lib/authClient";
@@ -48,6 +49,7 @@ function DashboardRoutes() {
         <Route path={"/auditoria"} component={Auditoria} />
         <Route path={"/usuarios"} component={Usuarios} />
         <Route path={"/mensagens"} component={MensagensWhatsApp} />
+        <Route path={"/mensagens-enviadas"} component={MensagensEnviadas} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>
