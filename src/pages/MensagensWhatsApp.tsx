@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { MessageCircle, Save, RotateCcw, Loader2 } from "lucide-react";
 import { renderTemplate, TEMPLATE_PADRAO, TEMPLATE_VARS } from "@/lib/whatsapp";
 import { hasPermission } from "@/lib/guard";
+import type { WhatsAppTemplate } from "@/lib/trpc-real/whatsappTemplates";
 
 const EXEMPLO = {
   cliente: "MARIA SILVA",
@@ -31,7 +32,7 @@ export default function MensagensWhatsApp() {
     if (!listaQuery.data) return;
     setRascunhos((prev) => {
       const next = { ...prev };
-      for (const t of listaQuery.data) if (next[t.chave] === undefined) next[t.chave] = t.corpo;
+      for (const t of listaQuery.data as WhatsAppTemplate[]) if (next[t.chave] === undefined) next[t.chave] = t.corpo;
       return next;
     });
   }, [listaQuery.data]);
@@ -62,7 +63,7 @@ export default function MensagensWhatsApp() {
     );
   }
 
-  const templates = listaQuery.data ?? [];
+  const templates: WhatsAppTemplate[] = listaQuery.data ?? [];
 
   return (
     <div className="space-y-6">
