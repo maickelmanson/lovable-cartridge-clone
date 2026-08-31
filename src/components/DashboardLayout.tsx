@@ -142,6 +142,8 @@ type DashboardLayoutContentProps = {
 function DashboardLayoutContent({
   children,
   setSidebarWidth,
+  sidebarOpen,
+  setSidebarOpen,
   isHovering,
   setIsHovering,
 }: DashboardLayoutContentProps) {
