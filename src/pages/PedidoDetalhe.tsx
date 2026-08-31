@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -62,20 +62,26 @@ export default function PedidoDetalhe({ params }: Props) {
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
   const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
   const empresaQuery = trpc.empresa.obter.useQuery();
-  const [editandoObs, setEditandoObs] = useState(false);
-  const [obsTemp, setObsTemp] = useState("");
+  const [obsTemp, setObsTemp] = useState(pedidoQuery.data?.observacaoGeral || "");
+
+  useEffect(() => {
+    if (pedidoQuery.data) {
+      setObsTemp(pedidoQuery.data.observacaoGeral || "");
+    }
+  }, [pedidoQuery.data?.observacaoGeral]);
 
   const handleSalvarObservacao = async () => {
+
     try {
       await obsMutation.mutateAsync({ id, observacaoGeral: obsTemp.trim() || null });
       await pedidoQuery.refetch();
-      setEditandoObs(false);
       toast.success("Observação salva!");
     } catch (error: any) {
       console.error("Erro ao salvar observação:", error);
       toast.error(error?.message || "Erro ao salvar observação.");
     }
   };
+
 
 
   const handleFinalizarPedido = async () => {
@@ -339,49 +345,7 @@ export default function PedidoDetalhe({ params }: Props) {
       </Card>
 
 
-      {/* Observação geral do pedido */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Observação geral do pedido</h2>
-          {!editandoObs && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setObsTemp(pedido.observacaoGeral || "");
-                setEditandoObs(true);
-              }}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-          )}
-        </div>
 
-        {editandoObs ? (
-          <div className="space-y-3">
-            <Textarea
-              value={obsTemp}
-              onChange={(e) => setObsTemp(e.target.value)}
-              placeholder="Observações gerais sobre este pedido..."
-              rows={5}
-              className="resize-y"
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setEditandoObs(false)}>
-                Cancelar
-              </Button>
-              <Button size="sm" onClick={handleSalvarObservacao} disabled={obsMutation.isPending}>
-                {obsMutation.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-            </div>
-          </div>
-        ) : pedido.observacaoGeral ? (
-          <p className="whitespace-pre-wrap text-sm">{pedido.observacaoGeral}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">Sem observações.</p>
-        )}
-      </Card>
 
       {/* Tabela de cartuchos */}
       <Card className="p-6">
@@ -542,7 +506,29 @@ export default function PedidoDetalhe({ params }: Props) {
         )}
       </Card>
 
+      {/* Observação geral do pedido */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Observação geral do pedido</h2>
+          <Button
+            size="sm"
+            onClick={handleSalvarObservacao}
+            disabled={obsMutation.isPending}
+          >
+            {obsMutation.isPending ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+        <Textarea
+          value={obsTemp}
+          onChange={(e) => setObsTemp(e.target.value)}
+          placeholder="Observações gerais sobre este pedido..."
+          rows={5}
+          className="resize-y"
+        />
+      </Card>
+
       {modalAberto && (
+
         <ModalCartucho
           pedidoId={id}
           cartucho={cartuchoditando}
