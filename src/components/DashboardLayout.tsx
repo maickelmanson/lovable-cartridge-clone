@@ -41,6 +41,7 @@ const menuItems = [
   { icon: ShoppingCart, label: "Reman - Pedidos", path: "/reman/pedidos" },
   { icon: History, label: "Auditoria", path: "/auditoria", permission: "auditoria.ver" as Permission },
   { icon: MessageCircle, label: "Mensagens WhatsApp", path: "/mensagens", permission: "mensagens.editar" as Permission },
+  { icon: Send, label: "Mensagens Enviadas", path: "/mensagens-enviadas", permission: "mensagens.ver" as Permission },
   { icon: UserCog, label: "Usuários", path: "/usuarios", permission: "usuarios.gerenciar" as Permission },
 ];
 
@@ -252,7 +253,7 @@ function DashboardLayoutContent({
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
               {menuItems
-                .filter(item => !("permission" in item) || can(user?.role as any, item.permission as Permission))
+                .filter(item => !("permission" in item) || can(user as any, item.permission as Permission))
                 .map(item => {
                 const isActive = item.path === '/' ? location === '/' : location.startsWith(item.path);
                 return (
