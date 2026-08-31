@@ -190,11 +190,15 @@ function DashboardLayoutContent({
     };
   }, [isResizing, setSidebarWidth]);
 
-  const handleMouseEnter = () => {
+  const cancelLeave = () => {
     if (leaveTimeoutRef.current) {
       clearTimeout(leaveTimeoutRef.current);
       leaveTimeoutRef.current = null;
     }
+  };
+
+  const handleMouseEnter = () => {
+    cancelLeave();
     setIsHovering(true);
   };
 
