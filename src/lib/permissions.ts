@@ -112,7 +112,7 @@ export function resolvePermissions(
   overrides?: Permission[] | string[] | null,
 ): Permission[] {
   if (Array.isArray(overrides)) {
-    const validas = overrides.filter((p): p is Permission =>
+    const validas: Permission[] = (overrides as string[]).filter((p): p is Permission =>
       ALL_PERMISSIONS.includes(p as Permission),
     );
     // Admin nunca perde o acesso à gestão de usuários (evita travar o sistema).
