@@ -64,8 +64,14 @@ export default function PedidoDetalhe({ params }: Props) {
   const empresaQuery = trpc.empresa.obter.useQuery();
   const [obsTemp, setObsTemp] = useState(pedidoQuery.data?.observacaoGeral || "");
 
+  useEffect(() => {
+    if (pedidoQuery.data) {
+      setObsTemp(pedidoQuery.data.observacaoGeral || "");
+    }
+  }, [pedidoQuery.data?.observacaoGeral]);
 
   const handleSalvarObservacao = async () => {
+
     try {
       await obsMutation.mutateAsync({ id, observacaoGeral: obsTemp.trim() || null });
       await pedidoQuery.refetch();
