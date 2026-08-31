@@ -305,12 +305,23 @@ export default function Usuarios() {
               </div>
               <div className="space-y-1">
                 <Label>{form.id ? "Nova senha (opcional)" : "Senha"}</Label>
-                <Input
-                  type="password"
-                  style={{ textTransform: "none" }}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                />
+                <div className="relative">
+                  <Input
+                    type={mostrarSenha ? "text" : "password"}
+                    style={{ textTransform: "none" }}
+                    className="pr-10"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarSenha((v) => !v)}
+                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {mostrarSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="space-y-1">
                 <Label>Papel</Label>
