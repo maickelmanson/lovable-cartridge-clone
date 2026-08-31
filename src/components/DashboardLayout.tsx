@@ -224,7 +224,7 @@ function DashboardLayoutContent({
         onMouseLeave={handleMouseLeave}
       >
         <Sidebar
-          collapsible="offcanvas"
+          collapsible="icon"
           className="border-r-0"
           disableTransition={true}
           onMouseEnter={handleMouseEnter}
