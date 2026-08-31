@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hashPassword, publicUser, requireAdmin, type AppRole, type DbUser } from "@/auth.server";
+import { ALL_PERMISSIONS, type Permission } from "@/lib/permissions";
 
 const ROLES: AppRole[] = ["admin", "gerente", "vendedor", "tecnico"];
 
@@ -28,7 +29,14 @@ export const Route = createFileRoute("/api/auth/users")({
         if ("response" in guard) return guard.response;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        let body: { email?: string; password?: string; name?: string; role?: string; active?: boolean };
+        let body: {
+          email?: string;
+          password?: string;
+          name?: string;
+          role?: string;
+          active?: boolean;
+          permissions?: unknown;
+        };
         try {
           body = await request.json();
         } catch {
@@ -57,6 +65,11 @@ export const Route = createFileRoute("/api/auth/users")({
             name,
             role,
             active: body.active ?? true,
+            permissions: Array.isArray(body.permissions)
+              ? (body.permissions as string[]).filter((p) =>
+                  ALL_PERMISSIONS.includes(p as Permission),
+                )
+              : null,
             password: await hashPassword(password),
             password_changed_at: new Date().toISOString(),
           })

@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hashPassword, publicUser, requireAdmin, type AppRole, type DbUser } from "@/auth.server";
+import { ALL_PERMISSIONS, type Permission } from "@/lib/permissions";
+
+function sanitizePermissions(value: unknown): string[] | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (!Array.isArray(value)) return undefined;
+  return (value as string[]).filter((p) => ALL_PERMISSIONS.includes(p as Permission));
+}
 
 const ROLES: AppRole[] = ["admin", "gerente", "vendedor", "tecnico"];
 
@@ -11,7 +19,14 @@ export const Route = createFileRoute("/api/auth/users/$id")({
         if ("response" in guard) return guard.response;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        let body: { email?: string; password?: string; name?: string; role?: string; active?: boolean };
+        let body: {
+          email?: string;
+          password?: string;
+          name?: string;
+          role?: string;
+          active?: boolean;
+          permissions?: unknown;
+        };
         try {
           body = await request.json();
         } catch {
@@ -25,6 +40,7 @@ export const Route = createFileRoute("/api/auth/users/$id")({
           role?: AppRole;
           password?: string;
           password_changed_at?: string;
+          permissions?: string[] | null;
         };
         const patch: UserPatch = {};
         if (body.email !== undefined) patch.email = body.email.trim().toLowerCase();
@@ -36,6 +52,8 @@ export const Route = createFileRoute("/api/auth/users/$id")({
           }
           patch.role = body.role as AppRole;
         }
+        const perms = sanitizePermissions(body.permissions);
+        if (perms !== undefined) patch.permissions = perms;
         if (body.password) {
           if (body.password.length < 6) {
             return Response.json({ error: "A senha precisa ter ao menos 6 caracteres" }, { status: 400 });
