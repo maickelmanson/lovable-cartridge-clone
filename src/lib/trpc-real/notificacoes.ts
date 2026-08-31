@@ -71,6 +71,29 @@ export const notificacoesApi = {
           const { data, error, count } = await q.range(from, from + porPagina - 1);
           if (error) throw error;
           let itens = (data ?? []).map(toApp);
+
+          // notifications não tem chave estrangeira declarada: buscamos os nomes à parte.
+          const clienteIds = [...new Set(itens.map((n) => n.clienteId).filter(Boolean))] as number[];
+          const pedidoIds = [...new Set(itens.map((n) => n.pedidoId).filter(Boolean))] as number[];
+          if (clienteIds.length) {
+            const { data: cli } = await supabase
+              .from("clientes")
+              .select("id, nome")
+              .in("id", clienteIds);
+            const mapa = new Map((cli ?? []).map((c: any) => [c.id, c.nome]));
+            itens = itens.map((n) => ({ ...n, clienteNome: mapa.get(n.clienteId as number) ?? null }));
+          }
+          if (pedidoIds.length) {
+            const { data: ped } = await supabase
+              .from("pedidos")
+              .select("id, numero")
+              .in("id", pedidoIds);
+            const mapa = new Map((ped ?? []).map((p: any) => [p.id, p.numero]));
+            itens = itens.map((n) => ({
+              ...n,
+              pedidoNumero: (mapa.get(n.pedidoId as number) as string) ?? null,
+            }));
+          }
           if (termo) {
             const alvo = termo.toLowerCase();
             const filtrados = itens.filter(
