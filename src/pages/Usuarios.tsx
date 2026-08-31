@@ -221,8 +221,14 @@ export default function Usuarios() {
                       {u.active ? "Ativo" : "Inativo"}
                     </Badge>
                   </td>
+                  <td className="p-3">{formatarData(u.lastLogin)}</td>
                   <td className="p-3">
-                    {u.lastLogin ? new Date(u.lastLogin).toLocaleString("pt-BR") : "—"}
+                    {formatarData(u.updatedAt)}
+                    {u.passwordChangedAt ? (
+                      <div className="text-xs text-muted-foreground">
+                        senha: {formatarData(u.passwordChangedAt)}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="p-3 text-right space-x-2 whitespace-nowrap">
                     <Button
