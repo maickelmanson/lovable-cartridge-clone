@@ -306,6 +306,50 @@ export default function PedidoDetalhe({ params }: Props) {
         </Card>
       </div>
 
+      {/* Observação geral do pedido */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Observação geral do pedido</h2>
+          {!editandoObs && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setObsTemp(pedido.observacaoGeral || "");
+                setEditandoObs(true);
+              }}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+          )}
+        </div>
+
+        {editandoObs ? (
+          <div className="space-y-3">
+            <Textarea
+              value={obsTemp}
+              onChange={(e) => setObsTemp(e.target.value)}
+              placeholder="Observações gerais sobre este pedido..."
+              rows={5}
+              className="resize-y"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" size="sm" onClick={() => setEditandoObs(false)}>
+                Cancelar
+              </Button>
+              <Button size="sm" onClick={handleSalvarObservacao} disabled={obsMutation.isPending}>
+                {obsMutation.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </div>
+        ) : pedido.observacaoGeral ? (
+          <p className="whitespace-pre-wrap text-sm">{pedido.observacaoGeral}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">Sem observações.</p>
+        )}
+      </Card>
+
       {/* Tabela de cartuchos */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
