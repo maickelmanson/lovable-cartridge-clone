@@ -24,6 +24,7 @@ export type DbUser = {
   password: string;
   name: string;
   role: AppRole;
+  permissions?: string[] | null;
   active: boolean;
   created_at: string;
   updated_at?: string | null;
@@ -136,6 +137,7 @@ export function publicUser(user: DbUser) {
     email: user.email,
     name: user.name,
     role: user.role,
+    permissions: user.permissions ?? null,
     active: user.active,
     createdAt: user.created_at,
     updatedAt: user.updated_at ?? null,
