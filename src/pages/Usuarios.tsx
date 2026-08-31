@@ -339,8 +339,25 @@ export default function Usuarios() {
             </div>
           ) : null}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setForm(null)}>Cancelar</Button>
-            <Button disabled={salvar.isPending} onClick={() => form && salvar.mutate(form)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setForm(null);
+                setErroForm(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              disabled={salvar.isPending}
+              onClick={() => {
+                if (!form) return;
+                const invalido = validarForm(form);
+                setErroForm(invalido);
+                if (invalido) return;
+                salvar.mutate(form);
+              }}
+            >
               {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Salvar
             </Button>
