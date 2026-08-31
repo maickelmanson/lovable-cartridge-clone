@@ -270,13 +270,26 @@ export default function Usuarios() {
         )}
       </Card>
 
-      <Dialog open={form !== null} onOpenChange={(open) => !open && setForm(null)}>
+      <Dialog
+        open={form !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setForm(null);
+            setErroForm(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{form?.id ? "Editar usuário" : "Novo usuário"}</DialogTitle>
           </DialogHeader>
           {form ? (
             <div className="space-y-4">
+              {erroForm ? (
+                <p className="text-sm text-destructive border border-destructive/40 rounded-md p-2">
+                  {erroForm}
+                </p>
+              ) : null}
               <div className="space-y-1">
                 <Label>Nome</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
