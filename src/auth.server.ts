@@ -67,6 +67,7 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
       email: String(payload["email"] ?? ""),
       name: String(payload["name"] ?? ""),
       role: (payload["role"] as AppRole) ?? "vendedor",
+      iat: typeof payload.iat === "number" ? payload.iat : undefined,
     };
   } catch {
     return null;
