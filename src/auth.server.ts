@@ -138,6 +138,8 @@ export function publicUser(user: DbUser) {
     role: user.role,
     active: user.active,
     createdAt: user.created_at,
+    updatedAt: user.updated_at ?? null,
+    passwordChangedAt: user.password_changed_at ?? null,
     lastLogin: user.last_login,
   };
 }
