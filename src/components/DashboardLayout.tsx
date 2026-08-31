@@ -133,6 +133,8 @@ export default function DashboardLayout({
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (value: boolean) => void;
   isHovering: boolean;
   setIsHovering: (value: boolean) => void;
 };
