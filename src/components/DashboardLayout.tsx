@@ -119,6 +119,8 @@ export default function DashboardLayout({
     >
       <DashboardLayoutContent
         setSidebarWidth={setSidebarWidth}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
         isHovering={isHovering}
         setIsHovering={setIsHovering}
       >
