@@ -14,6 +14,8 @@ export type TokenPayload = {
   email: string;
   name: string;
   role: AppRole;
+  /** Emissão do token (segundos), usada para invalidar tokens antigos. */
+  iat?: number;
 };
 
 export type DbUser = {
