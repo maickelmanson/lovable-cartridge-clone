@@ -84,8 +84,8 @@ export default function Usuarios() {
   const salvar = useMutation({
     mutationFn: async (values: FormState) => {
       const body: Record<string, unknown> = {
-        name: values.name,
-        email: values.email,
+        name: values.name.trim(),
+        email: values.email.trim().toLowerCase(),
         role: values.role,
         active: values.active,
       };
@@ -94,23 +94,57 @@ export default function Usuarios() {
         method: values.id ? "PUT" : "POST",
         body: JSON.stringify(body),
       });
-      const json = (await res.json()) as { user?: SessionUser; error?: string };
-      if (!res.ok) throw new Error(json.error ?? "Falha ao salvar usuário");
+      const json = (await res.json().catch(() => ({}))) as {
+        user?: SessionUser;
+        passwordChanged?: boolean;
+        error?: string;
+      };
+      if (!res.ok || !json.user) {
+        const motivo = json.error ?? `Falha ao salvar usuário (HTTP ${res.status})`;
+        await registrarAuditoria({
+          action: values.id ? "usuario.alterar_falha" : "usuario.criar_falha",
+          entityType: "users",
+          entityId: values.id,
+          entityLabel: values.email,
+          details: { motivo, status: res.status },
+        });
+        throw new Error(motivo);
+      }
       await registrarAuditoria({
         action: values.id ? "usuario.alterar" : "usuario.criar",
         entityType: "users",
-        entityId: json.user?.id ?? values.id,
+        entityId: json.user.id,
         entityLabel: values.email,
-        details: { depois: { name: values.name, email: values.email, role: values.role, active: values.active } },
+        details: {
+          depois: { name: values.name, email: values.email, role: values.role, active: values.active },
+        },
       });
-      return json.user!;
+      if (values.password) {
+        await registrarAuditoria({
+          action: "usuario.senha_alterada",
+          entityType: "users",
+          entityId: json.user.id,
+          entityLabel: values.email,
+        });
+      }
+      return { user: json.user, senhaAlterada: Boolean(values.password), editou: Boolean(values.id) };
     },
-    onSuccess: () => {
-      toast.success("Usuário salvo");
+    onSuccess: async ({ user, senhaAlterada, editou }) => {
       setForm(null);
-      qc.invalidateQueries({ queryKey: ["usuarios"] });
+      setErroForm(null);
+      await qc.invalidateQueries({ queryKey: ["usuarios"] });
+      const partes = [editou ? "Usuário atualizado" : "Usuário criado"];
+      if (senhaAlterada) partes.push("senha redefinida");
+      toast.success(`${partes.join(" · ")} — ${user.email}`);
+      if (senhaAlterada && user.id === atual?.id) {
+        toast.info("Sua senha mudou: entre novamente com a nova senha.");
+        setTimeout(() => logout(), 1500);
+      }
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => {
+      setErroForm(err.message);
+      toast.error(err.message);
+    },
   });
 
   const desativar = useMutation({
