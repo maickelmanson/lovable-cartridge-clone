@@ -58,6 +58,7 @@ export const Route = createFileRoute("/api/auth/users")({
             role,
             active: body.active ?? true,
             password: await hashPassword(password),
+            password_changed_at: new Date().toISOString(),
           })
           .select("*")
           .single();

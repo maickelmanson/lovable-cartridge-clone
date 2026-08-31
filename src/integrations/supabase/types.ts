@@ -636,7 +636,9 @@ export type Database = {
           last_login: string | null
           name: string
           password: string
+          password_changed_at: string | null
           role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
         }
         Insert: {
           active?: boolean
@@ -646,7 +648,9 @@ export type Database = {
           last_login?: string | null
           name: string
           password: string
+          password_changed_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
         }
         Update: {
           active?: boolean
@@ -656,7 +660,9 @@ export type Database = {
           last_login?: string | null
           name?: string
           password?: string
+          password_changed_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
         }
         Relationships: []
       }

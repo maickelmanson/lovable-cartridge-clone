@@ -24,6 +24,7 @@ export const Route = createFileRoute("/api/auth/users/$id")({
           active?: boolean;
           role?: AppRole;
           password?: string;
+          password_changed_at?: string;
         };
         const patch: UserPatch = {};
         if (body.email !== undefined) patch.email = body.email.trim().toLowerCase();
@@ -40,6 +41,8 @@ export const Route = createFileRoute("/api/auth/users/$id")({
             return Response.json({ error: "A senha precisa ter ao menos 6 caracteres" }, { status: 400 });
           }
           patch.password = await hashPassword(body.password);
+          // Invalida tokens emitidos antes da troca de senha.
+          patch.password_changed_at = new Date().toISOString();
         }
 
         if (Object.keys(patch).length === 0) {
@@ -59,7 +62,10 @@ export const Route = createFileRoute("/api/auth/users/$id")({
 
         if (error) return Response.json({ error: error.message }, { status: 500 });
         if (!data) return Response.json({ error: "Usuário não encontrado" }, { status: 404 });
-        return Response.json({ user: publicUser(data as DbUser) });
+        return Response.json(
+          { user: publicUser(data as DbUser), passwordChanged: Boolean(patch.password) },
+          { headers: { "Cache-Control": "no-store" } },
+        );
       },
 
       DELETE: async ({ request, params }) => {

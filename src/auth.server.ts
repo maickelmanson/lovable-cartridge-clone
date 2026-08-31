@@ -14,6 +14,8 @@ export type TokenPayload = {
   email: string;
   name: string;
   role: AppRole;
+  /** Emissão do token (segundos), usada para invalidar tokens antigos. */
+  iat?: number;
 };
 
 export type DbUser = {
@@ -24,6 +26,8 @@ export type DbUser = {
   role: AppRole;
   active: boolean;
   created_at: string;
+  updated_at?: string | null;
+  password_changed_at?: string | null;
   last_login: string | null;
 };
 
@@ -63,6 +67,7 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
       email: String(payload["email"] ?? ""),
       name: String(payload["name"] ?? ""),
       role: (payload["role"] as AppRole) ?? "vendedor",
+      iat: typeof payload.iat === "number" ? payload.iat : undefined,
     };
   } catch {
     return null;
@@ -97,6 +102,13 @@ export async function authenticateRequest(
 
   const user = data as DbUser | null;
   if (!user || !user.active) return null;
+
+  // Token emitido antes da última troca de senha deixa de valer.
+  if (user.password_changed_at && payload.iat) {
+    const changed = Math.floor(new Date(user.password_changed_at).getTime() / 1000);
+    if (payload.iat < changed) return null;
+  }
+
   return { payload, user };
 }
 
@@ -126,6 +138,8 @@ export function publicUser(user: DbUser) {
     role: user.role,
     active: user.active,
     createdAt: user.created_at,
+    updatedAt: user.updated_at ?? null,
+    passwordChangedAt: user.password_changed_at ?? null,
     lastLogin: user.last_login,
   };
 }

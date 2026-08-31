@@ -7,6 +7,8 @@ export type SessionUser = {
   role: "admin" | "gerente" | "vendedor" | "tecnico";
   active: boolean;
   createdAt: string;
+  updatedAt?: string | null;
+  passwordChangedAt?: string | null;
   lastLogin: string | null;
 };
 
