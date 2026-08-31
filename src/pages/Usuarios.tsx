@@ -206,6 +206,7 @@ export default function Usuarios() {
                 <th className="p-3">Papel</th>
                 <th className="p-3">Status</th>
                 <th className="p-3">Último login</th>
+                <th className="p-3">Atualizado em</th>
                 <th className="p-3 text-right">Ações</th>
               </tr>
             </thead>
