@@ -418,6 +418,37 @@ export const pedidosApi = {
       });
     },
   },
+  atualizarObservacao: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (input: { id: number; observacaoGeral: string | null }) => {
+          requirePermission("pedido.editar");
+          const { data: antes } = await supabase
+            .from("pedidos")
+            .select("*")
+            .eq("id", input.id)
+            .maybeSingle();
+          const { data, error } = await supabase
+            .from("pedidos")
+            .update({ observacao_geral: input.observacaoGeral || null } as any)
+            .eq("id", input.id)
+            .select("*")
+            .single();
+          if (error) throw error;
+          await registrarAuditoria({
+            action: "pedido.editar",
+            entityType: "pedidos",
+            entityId: input.id,
+            entityLabel: `Pedido #${data.numero}`,
+            details: diff(antes ?? {}, data),
+          });
+          return toApp(data);
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+      });
+    },
+  },
   deletar: {
     useMutation: () => {
       const qc = useQueryClient();
