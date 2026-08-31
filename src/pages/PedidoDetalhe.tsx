@@ -305,23 +305,28 @@ export default function PedidoDetalhe({ params }: Props) {
         </div>
       )}
 
-      {/* Cards de resumo */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground">Status</p>
-          <p className={`text-lg font-bold ${isFinalizado ? "text-emerald-600" : "text-blue-600"}`}>
-            {isFinalizado ? "Finalizado" : "Aberto"}
-          </p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground">Data de Criação</p>
-          <p className="text-lg font-bold">{new Date(pedido.dataCriacao).toLocaleDateString("pt-BR")}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground">Cartuchos</p>
-          <p className="text-lg font-bold">{cartuchosQuery.data?.length || 0}</p>
-        </Card>
-      </div>
+      {/* Resumo compacto em uma linha */}
+      <Card className="px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 text-sm text-muted-foreground">Status:</span>
+            <span className={`truncate text-sm font-bold ${isFinalizado ? "text-emerald-600" : "text-blue-600"}`}>
+              {isFinalizado ? "Finalizado" : "Aberto"}
+            </span>
+          </div>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 text-sm text-muted-foreground">Data de Criação:</span>
+            <span className="truncate text-sm font-bold">
+              {new Date(pedido.dataCriacao).toLocaleDateString("pt-BR")}
+            </span>
+          </div>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 text-sm text-muted-foreground">Cartuchos:</span>
+            <span className="text-sm font-bold">{cartuchosQuery.data?.length || 0}</span>
+          </div>
+        </div>
+      </Card>
+
 
       {/* Observação geral do pedido */}
       <Card className="p-6">
