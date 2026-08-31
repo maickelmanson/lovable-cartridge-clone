@@ -21,7 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, ClipboardList, Package, Search, ShoppingCart, Building2, BarChart3, AlertCircle, History, UserCog } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, ClipboardList, Package, Search, ShoppingCart, Building2, BarChart3, AlertCircle, History, UserCog, MessageCircle } from "lucide-react";
 import { can, type Permission } from "@/lib/permissions";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -40,6 +40,7 @@ const menuItems = [
   { icon: Search, label: "Buscador de Cartuchos", path: "/buscador-cartuchos" },
   { icon: ShoppingCart, label: "Reman - Pedidos", path: "/reman/pedidos" },
   { icon: History, label: "Auditoria", path: "/auditoria", permission: "auditoria.ver" as Permission },
+  { icon: MessageCircle, label: "Mensagens WhatsApp", path: "/mensagens", permission: "mensagens.editar" as Permission },
   { icon: UserCog, label: "Usuários", path: "/usuarios", permission: "usuarios.gerenciar" as Permission },
 ];
 
