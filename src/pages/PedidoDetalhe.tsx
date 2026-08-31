@@ -506,7 +506,29 @@ export default function PedidoDetalhe({ params }: Props) {
         )}
       </Card>
 
+      {/* Observação geral do pedido */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Observação geral do pedido</h2>
+          <Button
+            size="sm"
+            onClick={handleSalvarObservacao}
+            disabled={obsMutation.isPending}
+          >
+            {obsMutation.isPending ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+        <Textarea
+          value={obsTemp}
+          onChange={(e) => setObsTemp(e.target.value)}
+          placeholder="Observações gerais sobre este pedido..."
+          rows={5}
+          className="resize-y"
+        />
+      </Card>
+
       {modalAberto && (
+
         <ModalCartucho
           pedidoId={id}
           cartucho={cartuchoditando}
