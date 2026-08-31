@@ -62,8 +62,8 @@ export default function PedidoDetalhe({ params }: Props) {
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
   const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
   const empresaQuery = trpc.empresa.obter.useQuery();
-  const [editandoObs, setEditandoObs] = useState(false);
-  const [obsTemp, setObsTemp] = useState("");
+  const [obsTemp, setObsTemp] = useState(pedidoQuery.data?.observacaoGeral || "");
+
 
   const handleSalvarObservacao = async () => {
     try {
