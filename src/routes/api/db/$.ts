@@ -16,6 +16,7 @@ const ALLOWED_TABLES = new Set([
   "notifications",
   "error_logs",
   "profiles",
+  "whatsapp_templates",
 ]);
 
 const PREFIX = "/api/db/rest/v1/";
