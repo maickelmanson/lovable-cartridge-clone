@@ -637,6 +637,7 @@ export type Database = {
           name: string
           password: string
           password_changed_at: string | null
+          permissions: Json | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
@@ -649,6 +650,7 @@ export type Database = {
           name: string
           password: string
           password_changed_at?: string | null
+          permissions?: Json | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
@@ -661,6 +663,7 @@ export type Database = {
           name?: string
           password?: string
           password_changed_at?: string | null
+          permissions?: Json | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
