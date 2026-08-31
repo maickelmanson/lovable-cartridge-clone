@@ -69,13 +69,13 @@ export default function PedidoDetalhe({ params }: Props) {
     try {
       await obsMutation.mutateAsync({ id, observacaoGeral: obsTemp.trim() || null });
       await pedidoQuery.refetch();
-      setEditandoObs(false);
       toast.success("Observação salva!");
     } catch (error: any) {
       console.error("Erro ao salvar observação:", error);
       toast.error(error?.message || "Erro ao salvar observação.");
     }
   };
+
 
 
   const handleFinalizarPedido = async () => {
