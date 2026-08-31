@@ -41,6 +41,8 @@ export const Route = createFileRoute("/api/auth/users/$id")({
             return Response.json({ error: "A senha precisa ter ao menos 6 caracteres" }, { status: 400 });
           }
           patch.password = await hashPassword(body.password);
+          // Invalida tokens emitidos antes da troca de senha.
+          patch.password_changed_at = new Date().toISOString();
         }
 
         if (Object.keys(patch).length === 0) {
