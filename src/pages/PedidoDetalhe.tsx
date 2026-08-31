@@ -129,8 +129,17 @@ export default function PedidoDetalhe({ params }: Props) {
     const cliente = clienteQuery.data;
     if (!pedido) return;
     const telefone = cliente?.telefone || cliente?.telefone2;
-    const statusTexto = pedido.status === "finalizado" ? "finalizado" : "em andamento";
-    const mensagem = `Olá${cliente?.nome ? ` ${cliente.nome}` : ""}, seu pedido #${pedido.numero} está ${statusTexto}. Qualquer dúvida estamos à disposição.`;
+    const finalizado = pedido.status === "finalizado";
+    const statusTexto = finalizado ? "finalizado" : "em andamento";
+    const chave = finalizado ? "pedido_finalizado" : "pedido_em_andamento";
+    const template = (templatesQuery.data as any[] | undefined)?.find((t) => t.chave === chave);
+    const corpo = template?.corpo || TEMPLATE_PADRAO[chave];
+    const mensagem = renderTemplate(corpo, {
+      cliente: cliente?.nome ?? "",
+      pedido: String(pedido.numero),
+      status: statusTexto,
+      empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
+    });
     if (!openWhatsApp(telefone, mensagem)) {
       toast.error("Cliente não possui telefone válido para WhatsApp.");
     }
