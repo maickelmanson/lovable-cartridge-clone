@@ -220,6 +220,8 @@ function DashboardLayoutContent({
           collapsible="offcanvas"
           className="border-r-0"
           disableTransition={true}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <SidebarHeader className="h-16 justify-center">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
