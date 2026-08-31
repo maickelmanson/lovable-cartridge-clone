@@ -59,6 +59,22 @@ export default function PedidoDetalhe({ params }: Props) {
   const atualizarMutation = trpc.pedidoCartuchos.atualizar.useMutation();
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
   const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
+  const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
+  const [editandoObs, setEditandoObs] = useState(false);
+  const [obsTemp, setObsTemp] = useState("");
+
+  const handleSalvarObservacao = async () => {
+    try {
+      await obsMutation.mutateAsync({ id, observacaoGeral: obsTemp.trim() || null });
+      await pedidoQuery.refetch();
+      setEditandoObs(false);
+      toast.success("Observação salva!");
+    } catch (error: any) {
+      console.error("Erro ao salvar observação:", error);
+      toast.error(error?.message || "Erro ao salvar observação.");
+    }
+  };
+
 
   const handleFinalizarPedido = async () => {
     if (!confirm("Deseja finalizar este pedido? Um pedido de remanufatura será gerado automaticamente.")) return;
