@@ -45,11 +45,30 @@ const EMPTY: FormState = {
   active: true,
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validarForm(values: FormState): string | null {
+  if (!values.name.trim()) return "Informe o nome do usuário";
+  if (!EMAIL_RE.test(values.email.trim())) return "Informe um e-mail válido";
+  if (!values.id && values.password.length < 6) {
+    return "A senha precisa ter ao menos 6 caracteres";
+  }
+  if (values.id && values.password && values.password.length < 6) {
+    return "A nova senha precisa ter ao menos 6 caracteres";
+  }
+  return null;
+}
+
+function formatarData(valor: string | null | undefined) {
+  return valor ? new Date(valor).toLocaleString("pt-BR") : "—";
+}
+
 export default function Usuarios() {
   const atual = getCurrentUser();
   const autorizado = can(atual?.role, "usuarios.gerenciar");
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
+  const [erroForm, setErroForm] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["usuarios", "listar"],
