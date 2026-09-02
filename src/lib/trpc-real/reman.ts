@@ -16,6 +16,9 @@ function orderToApp(r: any, clienteNome?: string | null) {
     orderNumber: r.order_number,
     clienteId: r.cliente_id,
     clienteNome: clienteNome ?? null,
+    pedidoId: r.pedido_id ?? null,
+
+
     commercialProfileSnapshot: r.commercial_profile_snapshot,
     status: r.status,
     subtotal: r.subtotal,
@@ -296,24 +299,53 @@ export const remanOrdersApi = {
       const qc = useQueryClient();
       return useMutation({
         mutationFn: async (id: number) => {
+          requirePermission("pedido.deletar");
+          const { data: order } = await supabase
+            .from("reman_orders")
+            .select("id, order_number, pedido_id")
+            .eq("id", id)
+            .maybeSingle();
           const { data: items } = await supabase.from("reman_order_items").select("id").eq("order_id", id);
           const itemIds = (items ?? []).map((i: any) => i.id);
           if (itemIds.length) {
             await supabase.from("reman_order_units").delete().in("order_item_id", itemIds);
           }
           await supabase.from("reman_order_items").delete().eq("order_id", id);
-          requirePermission("pedido.deletar");
           const { error } = await supabase.from("reman_orders").delete().eq("id", id);
           if (error) throw error;
           await registrarAuditoria({
             action: "reman.deletar",
             entityType: "reman_orders",
             entityId: id,
+            entityLabel: (order as any)?.order_number ?? null,
             details: { antes: { id }, depois: null },
           });
+
+          // Quando gerado a partir de um pedido, remove também o pedido de origem
+          const pedidoId = (order as any)?.pedido_id;
+          if (pedidoId) {
+            const { data: pedido } = await supabase
+              .from("pedidos")
+              .select("*")
+              .eq("id", pedidoId)
+              .maybeSingle();
+            await supabase.from("pedido_cartuchos").delete().eq("pedido_id", pedidoId);
+            await supabase.from("pedidos").delete().eq("id", pedidoId);
+            await registrarAuditoria({
+              action: "pedido.deletar",
+              entityType: "pedidos",
+              entityId: pedidoId,
+              entityLabel: (pedido as any)?.numero ? `Pedido #${(pedido as any).numero}` : null,
+              details: { antes: pedido, depois: null },
+            });
+          }
           return { id };
         },
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["remanOrders"] }),
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["remanOrders"] });
+          qc.invalidateQueries({ queryKey: ["pedidos"] });
+        },
+
       });
     },
   },

@@ -32,16 +32,17 @@ async function fetchClienteNomes(clienteIds: number[]) {
 }
 
 async function proximoNumero() {
-  const { data, error } = await supabase
-    .from("pedidos")
-    .select("numero")
-    .order("id", { ascending: false })
-    .limit(1);
+  // Usa o MAIOR número já utilizado (não o último registro) para nunca
+  // reaproveitar o número de um pedido excluído.
+  const { data, error } = await supabase.from("pedidos").select("numero");
   if (error) throw error;
-  const last = data?.[0]?.numero;
-  const n = last ? parseInt(String(last).replace(/\D/g, ""), 10) : 0;
-  return String((isNaN(n) ? 0 : n) + 1).padStart(4, "0");
+  const max = (data ?? []).reduce((m: number, r: any) => {
+    const n = parseInt(String(r.numero).replace(/\D/g, ""), 10);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  return String(max + 1).padStart(4, "0");
 }
+
 
 async function copiarCartuchosDoPedido(origemId: number, destinoId: number, owner_id: string) {
   const { data: itens, error } = await supabase
@@ -95,19 +96,23 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
   const profile = cliente.commercial_profile || "CLIENTE_FINAL";
   const orderNumber = `REM-${pedido.numero}`;
 
-  // Reaproveitar pedido reman existente (evita criar novo ao reabrir/finalizar de novo)
+  // Reaproveitar pedido reman existente pelo VÍNCULO com o pedido (não pelo número),
+  // evitando que um pedido novo caia dentro do reman de outro pedido.
   const { data: existente } = await supabase
     .from("reman_orders")
-    .select("id, order_number")
-    .eq("order_number", orderNumber)
+    .select("id")
+    .eq("pedido_id", pedidoId)
     .maybeSingle();
 
   let remanOrderId: number;
   if (existente) {
-    remanOrderId = existente.id;
+    remanOrderId = (existente as any).id;
     await supabase
       .from("reman_orders")
-      .update({ observacao_geral: (pedido as any).observacao_geral ?? null } as any)
+      .update({
+        order_number: orderNumber,
+        observacao_geral: (pedido as any).observacao_geral ?? null,
+      } as any)
       .eq("id", remanOrderId);
     const { data: oldItems } = await supabase
       .from("reman_order_items")
@@ -121,8 +126,10 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
       .from("reman_orders")
       .insert({
         owner_id,
+        pedido_id: pedidoId,
         order_number: orderNumber,
         cliente_id: pedido.cliente_id,
+
         commercial_profile_snapshot: profile,
         status: "finalizado",
         subtotal: "0",
@@ -456,6 +463,34 @@ export const pedidosApi = {
         mutationFn: async (id: number) => {
           requirePermission("pedido.deletar");
           const { data: antes } = await supabase.from("pedidos").select("*").eq("id", id).maybeSingle();
+
+          // Remove o pedido de remanufatura vinculado (itens e unidades incluídos)
+          const { data: reman } = await supabase
+            .from("reman_orders")
+            .select("id, order_number")
+            .eq("pedido_id", id)
+            .maybeSingle();
+          if (reman) {
+            const remanId = (reman as any).id;
+            const { data: itens } = await supabase
+              .from("reman_order_items")
+              .select("id")
+              .eq("order_id", remanId);
+            const itemIds = (itens ?? []).map((i: any) => i.id);
+            if (itemIds.length) {
+              await supabase.from("reman_order_units").delete().in("order_item_id", itemIds);
+            }
+            await supabase.from("reman_order_items").delete().eq("order_id", remanId);
+            await supabase.from("reman_orders").delete().eq("id", remanId);
+            await registrarAuditoria({
+              action: "reman.deletar",
+              entityType: "reman_orders",
+              entityId: remanId,
+              entityLabel: (reman as any).order_number ?? null,
+              details: { antes: { id: remanId, motivo: `Pedido #${(antes as any)?.numero} excluído` }, depois: null },
+            });
+          }
+
           await supabase.from("pedido_cartuchos").delete().eq("pedido_id", id);
           const { error } = await supabase.from("pedidos").delete().eq("id", id);
           if (error) throw error;
@@ -468,7 +503,11 @@ export const pedidosApi = {
           });
           return { id };
         },
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["pedidos"] });
+          qc.invalidateQueries({ queryKey: ["remanOrders"] });
+        },
+
       });
     },
   },

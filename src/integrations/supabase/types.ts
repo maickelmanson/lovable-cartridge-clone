@@ -564,6 +564,7 @@ export type Database = {
           observacao_geral: string | null
           order_number: string
           owner_id: string | null
+          pedido_id: number | null
           status: Database["public"]["Enums"]["reman_order_status"]
           subtotal: number
           total: number
@@ -579,6 +580,7 @@ export type Database = {
           observacao_geral?: string | null
           order_number: string
           owner_id?: string | null
+          pedido_id?: number | null
           status?: Database["public"]["Enums"]["reman_order_status"]
           subtotal?: number
           total?: number
@@ -594,6 +596,7 @@ export type Database = {
           observacao_geral?: string | null
           order_number?: string
           owner_id?: string | null
+          pedido_id?: number | null
           status?: Database["public"]["Enums"]["reman_order_status"]
           subtotal?: number
           total?: number
@@ -605,6 +608,13 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reman_orders_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
             referencedColumns: ["id"]
           },
         ]
