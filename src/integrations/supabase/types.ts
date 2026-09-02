@@ -310,6 +310,7 @@ export type Database = {
           protegido: number
           status: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at: string
+          usuario_id: string | null
         }
         Insert: {
           cartucho_id?: number | null
@@ -324,6 +325,7 @@ export type Database = {
           protegido?: number
           status?: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at?: string
+          usuario_id?: string | null
         }
         Update: {
           cartucho_id?: number | null
@@ -338,6 +340,7 @@ export type Database = {
           protegido?: number
           status?: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at?: string
+          usuario_id?: string | null
         }
         Relationships: [
           {
@@ -352,6 +355,13 @@ export type Database = {
             columns: ["pedido_id"]
             isOneToOne: false
             referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_cartuchos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
