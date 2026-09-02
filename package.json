@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seed": "bun run scripts/seed-admin.ts",
+    "seed-sql": "psql \"$SUPABASE_DB_URL\" -f supabase/seed.sql",
+    "backup": "bun run scripts/backup-database.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
