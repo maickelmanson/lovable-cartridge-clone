@@ -15,7 +15,9 @@ function orderToApp(r: any, clienteNome?: string | null) {
     id: r.id,
     orderNumber: r.order_number,
     clienteId: r.cliente_id,
+    clienteNome: clienteNome ?? null,
     pedidoId: r.pedido_id ?? null,
+
 
     commercialProfileSnapshot: r.commercial_profile_snapshot,
     status: r.status,
