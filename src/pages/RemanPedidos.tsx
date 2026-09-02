@@ -175,7 +175,7 @@ export default function RemanPedidos() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeletar(p.id, p.orderNumber)}
+                          onClick={() => handleDeletar(p.id, p.orderNumber, p.pedidoId)}
                           title="Deletar pedido"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
