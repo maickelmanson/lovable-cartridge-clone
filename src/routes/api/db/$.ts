@@ -60,7 +60,8 @@ async function proxy({ request }: { request: Request }): Promise<Response> {
     if (v) outHeaders.set(h, v);
   }
   outHeaders.set("Cache-Control", "no-store");
-  return new Response(text, { status: res.status, headers: outHeaders });
+  const noBody = res.status === 204 || res.status === 205 || res.status === 304 || method === "HEAD";
+  return new Response(noBody ? null : text, { status: res.status, headers: outHeaders });
 }
 
 export const Route = createFileRoute("/api/db/$")({
