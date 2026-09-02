@@ -32,16 +32,17 @@ async function fetchClienteNomes(clienteIds: number[]) {
 }
 
 async function proximoNumero() {
-  const { data, error } = await supabase
-    .from("pedidos")
-    .select("numero")
-    .order("id", { ascending: false })
-    .limit(1);
+  // Usa o MAIOR número já utilizado (não o último registro) para nunca
+  // reaproveitar o número de um pedido excluído.
+  const { data, error } = await supabase.from("pedidos").select("numero");
   if (error) throw error;
-  const last = data?.[0]?.numero;
-  const n = last ? parseInt(String(last).replace(/\D/g, ""), 10) : 0;
-  return String((isNaN(n) ? 0 : n) + 1).padStart(4, "0");
+  const max = (data ?? []).reduce((m: number, r: any) => {
+    const n = parseInt(String(r.numero).replace(/\D/g, ""), 10);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  return String(max + 1).padStart(4, "0");
 }
+
 
 async function copiarCartuchosDoPedido(origemId: number, destinoId: number, owner_id: string) {
   const { data: itens, error } = await supabase
