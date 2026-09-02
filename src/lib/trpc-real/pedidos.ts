@@ -96,19 +96,23 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
   const profile = cliente.commercial_profile || "CLIENTE_FINAL";
   const orderNumber = `REM-${pedido.numero}`;
 
-  // Reaproveitar pedido reman existente (evita criar novo ao reabrir/finalizar de novo)
+  // Reaproveitar pedido reman existente pelo VÍNCULO com o pedido (não pelo número),
+  // evitando que um pedido novo caia dentro do reman de outro pedido.
   const { data: existente } = await supabase
     .from("reman_orders")
-    .select("id, order_number")
-    .eq("order_number", orderNumber)
+    .select("id")
+    .eq("pedido_id", pedidoId)
     .maybeSingle();
 
   let remanOrderId: number;
   if (existente) {
-    remanOrderId = existente.id;
+    remanOrderId = (existente as any).id;
     await supabase
       .from("reman_orders")
-      .update({ observacao_geral: (pedido as any).observacao_geral ?? null } as any)
+      .update({
+        order_number: orderNumber,
+        observacao_geral: (pedido as any).observacao_geral ?? null,
+      } as any)
       .eq("id", remanOrderId);
     const { data: oldItems } = await supabase
       .from("reman_order_items")
@@ -122,8 +126,10 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
       .from("reman_orders")
       .insert({
         owner_id,
+        pedido_id: pedidoId,
         order_number: orderNumber,
         cliente_id: pedido.cliente_id,
+
         commercial_profile_snapshot: profile,
         status: "finalizado",
         subtotal: "0",
