@@ -21,7 +21,7 @@ export default function Pedidos() {
   ) || [];
 
   const handleDeletar = async (id: number, numero: string) => {
-    if (!confirm(`Deseja excluir o pedido #${numero}?`)) return;
+    if (!confirm(`Deseja excluir o pedido #${numero}? O pedido de remanufatura gerado a partir dele também será excluído.`)) return;
     try {
       await deletarMutation.mutateAsync(id);
       pedidosQuery.refetch();
