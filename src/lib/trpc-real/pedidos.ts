@@ -463,6 +463,34 @@ export const pedidosApi = {
         mutationFn: async (id: number) => {
           requirePermission("pedido.deletar");
           const { data: antes } = await supabase.from("pedidos").select("*").eq("id", id).maybeSingle();
+
+          // Remove o pedido de remanufatura vinculado (itens e unidades incluídos)
+          const { data: reman } = await supabase
+            .from("reman_orders")
+            .select("id, order_number")
+            .eq("pedido_id", id)
+            .maybeSingle();
+          if (reman) {
+            const remanId = (reman as any).id;
+            const { data: itens } = await supabase
+              .from("reman_order_items")
+              .select("id")
+              .eq("order_id", remanId);
+            const itemIds = (itens ?? []).map((i: any) => i.id);
+            if (itemIds.length) {
+              await supabase.from("reman_order_units").delete().in("order_item_id", itemIds);
+            }
+            await supabase.from("reman_order_items").delete().eq("order_id", remanId);
+            await supabase.from("reman_orders").delete().eq("id", remanId);
+            await registrarAuditoria({
+              action: "reman.deletar",
+              entityType: "reman_orders",
+              entityId: remanId,
+              entityLabel: (reman as any).order_number ?? null,
+              details: { antes: { id: remanId, motivo: `Pedido #${(antes as any)?.numero} excluído` }, depois: null },
+            });
+          }
+
           await supabase.from("pedido_cartuchos").delete().eq("pedido_id", id);
           const { error } = await supabase.from("pedidos").delete().eq("id", id);
           if (error) throw error;
@@ -475,7 +503,11 @@ export const pedidosApi = {
           });
           return { id };
         },
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["pedidos"] });
+          qc.invalidateQueries({ queryKey: ["remanOrders"] });
+        },
+
       });
     },
   },
