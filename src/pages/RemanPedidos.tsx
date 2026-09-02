@@ -78,8 +78,12 @@ export default function RemanPedidos() {
     }
   };
 
-  const handleDeletar = async (id: number, orderNumber: string) => {
-    if (!confirm(`Deseja excluir o pedido ${orderNumber}? Todos os itens e unidades serão removidos.`)) return;
+  const handleDeletar = async (id: number, orderNumber: string, pedidoId?: number | null) => {
+    const extra = pedidoId
+      ? " O pedido de origem na tela Pedidos também será excluído."
+      : "";
+    if (!confirm(`Deseja excluir o pedido ${orderNumber}? Todos os itens e unidades serão removidos.${extra}`)) return;
+
     try {
       await deletarMutation.mutateAsync(id);
       toast.success("Pedido removido.");
