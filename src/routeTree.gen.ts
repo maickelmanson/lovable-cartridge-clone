@@ -16,6 +16,7 @@ import { Route as ApiDbSplatRouteImport } from './routes/api/db/$'
 import { Route as ApiBackupRestoreRouteImport } from './routes/api/backup/restore'
 import { Route as ApiBackupDatabaseRouteImport } from './routes/api/backup/database'
 import { Route as ApiBackupCodeRouteImport } from './routes/api/backup/code'
+import { Route as ApiAuthUsuariosAtivosRouteImport } from './routes/api/auth/usuarios-ativos'
 import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
 import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -58,6 +59,11 @@ const ApiBackupCodeRoute = ApiBackupCodeRouteImport.update({
   path: '/api/backup/code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthUsuariosAtivosRoute = ApiAuthUsuariosAtivosRouteImport.update({
+  id: '/api/auth/usuarios-ativos',
+  path: '/api/auth/usuarios-ativos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthUsersRoute = ApiAuthUsersRouteImport.update({
   id: '/api/auth/users',
   path: '/api/auth/users',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/usuarios-ativos': typeof ApiAuthUsuariosAtivosRoute
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
   '/api/backup/restore': typeof ApiBackupRestoreRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/usuarios-ativos': typeof ApiAuthUsuariosAtivosRoute
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
   '/api/backup/restore': typeof ApiBackupRestoreRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/auth/users': typeof ApiAuthUsersRouteWithChildren
+  '/api/auth/usuarios-ativos': typeof ApiAuthUsuariosAtivosRoute
   '/api/backup/code': typeof ApiBackupCodeRoute
   '/api/backup/database': typeof ApiBackupDatabaseRoute
   '/api/backup/restore': typeof ApiBackupRestoreRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/refresh'
     | '/api/auth/users'
+    | '/api/auth/usuarios-ativos'
     | '/api/backup/code'
     | '/api/backup/database'
     | '/api/backup/restore'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/refresh'
     | '/api/auth/users'
+    | '/api/auth/usuarios-ativos'
     | '/api/backup/code'
     | '/api/backup/database'
     | '/api/backup/restore'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/refresh'
     | '/api/auth/users'
+    | '/api/auth/usuarios-ativos'
     | '/api/backup/code'
     | '/api/backup/database'
     | '/api/backup/restore'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiAuthRefreshRoute: typeof ApiAuthRefreshRoute
   ApiAuthUsersRoute: typeof ApiAuthUsersRouteWithChildren
+  ApiAuthUsuariosAtivosRoute: typeof ApiAuthUsuariosAtivosRoute
   ApiBackupCodeRoute: typeof ApiBackupCodeRoute
   ApiBackupDatabaseRoute: typeof ApiBackupDatabaseRoute
   ApiBackupRestoreRoute: typeof ApiBackupRestoreRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/api/backup/code'
       fullPath: '/api/backup/code'
       preLoaderRoute: typeof ApiBackupCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/usuarios-ativos': {
+      id: '/api/auth/usuarios-ativos'
+      path: '/api/auth/usuarios-ativos'
+      fullPath: '/api/auth/usuarios-ativos'
+      preLoaderRoute: typeof ApiAuthUsuariosAtivosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/users': {
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiAuthRefreshRoute: ApiAuthRefreshRoute,
   ApiAuthUsersRoute: ApiAuthUsersRouteWithChildren,
+  ApiAuthUsuariosAtivosRoute: ApiAuthUsuariosAtivosRoute,
   ApiBackupCodeRoute: ApiBackupCodeRoute,
   ApiBackupDatabaseRoute: ApiBackupDatabaseRoute,
   ApiBackupRestoreRoute: ApiBackupRestoreRoute,
