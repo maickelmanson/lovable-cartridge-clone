@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useUsuariosAtivos } from "@/lib/usuariosAtivos";
 
 const formatarPesoComVirgula = (valor: string) => {
   // Remove tudo que não é número
@@ -44,6 +46,8 @@ interface Props {
 }
 
 export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }: Props) {
+  const { user } = useAuth();
+  const usuariosQuery = useUsuariosAtivos();
   const [form, setForm] = React.useState({
     cartuchoId: cartucho?.cartuchoId || null,
     codigo: cartucho?.codigo || "",
@@ -51,7 +55,15 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
     pesoSaida: cartucho?.pesoSaida || "",
     protegido: cartucho?.protegido === 1,
     observacoes: cartucho?.observacoes || "",
+    usuarioId: cartucho?.usuarioId || "",
   });
+
+  // Ao criar um cartucho, o usuário logado vem pré-selecionado (pode ser trocado).
+  React.useEffect(() => {
+    if (!cartucho?.id && !form.usuarioId && user?.id) {
+      setForm((prev) => (prev.usuarioId ? prev : { ...prev, usuarioId: user.id }));
+    }
+  }, [user?.id, cartucho?.id]);
 
   const [modalCriarAberto, setModalCriarAberto] = React.useState(false);
   const [novoModelo, setNovoModelo] = React.useState({ modelo01: "", modelo02: "" });
@@ -104,6 +116,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
           pesoSaida,
           protegido: form.protegido,
           observacoes: form.observacoes,
+          usuarioId: form.usuarioId || null,
         });
       } else {
         await criarMutation.mutateAsync({
@@ -114,6 +127,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
           pesoSaida,
           protegido: form.protegido,
           observacoes: form.observacoes,
+          usuarioId: form.usuarioId || null,
         });
       }
       onSalvar();
@@ -213,6 +227,25 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
                 onChange={handleChange}
                 placeholder="00,00"
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Usuário responsável</label>
+              <Select
+                value={form.usuarioId || ""}
+                onValueChange={(value) => setForm((prev) => ({ ...prev, usuarioId: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o responsável..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(usuariosQuery.data ?? []).map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name || "Sem nome"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-2">
