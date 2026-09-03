@@ -10,6 +10,7 @@ import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, M
 import { toast } from "sonner";
 import { openWhatsApp, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
+import { useUsuariosAtivos } from "@/lib/usuariosAtivos";
 
 interface Props {
   params: { id: string };
@@ -50,6 +51,10 @@ export default function PedidoDetalhe({ params }: Props) {
   const [pesoTemp, setPesoTemp] = useState("");
   const [reabrindo, setReabrindo] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
+
+  const usuariosQuery = useUsuariosAtivos();
+  const nomeUsuario = (usuarioId?: string | null) =>
+    (usuariosQuery.data ?? []).find((u) => u.id === usuarioId)?.name || "-";
 
   const pedidoQuery = trpc.pedidos.buscar.useQuery(id);
   const cartuchosQuery = trpc.pedidoCartuchos.listar.useQuery(id);
@@ -383,6 +388,7 @@ export default function PedidoDetalhe({ params }: Props) {
                   <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Peso Chegada (g)</th>
                   <th className="px-4 py-2 text-left">Peso Saída (g)</th>
+                  <th className="px-4 py-2 text-left">Responsável</th>
                   <th className="px-4 py-2 text-left">Protegido</th>
                   <th className="px-4 py-2 text-left">Observações</th>
                   <th className="px-4 py-2 text-right">Ações</th>
@@ -482,6 +488,7 @@ export default function PedidoDetalhe({ params }: Props) {
                         )}
                       </td>
 
+                      <td className="px-4 py-2">{nomeUsuario(c.usuarioId)}</td>
                       <td className="px-4 py-2">{c.protegido ? "Sim" : "Não"}</td>
                       <td className="px-4 py-2 max-w-xs truncate">{c.observacoes || "-"}</td>
                       <td className="px-4 py-2">
