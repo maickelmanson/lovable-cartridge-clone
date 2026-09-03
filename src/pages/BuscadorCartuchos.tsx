@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUsuariosAtivos } from "@/lib/usuariosAtivos";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Calendar, Package, Download } from "lucide-react";
 
@@ -19,10 +21,16 @@ export default function BuscadorCartuchos() {
     new Date().toISOString().split('T')[0]
   );
 
+  const [usuarioId, setUsuarioId] = useState<string>("todos");
+  const usuariosQuery = useUsuariosAtivos();
+  const nomeUsuario = (id?: string | null) =>
+    (usuariosQuery.data ?? []).find((u) => u.id === id)?.name || "-";
+
   const { data, isLoading, error, refetch } = trpc.buscadorCartuchos.listar.useQuery(
     {
       dataInicio: new Date(dataInicio),
       dataFim: new Date(dataFim),
+      usuarioId: usuarioId === "todos" ? null : usuarioId,
     },
     {
       enabled: false, // Não fazer query automática
@@ -36,10 +44,11 @@ export default function BuscadorCartuchos() {
   const handleExportarCSV = () => {
     if (!data || data.cartuchos.length === 0) return;
 
-    const headers = ["Código", "Descrição", "Preço", "Data"];
+    const headers = ["Código", "Descrição", "Responsável", "Preço", "Data"];
     const rows = data.cartuchos.map((cartucho: any) => [
       cartucho.modelo02,
       cartucho.modelo01,
+      nomeUsuario(cartucho.usuarioId),
       `R$ ${cartucho.preco?.toFixed(2) ?? '0.00'}`,
       new Date(cartucho.dataFuncionando).toLocaleDateString('pt-BR'),
     ]);
@@ -111,6 +120,24 @@ export default function BuscadorCartuchos() {
                 disabled={isLoading}
               />
             </div>
+          </div>
+
+          {/* Filtro por usuário */}
+          <div className="space-y-2">
+            <Label htmlFor="usuario">Usuário</Label>
+            <Select value={usuarioId} onValueChange={setUsuarioId}>
+              <SelectTrigger id="usuario">
+                <SelectValue placeholder="Todos os usuários" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os usuários</SelectItem>
+                {(usuariosQuery.data ?? []).map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name || "Sem nome"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Botão de Busca */}
@@ -229,6 +256,7 @@ export default function BuscadorCartuchos() {
                       <tr>
                         <th className="text-left py-2 px-4 font-medium">Código</th>
                         <th className="text-left py-2 px-4 font-medium">Descrição</th>
+                        <th className="text-left py-2 px-4 font-medium">Responsável</th>
                         <th className="text-left py-2 px-4 font-medium">Preço</th>
                         <th className="text-left py-2 px-4 font-medium">Data</th>
                       </tr>
@@ -241,6 +269,9 @@ export default function BuscadorCartuchos() {
                           </td>
                           <td className="py-2 px-4 text-xs">
                             {cartucho.modelo01}
+                          </td>
+                          <td className="py-2 px-4 text-xs">
+                            {nomeUsuario(cartucho.usuarioId)}
                           </td>
                           <td className="py-2 px-4 font-semibold">
                             R$ {cartucho.preco?.toFixed(2) ?? '0.00'}

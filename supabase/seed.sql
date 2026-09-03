@@ -186,9 +186,13 @@ CREATE TABLE IF NOT EXISTS public.pedido_cartuchos (
   protegido smallint NOT NULL DEFAULT 0,
   status public.pedido_cartucho_status NOT NULL DEFAULT 'em_espera',
   observacoes text,
+  usuario_id uuid REFERENCES public.users(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE public.pedido_cartuchos
+  ADD COLUMN IF NOT EXISTS usuario_id uuid REFERENCES public.users(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_pedido_cartuchos_usuario_id ON public.pedido_cartuchos (usuario_id);
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.pedido_cartuchos TO authenticated;
 GRANT ALL ON public.pedido_cartuchos TO service_role;
 ALTER TABLE public.pedido_cartuchos ENABLE ROW LEVEL SECURITY;
