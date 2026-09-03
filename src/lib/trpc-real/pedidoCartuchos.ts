@@ -26,6 +26,7 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
     protegido: r.protegido,
     status: r.status,
     observacoes: r.observacoes,
+    usuarioId: r.usuario_id ?? null,
     dataInclusao: r.created_at,
     modelo01: modelo?.modelo_01 ?? null,
     modelo02: modelo?.modelo_02 ?? null,
@@ -43,8 +44,10 @@ function toDb(i: any) {
   if ("protegido" in i) o.protegido = i.protegido ? 1 : 0;
   if ("status" in i) o.status = i.status;
   if ("observacoes" in i) o.observacoes = i.observacoes || null;
+  if ("usuarioId" in i) o.usuario_id = i.usuarioId || null;
   return o;
 }
+
 
 export const pedidoCartuchosApi = {
   listar: {
