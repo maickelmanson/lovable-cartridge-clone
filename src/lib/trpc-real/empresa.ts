@@ -47,12 +47,12 @@ export const empresaApi = {
       useQuery({
         queryKey: ["empresa", "obter"],
         queryFn: async () => {
-          const { data: userData } = await supabase.auth.getUser();
-          if (!userData.user) return null;
+          // Cadastro único e compartilhado: qualquer usuário logado vê o mesmo registro.
           const { data, error } = await supabase
             .from("empresa_dados")
             .select("*")
-            .eq("owner_id", userData.user.id)
+            .order("id", { ascending: true })
+            .limit(1)
             .maybeSingle();
           if (error) throw error;
           return data ? toApp(data) : null;
