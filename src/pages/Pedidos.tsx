@@ -15,10 +15,14 @@ export default function Pedidos() {
   const pedidosQuery = trpc.pedidos.listar.useQuery();
   const deletarMutation = trpc.pedidos.deletar.useMutation();
 
-  const pedidosFiltrados = pedidosQuery.data?.filter((p: any) =>
+  const pedidosFiltrados = (pedidosQuery.data?.filter((p: any) =>
     p.numero.includes(filtro) ||
     (p.clienteNome || "").toLowerCase().includes(filtro.toLowerCase())
-  ) || [];
+  ) || []).sort((a: any, b: any) => {
+    if (a.status === "aberto" && b.status !== "aberto") return -1;
+    if (a.status !== "aberto" && b.status === "aberto") return 1;
+    return 0;
+  });
 
   const handleDeletar = async (id: number, numero: string) => {
     if (!confirm(`Deseja excluir o pedido #${numero}? O pedido de remanufatura gerado a partir dele também será excluído.`)) return;
