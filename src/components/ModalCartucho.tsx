@@ -183,21 +183,52 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
             <div>
               <label className="text-sm font-medium">Modelo Cadastrado</label>
               <div className="flex gap-2">
-                <Select 
-                  value={String(form.cartuchoId || "")} 
-                  onValueChange={(value) => setForm(prev => ({ ...prev, cartuchoId: parseInt(value) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um modelo..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modelosQuery.data?.map((m: any) => (
-                      <SelectItem key={m.id} value={String(m.id)}>
-                        {m.modelo02} - {m.modelo01}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={modeloPopoverAberto} onOpenChange={setModeloPopoverAberto}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={modeloPopoverAberto}
+                      className="flex-1 justify-between font-normal"
+                    >
+                      <span className="truncate">
+                        {(() => {
+                          const sel = modelosQuery.data?.find((m: any) => m.id === form.cartuchoId);
+                          return sel ? `${sel.modelo02} - ${sel.modelo01}` : "Selecione um modelo...";
+                        })()}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Digite o número ou modelo do cartucho..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum modelo encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          {modelosQuery.data?.map((m: any) => (
+                            <CommandItem
+                              key={m.id}
+                              value={`${m.modelo02} ${m.modelo01}`}
+                              onSelect={() => {
+                                setForm((prev) => ({ ...prev, cartuchoId: m.id }));
+                                setModeloPopoverAberto(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  form.cartuchoId === m.id ? "opacity-100" : "opacity-0",
+                                )}
+                              />
+                              {m.modelo02} - {m.modelo01}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <Button 
                   size="icon" 
                   onClick={() => setModalCriarAberto(true)}
