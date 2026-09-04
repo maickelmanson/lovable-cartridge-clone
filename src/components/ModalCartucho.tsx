@@ -77,6 +77,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
 
   const [modalCriarAberto, setModalCriarAberto] = React.useState(false);
   const [novoModelo, setNovoModelo] = React.useState({ modelo01: "", modelo02: "" });
+  const [modeloPopoverAberto, setModeloPopoverAberto] = React.useState(false);
 
   const modelosQuery = trpc.cartuchos.listar.useQuery();
   const criarMutation = trpc.pedidoCartuchos.adicionar.useMutation();
