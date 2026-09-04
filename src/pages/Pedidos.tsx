@@ -92,9 +92,11 @@ export default function Pedidos() {
                 </tr>
               ) : (
                 pedidosFiltrados.map((p: any) => (
-                  <tr 
-                    key={p.id} 
-                    className="border-b hover:bg-muted/50 cursor-pointer"
+                  <tr
+                    key={p.id}
+                    className={`border-b hover:bg-muted/50 cursor-pointer ${
+                      p.status === "aberto" ? "bg-red-50 text-red-700" : ""
+                    }`}
                     onClick={() => setLocation(`/pedidos/${p.id}`)}
                   >
                     <td className="px-4 py-3 font-mono font-bold">#{p.numero}</td>
@@ -102,7 +104,11 @@ export default function Pedidos() {
                     <td className="px-4 py-3 text-sm">{new Date(p.dataCriacao).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-sm">{p.dataFinalizacao ? new Date(p.dataFinalizacao).toLocaleDateString() : "-"}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded ${p.status === "finalizado" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"}`}>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        p.status === "finalizado"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-red-100 text-red-800"
+                      }`}>
                         {p.status === "finalizado" ? "Finalizado" : "Aberto"}
                       </span>
                     </td>
