@@ -66,12 +66,13 @@ export const empresaApi = {
         mutationFn: async (input: any) => {
           requirePermission("empresa.editar");
           const { data: userData } = await supabase.auth.getUser();
-          const owner_id = userData.user?.id;
-          if (!owner_id) throw new Error("Usuário não autenticado");
+          const owner_id = userData.user?.id ?? null;
+          // Registro único compartilhado: atualiza o existente, seja de quem for.
           const { data: existing } = await supabase
             .from("empresa_dados")
             .select("id")
-            .eq("owner_id", owner_id)
+            .order("id", { ascending: true })
+            .limit(1)
             .maybeSingle();
           if (existing) {
             const { data, error } = await supabase
