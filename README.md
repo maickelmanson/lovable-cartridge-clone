@@ -1,20 +1,21 @@
-# Cartuchos Web — Sistema de Remanufatura de Cartuchos
+# Cartuchos Web — EPSOLUÇÕES
 
-> Repositório oficial: https://github.com/maickelmanson/lovable-cartridge-clone.git
-> (o repositório anterior `cartuchos-web` foi descontinuado)
+> **Repositório oficial atualizado:** https://github.com/maickelmanson/lovable-cartridge-clone.git
+> O repositório anterior (`cartuchos-web`) foi descontinuado.
 
 ## Sobre o projeto
 
-**Cartuchos Web** é o sistema de gestão da **EPSOLUÇÕES** para a operação de remanufatura de cartuchos e o controle de pedidos.
+**Cartuchos Web** é o sistema de gestão da **EPSOLUÇÕES EM IMPRESSORAS** para a operação de remanufatura de cartuchos e o controle de pedidos.
 
 Ele centraliza:
-
 - o cadastro de clientes (cliente final e revenda);
 - a entrada de cartuchos por pedido, com pesos de chegada/saída, status e usuário responsável;
 - a geração e impressão das ordens de remanufatura (duas vias em A4 paisagem);
 - a auditoria de tudo o que é criado, alterado e excluído;
 - o controle do que cada usuário pode fazer no sistema;
 - o backup dos dados do banco.
+
+This project was built with [Lovable](https://lovable.dev).
 
 ## Tecnologias
 
@@ -31,15 +32,16 @@ Ele centraliza:
 
 ## Funcionalidades
 
-- **Login com JWT próprio** — e-mail e senha validados com bcrypt; token de 7 dias guardado no navegador, com renovação automática antes de expirar.
+- **Login com JWT próprio** — e-mail e senha validados com bcrypt; token de 7 dias guardado no navegador, com renovação automática e revalidação antes de encerrar a sessão.
 - **Gestão de clientes** — cadastro completo, perfil comercial, histórico de pedidos.
 - **Pedidos** — numeração automática, observação geral, duplicação, finalização e reabertura.
-- **Cartuchos do pedido** — modelo, código, peso de chegada/saída, protegido, status, observações e **usuário responsável**.
+- **Cartuchos do pedido** — modelo, código, peso de chegada/saída (em gramas), protegido, status, observações e **usuário responsável**.
 - **Remanufatura** — ordens geradas a partir do pedido, itens e unidades, garantia, preços por perfil e impressão em duas vias.
+- **Buscador de cartuchos** — busca por período com filtro de usuário responsável, quantidade total, valor total e exportação CSV.
 - **Auditoria** — cada mutação registra usuário, ação, entidade e o diff dos campos alterados.
-- **Permissões** — papéis `admin`, `gerente`, `vendedor` e `tecnico`, com autorizações individuais por caixas de marcação.
+- **Permissões** — papéis admin, gerente, vendedor e tecnico, com autorizações individuais por caixas de marcação.
 - **Backup do banco** — exportação em SQL pela interface (admin) ou pelo terminal.
-- **Dashboard retrátil** — barra lateral que recolhe automaticamente e reaparece ao passar o mouse.
+- **Dashboard retrátil** — barra lateral que recolhe e expande, com preferência salva no localStorage.
 - **Máscaras** — CPF, CNPJ, telefone e CEP aplicadas nos formulários.
 - **WhatsApp via wa.me** — mensagens padrão configuráveis e histórico de envios.
 
@@ -50,7 +52,6 @@ Ele centraliza:
 - Um projeto **Supabase** com acesso à chave de serviço
 
 ## Instalação passo a passo
-
 ```sh
 # 1. Clonar o repositório
 git clone https://github.com/maickelmanson/lovable-cartridge-clone.git
@@ -75,13 +76,12 @@ Acesse http://localhost:8080.
 - Endpoint: `https://ejwvxdqkxrcywehtesyo.supabase.co`
 
 Para rodar com um projeto próprio:
-
 1. Crie um projeto no Supabase.
 2. Copie a URL, o project ref, a chave publicável e a chave de serviço para o `.env`.
 3. Execute o schema completo:
-   ```sh
+```sh
    npm run seed-sql
-   ```
+```
    O arquivo `supabase/seed.sql` cria os tipos, todas as tabelas, GRANTs, RLS, políticas, triggers e o usuário administrador inicial (`admin@epsolucoes.com`).
 4. Alternativamente, `npm run seed` cria apenas o usuário administrador usando a chave de serviço.
 
@@ -116,25 +116,47 @@ Regra: `import.meta.env.VITE_*` no navegador, `process.env.*` apenas dentro de h
 | `npm run backup` | Gera `backups/dump.sql` com os dados de todas as tabelas |
 
 ## Estrutura de pastas
-
 ```text
 src/
-├── pages/              # Telas do sistema (pedidos, clientes, remanufatura, usuários...)
-├── lib/                # Regras de negócio, tRPC próprio, permissões, auditoria, máscaras
-│   └── trpc-real/      # Drivers de dados por módulo
+├── pages/              # Telas do sistema (25 páginas)
+│   ├── Login.tsx           # Tela de login (JWT próprio)
+│   ├── Dashboard.tsx      # Dashboard principal
+│   ├── Clientes.tsx       # Gestão de clientes
+│   ├── Pedidos.tsx        # Lista de pedidos
+│   ├── PedidoDetalhe.tsx  # Detalhe do pedido + cartuchos
+│   ├── BuscadorCartuchos.tsx  # Busca por período + filtro de usuário
+│   ├── Auditoria.tsx      # Trilha de auditoria
+│   ├── Usuarios.tsx       # Gestão de usuários e permissões
+│   └── ...
+├── lib/                # Regras de negócio, tRPC, permissões, auditoria, máscaras
+│   ├── authClient.ts       # Sessão JWT, interceptor, renovação automática
+│   ├── masks.ts            # Máscaras CPF/CNPJ/telefone/CEP
+│   ├── permissions.ts      # Matriz de permissões por role
+│   ├── audit.ts            # Registro de auditoria
+│   ├── backup.server.ts    # Dump + restore SQL
+│   └── trpc-real/          # Drivers de dados por módulo
 ├── routes/             # Rotas TanStack (UI catch-all + endpoints em routes/api)
 ├── components/         # Componentes compartilhados e shadcn/ui
-├── integrations/       # Clientes Supabase gerados
+└── integrations/       # Clientes Supabase gerados
+
 supabase/
 ├── migrations/         # Histórico de alterações do banco
 └── seed.sql            # Schema completo e idempotente + admin inicial
-scripts/                # seed-admin.ts e backup-database.ts
+
+scripts/
+├── seed-admin.ts       # Script para criar usuário admin
+└── backup-database.ts   # Script de backup local
 ```
+
+## Banco de dados
+
+Tabelas principais: `users`, `audit_logs`, `clientes`, `pedidos`, `pedido_cartuchos`, `cartuchos_cadastro`, `empresa_dados`, `reman_orders`, `reman_order_items`, `reman_order_units`, `notifications`, `whatsapp_templates`, `error_logs`.
+
+Schema completo e idempotente: `supabase/seed.sql` (`npm run seed-sql`).
 
 ## Deploy pelo Lovable
 
-O projeto está conectado ao Lovable:
-
+O projeto está conectado ao [Lovable](https://lovable.dev):
 - alterações feitas no Lovable são sincronizadas automaticamente com o GitHub;
 - commits feitos no GitHub voltam para o Lovable;
 - a publicação é feita pelo botão **Publish** dentro do Lovable.
@@ -155,3 +177,24 @@ O projeto está conectado ao Lovable:
 | `npm run seed-sql` falha | Confirme `SUPABASE_DB_URL` (usuário, senha e host do Postgres) |
 | Login não funciona / sem usuários | Rode `npm run seed` para criar o administrador |
 | Dados não aparecem após clonar | Rode `npm run seed-sql` para criar o schema no seu projeto Supabase |
+| Notificação WhatsApp não funciona | Sistema usa links `wa.me` (gratuito, sem API); verifique o telefone do cliente |
+| Build falha | Execute `npm install` e `npm run build` |
+
+## Convenções
+
+- **NÃO editar:** `src/routeTree.gen.ts`, `src/integrations/supabase/client.ts`, `client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`, `types.ts`, `.env`
+- Mudanças de schema sempre por migration em `supabase/migrations`; refletir em `supabase/seed.sql`
+- Peso sempre em gramas (g), nunca kg
+- CNPJ/Telefone sempre com máscaras (`formatCNPJ`, `formatPhone` de `src/lib/masks.ts`)
+
+## Segurança
+
+- **RLS:** Row Level Security ativa nas tabelas de negócio
+- **JWT:** Token com expiração de 7 dias, renovação automática nos últimos 30 minutos
+- **bcrypt:** Senhas com hash bcrypt (não texto plano)
+- **Service Role Key:** Nunca versionar, apenas no `.env` server-side
+- **Permissões:** Matriz admin/gerente/vendedor/tecnico com overrides individuais
+
+## Documentação para IAs
+
+Veja `AGENTS.md` para documentação completa do projeto (stack, páginas, banco, auth, permissões, auditoria, backup).
