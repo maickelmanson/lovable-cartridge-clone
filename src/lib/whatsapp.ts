@@ -30,6 +30,7 @@ export const TEMPLATE_VARS = [
   { nome: "pedido", descricao: "Número do pedido" },
   { nome: "status", descricao: "Status do pedido por extenso" },
   { nome: "empresa", descricao: "Nome da empresa cadastrada" },
+  { nome: "total", descricao: "Valor total do pedido (ex.: R$ 90,00)" },
 ] as const;
 
 /** Textos originais de fábrica, por chave de template. */
