@@ -47,12 +47,12 @@ Observações importantes:
 | `Clientes.tsx` | Lista, busca e criação de clientes. |
 | `ClienteDetalhe.tsx` | Ficha do cliente com histórico de pedidos. |
 | `Pedidos.tsx` | Lista de pedidos, filtros, exclusão (em cascata com remanufatura). |
-| `PedidoDetalhe.tsx` | Pedido aberto: cartuchos, pesos, status, observação geral, WhatsApp. |
+| `PedidoDetalhe.tsx` | Pedido aberto: cartuchos, pesos, status, observação geral, WhatsApp e campo de usuário responsável no modal de editar cartucho (pré-selecionado com o usuário logado). |
 | `RemanPedidos.tsx` | Lista de ordens de remanufatura. |
 | `RemanPedidoDetalhe.tsx` | Itens/unidades da ordem, preços, garantia, finalização. |
 | `RemanPedidoImpressao.tsx` | Impressão em A4 paisagem com duas vias. |
 | `ModeloCartucho.tsx` | Cadastro de modelos de cartucho e preços por perfil. |
-| `BuscadorCartuchos.tsx` | Busca de compatibilidade de cartuchos. |
+| `BuscadorCartuchos.tsx` | Busca de cartuchos por período com filtro de usuário responsável (Select), quantidade total, valor total e exportação CSV. |
 | `TestBuscadorCartuchos.tsx` | Página de teste do buscador. |
 | `BuscaAvancada.tsx` | Busca global (clientes, pedidos, cartuchos) com normalização fuzzy. |
 | `DadosEmpresa.tsx` | Dados da empresa usados nos cabeçalhos de impressão. |
@@ -97,6 +97,7 @@ Observações importantes:
 | `error-capture.ts` / `error-page.ts` / `lovable-error-reporting.ts` | Captura e exibição de erros. |
 | `ai.functions.ts` | Server function do chat de IA. |
 | `utils.ts` | `cn()` e utilitários gerais. |
+| `usuariosAtivos.ts` | Hook `useUsuariosAtivos()` que lista usuários ativos para Selects de usuário responsável. |
 
 ## 4. Banco de dados
 
@@ -116,13 +117,14 @@ em_andamento, processo, funcionando, circuito_queimado, defeito_cabeca, garantia
 | `clientes` | nome, telefone, telefone2, endereco, cpf, cnpj, inscricao_estadual, commercial_profile, observacoes |
 | `cartuchos_cadastro` | modelo_01, modelo_02, price_final_customer, price_reseller |
 | `pedidos` | numero, cliente_id, status, observacao_geral, data_finalizacao |
-| `pedido_cartuchos` | pedido_id, cartucho_id, codigo, peso_chegada, peso_saida, protegido, status, observacoes |
+| `pedido_cartuchos` | pedido_id, cartucho_id, codigo, peso_chegada, peso_saida, protegido, status, observacoes, usuario_id (FK → users.id, registra qual usuário fez o serviço) |
 | `reman_orders` | order_number, cliente_id, **pedido_id** (FK com exclusão em cascata), commercial_profile_snapshot, status, subtotal, discount, total, notes, observacao_geral |
 | `reman_order_items` | order_id, cartucho_id, description_snapshot, model_code_snapshot, quantity, unit_price, price_source, line_total |
 | `reman_order_units` | order_item_id, cartucho_id, unit_code, status, defect_type, output_weight, is_warranty, notes |
 | `notifications` | pedido_id, cliente_id, channel, destination, message, status, external_id, error |
 | `whatsapp_templates` | chave, titulo, corpo |
 | `error_logs` | error_type, error_message, error_stack, context, severity, resolved, resolved_at, resolved_by, notes |
+
 
 Todas têm `id`, `created_at` e `updated_at` (trigger `tg_set_updated_at`).
 Schema completo e idempotente: `supabase/seed.sql`. Histórico: `supabase/migrations/`.
@@ -135,15 +137,24 @@ Schema completo e idempotente: `supabase/seed.sql`. Histórico: `supabase/migrat
 4. `installApiAuthInterceptor()` (em `src/lib/authClient.ts`) adiciona
    `Authorization: Bearer <token>` a toda chamada `/api/*`; um 401 limpa a sessão
    e redireciona para `/login`.
-5. `authenticateRequest()` (`src/auth.server.ts`) revalida o usuário no banco a
-   cada requisição (ativo? senha trocada depois da emissão? então o token cai).
-6. As leituras/escritas de dados passam pelo proxy `src/routes/api/db/$.ts`, que
-   valida o JWT e encaminha à Data API com a chave de serviço (lista de tabelas
-   permitidas embutida). O front usa `src/lib/db.ts` apontado para esse proxy.
+5. `installApiAuthInterceptor()` (em `src/lib/authClient.ts`) adiciona
+`Authorization: Bearer <token>` a toda chamada `/api/*`. Antes de encerrar
+a sessão em caso de 401, o interceptor tenta revalidar via `revalidarSessao()`
+e renovar via `refreshToken()` (POST /api/auth/refresh). Só chama
+`encerrarSessao()` se ambas falharem.
+6. Renovação proativa: `renovarSeProximoDoVencimento()` verifica o `exp`
+do JWT e renova automaticamente quando faltam menos de 30 minutos para
+expirar. Roda ao carregar a página, a cada 5 minutos e ao voltar o foco
+da aba (`window.addEventListener("focus")`).
+7. `getTokenExp(token)` decodifica o payload base64 do JWT e extrai o
+campo `exp` (segundos) sem validar a assinatura.
+8. As leituras/escritas de dados passam pelo proxy `src/routes/api/db/$.ts`,
+que valida o JWT e encaminha à Data API com a chave de serviço.
 
-Endpoints: `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`,
-`/api/auth/users`, `/api/auth/users/:id`, `/api/audit`, `/api/backup/database`,
-`/api/backup/code`, `/api/backup/restore`, `/api/db/rest/v1/*`.
+Endpoints: `/api/auth/login`, `/api/auth/me`, `/api/auth/refresh`,
+`/api/auth/logout`, `/api/auth/users`, `/api/auth/users/:id`,
+`/api/audit`, `/api/backup/database`, `/api/backup/code`,
+`/api/backup/restore`, `/api/db/rest/v1/*`.
 
 ## 6. Permissões
 
