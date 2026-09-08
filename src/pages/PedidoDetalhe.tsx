@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { openWhatsApp, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
 import { useUsuariosAtivos } from "@/lib/usuariosAtivos";
+import { supabase } from "@/lib/db";
 
 interface Props {
   params: { id: string };
@@ -137,7 +138,7 @@ export default function PedidoDetalhe({ params }: Props) {
 
   const registrarNotificacao = trpc.notificacoes.registrar.useMutation();
 
-  const handleNotificarCliente = () => {
+  const handleNotificarCliente = async () => {
     const pedido = pedidoQuery.data;
     const cliente = clienteQuery.data;
     if (!pedido) return;
@@ -147,11 +148,30 @@ export default function PedidoDetalhe({ params }: Props) {
     const chave = finalizado ? "pedido_finalizado" : "pedido_em_andamento";
     const template = (templatesQuery.data as any[] | undefined)?.find((t) => t.chave === chave);
     const corpo = template?.corpo || TEMPLATE_PADRAO[chave];
+
+    let totalTexto = "";
+    try {
+      const { data: reman } = await supabase
+        .from("reman_orders")
+        .select("total")
+        .eq("pedido_id", pedido.id)
+        .order("id", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const valor = Number((reman as any)?.total);
+      if (reman && Number.isFinite(valor)) {
+        totalTexto = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
+      }
+    } catch (e) {
+      console.error("Erro ao buscar total da remanufatura:", e);
+    }
+
     const mensagem = renderTemplate(corpo, {
       cliente: cliente?.nome ?? "",
       pedido: String(pedido.numero),
       status: statusTexto,
       empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
+      total: totalTexto,
     });
     const enviado = openWhatsApp(telefone, mensagem);
     registrarNotificacao.mutate({
