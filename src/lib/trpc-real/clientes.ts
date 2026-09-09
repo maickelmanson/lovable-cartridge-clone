@@ -71,9 +71,28 @@ function toApp(r: ClienteRow): ClienteApp {
   };
 }
 
+/** Monta o nome de exibição a partir dos campos por tipo de pessoa. */
+export function montarNomeExibicao(input: any, atual?: string | null): string {
+  const tipo = input?.tipoPessoa === "JURIDICA" ? "JURIDICA" : "FISICA";
+  const limpar = (v: any) => String(v ?? "").trim();
+  const derivado =
+    tipo === "JURIDICA"
+      ? limpar(input?.nomeFantasia) || limpar(input?.razaoSocial)
+      : [limpar(input?.primeiroNome), limpar(input?.sobrenome)].filter(Boolean).join(" ");
+  return derivado || limpar(input?.nome) || limpar(atual);
+}
+
 function toDb(input: any) {
   const out: any = {};
-  if ("nome" in input) out.nome = input.nome;
+  if ("tipoPessoa" in input) out.tipo_pessoa = input.tipoPessoa === "JURIDICA" ? "JURIDICA" : "FISICA";
+  if ("primeiroNome" in input) out.primeiro_nome = input.primeiroNome || null;
+  if ("sobrenome" in input) out.sobrenome = input.sobrenome || null;
+  if ("razaoSocial" in input) out.razao_social = input.razaoSocial || null;
+  if ("nomeFantasia" in input) out.nome_fantasia = input.nomeFantasia || null;
+  if ("responsavelNome" in input) out.responsavel_nome = input.responsavelNome || null;
+  const nomeDerivado = montarNomeExibicao(input);
+  if (nomeDerivado) out.nome = nomeDerivado;
+  else if ("nome" in input) out.nome = input.nome;
   if ("telefone" in input) out.telefone = input.telefone || null;
   if ("telefone2" in input) out.telefone2 = input.telefone2 || null;
   if ("endereco" in input) out.endereco = input.endereco || null;
