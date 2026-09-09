@@ -30,6 +30,12 @@ type ClienteRow = {
 type ClienteApp = {
   id: number;
   nome: string;
+  tipoPessoa: TipoPessoa;
+  primeiroNome: string | null;
+  sobrenome: string | null;
+  razaoSocial: string | null;
+  nomeFantasia: string | null;
+  responsavelNome: string | null;
   telefone: string | null;
   telefone2: string | null;
   endereco: string | null;
