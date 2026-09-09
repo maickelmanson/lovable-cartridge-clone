@@ -52,6 +52,12 @@ function toApp(r: ClienteRow): ClienteApp {
   return {
     id: r.id,
     nome: r.nome,
+    tipoPessoa: (r.tipo_pessoa as TipoPessoa) ?? "FISICA",
+    primeiroNome: r.primeiro_nome ?? null,
+    sobrenome: r.sobrenome ?? null,
+    razaoSocial: r.razao_social ?? null,
+    nomeFantasia: r.nome_fantasia ?? null,
+    responsavelNome: r.responsavel_nome ?? null,
     telefone: r.telefone,
     telefone2: r.telefone2,
     endereco: r.endereco,
