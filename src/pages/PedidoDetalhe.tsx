@@ -173,6 +173,9 @@ export default function PedidoDetalhe({ params }: Props) {
       empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
       total: totalTexto,
       periodo: periodoDoDia(),
+      primeiro_nome: (cliente as any)?.primeiroNome || (cliente as any)?.responsavelNome || "",
+      nome_fantasia: (cliente as any)?.nomeFantasia || "",
+      razao_social: (cliente as any)?.razaoSocial || "",
     });
     const enviado = openWhatsApp(telefone, mensagem);
     registrarNotificacao.mutate({
