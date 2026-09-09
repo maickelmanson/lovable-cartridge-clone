@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Edit, Trash2, Printer, RotateCcw, CheckCircle, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { openWhatsApp, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
+import { openWhatsApp, periodoDoDia, renderTemplate, TEMPLATE_PADRAO } from "@/lib/whatsapp";
 import ModalCartucho from "@/components/ModalCartucho";
 import { useUsuariosAtivos } from "@/lib/usuariosAtivos";
 import { supabase } from "@/lib/db";
@@ -172,6 +172,7 @@ export default function PedidoDetalhe({ params }: Props) {
       status: statusTexto,
       empresa: empresaQuery.data?.empresa ?? empresaQuery.data?.nome ?? "",
       total: totalTexto,
+      periodo: periodoDoDia(),
     });
     const enviado = openWhatsApp(telefone, mensagem);
     registrarNotificacao.mutate({
