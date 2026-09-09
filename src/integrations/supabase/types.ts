@@ -105,10 +105,16 @@ export type Database = {
           id: number
           inscricao_estadual: string | null
           nome: string
+          nome_fantasia: string | null
           observacoes: string | null
           owner_id: string | null
+          primeiro_nome: string | null
+          razao_social: string | null
+          responsavel_nome: string | null
+          sobrenome: string | null
           telefone: string | null
           telefone2: string | null
+          tipo_pessoa: string
           updated_at: string
         }
         Insert: {
@@ -120,10 +126,16 @@ export type Database = {
           id?: number
           inscricao_estadual?: string | null
           nome: string
+          nome_fantasia?: string | null
           observacoes?: string | null
           owner_id?: string | null
+          primeiro_nome?: string | null
+          razao_social?: string | null
+          responsavel_nome?: string | null
+          sobrenome?: string | null
           telefone?: string | null
           telefone2?: string | null
+          tipo_pessoa?: string
           updated_at?: string
         }
         Update: {
@@ -135,10 +147,16 @@ export type Database = {
           id?: number
           inscricao_estadual?: string | null
           nome?: string
+          nome_fantasia?: string | null
           observacoes?: string | null
           owner_id?: string | null
+          primeiro_nome?: string | null
+          razao_social?: string | null
+          responsavel_nome?: string | null
+          sobrenome?: string | null
           telefone?: string | null
           telefone2?: string | null
+          tipo_pessoa?: string
           updated_at?: string
         }
         Relationships: []

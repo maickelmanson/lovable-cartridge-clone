@@ -17,6 +17,9 @@ const EXEMPLO = {
   empresa: "EP SOLUÇÕES",
   total: "R$ 90,00",
   periodo: "tarde",
+  primeiro_nome: "MARIA",
+  nome_fantasia: "PAPELARIA CENTRAL",
+  razao_social: "CENTRAL COMÉRCIO DE PAPÉIS LTDA",
 };
 
 export default function MensagensWhatsApp() {

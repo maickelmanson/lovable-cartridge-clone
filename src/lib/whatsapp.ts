@@ -32,6 +32,9 @@ export const TEMPLATE_VARS = [
   { nome: "empresa", descricao: "Nome da empresa cadastrada" },
   { nome: "total", descricao: "Valor total do pedido (ex.: R$ 90,00)" },
   { nome: "periodo", descricao: "Período do dia conforme o horário do envio (dia/tarde/noite)" },
+  { nome: "primeiro_nome", descricao: "Primeiro nome do cliente (ou do responsável, na empresa)" },
+  { nome: "nome_fantasia", descricao: "Nome fantasia da empresa" },
+  { nome: "razao_social", descricao: "Razão social da empresa" },
 ] as const;
 
 /** Retorna o período do dia conforme o horário local: dia (<12h), tarde (12–17h) ou noite (>=18h). */

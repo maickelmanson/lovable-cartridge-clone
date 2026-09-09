@@ -21,6 +21,12 @@ interface Props {
 export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
   const [form, setForm] = useState({
     nome: "",
+    tipoPessoa: "FISICA" as "FISICA" | "JURIDICA",
+    primeiroNome: "",
+    sobrenome: "",
+    razaoSocial: "",
+    nomeFantasia: "",
+    responsavelNome: "",
     telefone: "",
     telefone2: "",
     endereco: "",
@@ -35,6 +41,12 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
     if (cliente) {
       setForm({
         nome: cliente.nome || "",
+        tipoPessoa: (cliente.tipoPessoa === "JURIDICA" || (!cliente.tipoPessoa && cliente.cnpj)) ? "JURIDICA" : "FISICA",
+        primeiroNome: cliente.primeiroNome || (cliente.tipoPessoa ? "" : cliente.nome || ""),
+        sobrenome: cliente.sobrenome || "",
+        razaoSocial: cliente.razaoSocial || "",
+        nomeFantasia: cliente.nomeFantasia || "",
+        responsavelNome: cliente.responsavelNome || "",
         telefone: cliente.telefone || "",
         telefone2: cliente.telefone2 || "",
         endereco: cliente.endereco || "",
@@ -68,24 +80,43 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome.trim()) {
-      alert("O nome do cliente é obrigatório.");
+    const pj = form.tipoPessoa === "JURIDICA";
+    if (pj && !form.razaoSocial.trim()) {
+      alert("A razão social é obrigatória.");
+      return;
+    }
+    if (!pj && !form.primeiroNome.trim()) {
+      alert("O primeiro nome do cliente é obrigatório.");
       return;
     }
     
     // Validar CPF se preenchido
-    if (form.cpf.trim() && !validarCPF(form.cpf)) {
+    if (!pj && form.cpf.trim() && !validarCPF(form.cpf)) {
       alert("CPF inválido. Verifique os dígitos verificadores.");
       return;
     }
     
     // Validar CNPJ se preenchido
-    if (form.cnpj.trim() && !validarCNPJ(form.cnpj)) {
+    if (pj && form.cnpj.trim() && !validarCNPJ(form.cnpj)) {
       alert("CNPJ inválido. Verifique os dígitos verificadores.");
       return;
     }
     
-    onSalvar(form);
+    const nomeExibicao = pj
+      ? (form.nomeFantasia.trim() || form.razaoSocial.trim())
+      : [form.primeiroNome.trim(), form.sobrenome.trim()].filter(Boolean).join(" ");
+    onSalvar({
+      ...form,
+      nome: nomeExibicao || form.nome,
+      cpf: pj ? "" : form.cpf,
+      cnpj: pj ? form.cnpj : "",
+      inscricaoEstadual: pj ? form.inscricaoEstadual : "",
+      razaoSocial: pj ? form.razaoSocial : "",
+      nomeFantasia: pj ? form.nomeFantasia : "",
+      responsavelNome: pj ? form.responsavelNome : "",
+      primeiroNome: pj ? "" : form.primeiroNome,
+      sobrenome: pj ? "" : form.sobrenome,
+    });
   };
   
   // Função para verificar se CPF é válido
@@ -104,15 +135,72 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4 pb-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="text-sm font-medium">Nome *</label>
-              <Input
-                name="nome"
-                value={form.nome}
-                onChange={handleChange}
-                placeholder="NOME COMPLETO"
-                required
-              />
+              <label className="text-sm font-medium">Tipo de Pessoa</label>
+              <select
+                name="tipoPessoa"
+                value={form.tipoPessoa}
+                onChange={(e) => setForm(f => ({ ...f, tipoPessoa: e.target.value as "FISICA" | "JURIDICA" }))}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="FISICA">Pessoa Física (CPF)</option>
+                <option value="JURIDICA">Pessoa Jurídica (CNPJ)</option>
+              </select>
             </div>
+
+            {form.tipoPessoa === "FISICA" ? (
+              <>
+                <div>
+                  <label className="text-sm font-medium">Primeiro Nome *</label>
+                  <Input
+                    name="primeiroNome"
+                    value={form.primeiroNome}
+                    onChange={handleChange}
+                    placeholder="PRIMEIRO NOME"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Sobrenome</label>
+                  <Input
+                    name="sobrenome"
+                    value={form.sobrenome}
+                    onChange={handleChange}
+                    placeholder="SOBRENOME"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium">Razão Social *</label>
+                  <Input
+                    name="razaoSocial"
+                    value={form.razaoSocial}
+                    onChange={handleChange}
+                    placeholder="RAZÃO SOCIAL"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Nome Fantasia</label>
+                  <Input
+                    name="nomeFantasia"
+                    value={form.nomeFantasia}
+                    onChange={handleChange}
+                    placeholder="NOME FANTASIA"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Responsável (Primeiro Nome)</label>
+                  <Input
+                    name="responsavelNome"
+                    value={form.responsavelNome}
+                    onChange={handleChange}
+                    placeholder="PRIMEIRO NOME DO RESPONSÁVEL"
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <label className="text-sm font-medium">Telefone</label>
