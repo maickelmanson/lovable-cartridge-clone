@@ -4,9 +4,17 @@ import { supabase } from "@/lib/db";
 import { requirePermission } from "@/lib/guard";
 import { registrarAuditoria, diff } from "@/lib/audit";
 
+export type TipoPessoa = "FISICA" | "JURIDICA";
+
 type ClienteRow = {
   id: number;
   nome: string;
+  tipo_pessoa: TipoPessoa | null;
+  primeiro_nome: string | null;
+  sobrenome: string | null;
+  razao_social: string | null;
+  nome_fantasia: string | null;
+  responsavel_nome: string | null;
   telefone: string | null;
   telefone2: string | null;
   endereco: string | null;
