@@ -16,6 +16,7 @@ const EXEMPLO = {
   status: "em andamento",
   empresa: "EP SOLUÇÕES",
   total: "R$ 90,00",
+  periodo: "tarde",
 };
 
 export default function MensagensWhatsApp() {

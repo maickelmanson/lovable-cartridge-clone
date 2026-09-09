@@ -31,7 +31,16 @@ export const TEMPLATE_VARS = [
   { nome: "status", descricao: "Status do pedido por extenso" },
   { nome: "empresa", descricao: "Nome da empresa cadastrada" },
   { nome: "total", descricao: "Valor total do pedido (ex.: R$ 90,00)" },
+  { nome: "periodo", descricao: "Período do dia conforme o horário do envio (dia/tarde/noite)" },
 ] as const;
+
+/** Retorna o período do dia conforme o horário local: dia (<12h), tarde (12–17h) ou noite (>=18h). */
+export function periodoDoDia(data: Date = new Date()): string {
+  const hora = data.getHours();
+  if (hora < 12) return "dia";
+  if (hora < 18) return "tarde";
+  return "noite";
+}
 
 /** Textos originais de fábrica, por chave de template. */
 export const TEMPLATE_PADRAO: Record<string, string> = {
