@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AvisoCredito from "@/components/AvisoCredito";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
@@ -71,6 +72,8 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
 
   const clientesQuery = trpc.clientes.listar.useQuery();
   const cartuchosQuery = trpc.cartuchos.listar.useQuery();
+
+  const clienteComCredito = clientesQuery.data?.find((c: any) => String(c.id) === String(clienteId));
 
   const clientesFiltrados = clientesQuery.data?.filter((c: any) =>
     norm(c.nome).includes(norm(buscaCliente))
@@ -203,6 +206,14 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
               <div className="text-sm text-emerald-600 mt-2">
                 ✓ Cliente selecionado: {clienteSelecionado?.nome}
               </div>
+            )}
+            {clienteId && (
+              <AvisoCredito
+                className="mt-2"
+                valor={clienteComCredito?.creditoPendente}
+                observacao={clienteComCredito?.creditoObservacao}
+                clienteNome={clienteComCredito?.nome}
+              />
             )}
           </div>
 
