@@ -235,6 +235,8 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
               </select>
             </div>
 
+            {form.tipoPessoa === "FISICA" ? (
+              <>
             <div>
               <label className="text-sm font-medium flex items-center gap-2">
                 CPF
@@ -258,6 +260,9 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
               )}
             </div>
 
+              </>
+            ) : (
+              <>
             <div>
               <label className="text-sm font-medium flex items-center gap-2">
                 CNPJ
@@ -290,6 +295,9 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
                 placeholder="INSCRIÇÃO ESTADUAL"
               />
             </div>
+
+              </>
+            )}
 
             <div className="col-span-2">
               <label className="text-sm font-medium">Endereço</label>
