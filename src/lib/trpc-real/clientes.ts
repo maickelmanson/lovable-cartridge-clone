@@ -46,6 +46,8 @@ type ClienteApp = {
   inscricaoEstadual: string | null;
   commercialProfile: "CLIENTE_FINAL" | "REVENDA";
   observacoes: string | null;
+  creditoPendente: number;
+  creditoObservacao: string | null;
   criadoEm: string;
   atualizadoEm: string;
 };
