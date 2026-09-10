@@ -328,6 +328,27 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
                 rows={3}
               />
             </div>
+
+            <div>
+              <label className="text-sm font-medium">Crédito pendente (R$)</label>
+              <Input
+                name="creditoPendente"
+                value={form.creditoPendente}
+                onChange={handleChange}
+                placeholder="0,00"
+                inputMode="decimal"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Observação do crédito</label>
+              <Input
+                name="creditoObservacao"
+                value={form.creditoObservacao}
+                onChange={handleChange}
+                placeholder="Origem do crédito"
+              />
+            </div>
           </div>
 
           <div className="flex gap-2 justify-end">
