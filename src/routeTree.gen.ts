@@ -9,29 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuditIndexRouteImport } from './routes/api/audit/index'
-import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
-import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
-import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
-import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
-import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
-import { Route as ApiAuthUsuariosAtivosRouteImport } from './routes/api/auth/usuarios-ativos'
-import { Route as ApiBackupCodeRouteImport } from './routes/api/backup/code'
-import { Route as ApiBackupDatabaseRouteImport } from './routes/api/backup/database'
-import { Route as ApiBackupRestoreRouteImport } from './routes/api/backup/restore'
 import { Route as ApiDbSplatRouteImport } from './routes/api/db/$'
+import { Route as ApiBackupRestoreRouteImport } from './routes/api/backup/restore'
+import { Route as ApiBackupDatabaseRouteImport } from './routes/api/backup/database'
+import { Route as ApiBackupCodeRouteImport } from './routes/api/backup/code'
+import { Route as ApiAuthUsuariosAtivosRouteImport } from './routes/api/auth/usuarios-ativos'
+import { Route as ApiAuthUsersRouteImport } from './routes/api/auth/users'
+import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthUsersIdRouteImport } from './routes/api/auth/users.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuditIndexRoute = ApiAuditIndexRouteImport.update({
@@ -39,44 +39,9 @@ const ApiAuditIndexRoute = ApiAuditIndexRouteImport.update({
   path: '/api/audit/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
-  id: '/api/auth/login',
-  path: '/api/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
-  id: '/api/auth/logout',
-  path: '/api/auth/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
-  id: '/api/auth/me',
-  path: '/api/auth/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthRefreshRoute = ApiAuthRefreshRouteImport.update({
-  id: '/api/auth/refresh',
-  path: '/api/auth/refresh',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthUsersRoute = ApiAuthUsersRouteImport.update({
-  id: '/api/auth/users',
-  path: '/api/auth/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthUsuariosAtivosRoute = ApiAuthUsuariosAtivosRouteImport.update({
-  id: '/api/auth/usuarios-ativos',
-  path: '/api/auth/usuarios-ativos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiBackupCodeRoute = ApiBackupCodeRouteImport.update({
-  id: '/api/backup/code',
-  path: '/api/backup/code',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiBackupDatabaseRoute = ApiBackupDatabaseRouteImport.update({
-  id: '/api/backup/database',
-  path: '/api/backup/database',
+const ApiDbSplatRoute = ApiDbSplatRouteImport.update({
+  id: '/api/db/$',
+  path: '/api/db/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBackupRestoreRoute = ApiBackupRestoreRouteImport.update({
@@ -84,9 +49,44 @@ const ApiBackupRestoreRoute = ApiBackupRestoreRouteImport.update({
   path: '/api/backup/restore',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiDbSplatRoute = ApiDbSplatRouteImport.update({
-  id: '/api/db/$',
-  path: '/api/db/$',
+const ApiBackupDatabaseRoute = ApiBackupDatabaseRouteImport.update({
+  id: '/api/backup/database',
+  path: '/api/backup/database',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBackupCodeRoute = ApiBackupCodeRouteImport.update({
+  id: '/api/backup/code',
+  path: '/api/backup/code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthUsuariosAtivosRoute = ApiAuthUsuariosAtivosRouteImport.update({
+  id: '/api/auth/usuarios-ativos',
+  path: '/api/auth/usuarios-ativos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthUsersRoute = ApiAuthUsersRouteImport.update({
+  id: '/api/auth/users',
+  path: '/api/auth/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRefreshRoute = ApiAuthRefreshRouteImport.update({
+  id: '/api/auth/refresh',
+  path: '/api/auth/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthUsersIdRoute = ApiAuthUsersIdRouteImport.update({
@@ -213,18 +213,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$': {
       id: '/$'
       path: '/$'
       fullPath: '/$'
       preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/audit/': {
@@ -234,60 +234,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/login': {
-      id: '/api/auth/login'
-      path: '/api/auth/login'
-      fullPath: '/api/auth/login'
-      preLoaderRoute: typeof ApiAuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/logout': {
-      id: '/api/auth/logout'
-      path: '/api/auth/logout'
-      fullPath: '/api/auth/logout'
-      preLoaderRoute: typeof ApiAuthLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/me': {
-      id: '/api/auth/me'
-      path: '/api/auth/me'
-      fullPath: '/api/auth/me'
-      preLoaderRoute: typeof ApiAuthMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/refresh': {
-      id: '/api/auth/refresh'
-      path: '/api/auth/refresh'
-      fullPath: '/api/auth/refresh'
-      preLoaderRoute: typeof ApiAuthRefreshRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/users': {
-      id: '/api/auth/users'
-      path: '/api/auth/users'
-      fullPath: '/api/auth/users'
-      preLoaderRoute: typeof ApiAuthUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/usuarios-ativos': {
-      id: '/api/auth/usuarios-ativos'
-      path: '/api/auth/usuarios-ativos'
-      fullPath: '/api/auth/usuarios-ativos'
-      preLoaderRoute: typeof ApiAuthUsuariosAtivosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/backup/code': {
-      id: '/api/backup/code'
-      path: '/api/backup/code'
-      fullPath: '/api/backup/code'
-      preLoaderRoute: typeof ApiBackupCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/backup/database': {
-      id: '/api/backup/database'
-      path: '/api/backup/database'
-      fullPath: '/api/backup/database'
-      preLoaderRoute: typeof ApiBackupDatabaseRouteImport
+    '/api/db/$': {
+      id: '/api/db/$'
+      path: '/api/db/$'
+      fullPath: '/api/db/$'
+      preLoaderRoute: typeof ApiDbSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/backup/restore': {
@@ -297,11 +248,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBackupRestoreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/db/$': {
-      id: '/api/db/$'
-      path: '/api/db/$'
-      fullPath: '/api/db/$'
-      preLoaderRoute: typeof ApiDbSplatRouteImport
+    '/api/backup/database': {
+      id: '/api/backup/database'
+      path: '/api/backup/database'
+      fullPath: '/api/backup/database'
+      preLoaderRoute: typeof ApiBackupDatabaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/backup/code': {
+      id: '/api/backup/code'
+      path: '/api/backup/code'
+      fullPath: '/api/backup/code'
+      preLoaderRoute: typeof ApiBackupCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/usuarios-ativos': {
+      id: '/api/auth/usuarios-ativos'
+      path: '/api/auth/usuarios-ativos'
+      fullPath: '/api/auth/usuarios-ativos'
+      preLoaderRoute: typeof ApiAuthUsuariosAtivosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/users': {
+      id: '/api/auth/users'
+      path: '/api/auth/users'
+      fullPath: '/api/auth/users'
+      preLoaderRoute: typeof ApiAuthUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/refresh': {
+      id: '/api/auth/refresh'
+      path: '/api/auth/refresh'
+      fullPath: '/api/auth/refresh'
+      preLoaderRoute: typeof ApiAuthRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/users/$id': {
