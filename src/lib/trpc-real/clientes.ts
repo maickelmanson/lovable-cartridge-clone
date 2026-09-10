@@ -107,6 +107,8 @@ function toDb(input: any) {
   if ("inscricaoEstadual" in input) out.inscricao_estadual = input.inscricaoEstadual || null;
   if ("commercialProfile" in input) out.commercial_profile = input.commercialProfile || "CLIENTE_FINAL";
   if ("observacoes" in input) out.observacoes = input.observacoes || null;
+  if ("creditoPendente" in input) out.credito_pendente = Number(input.creditoPendente) || 0;
+  if ("creditoObservacao" in input) out.credito_observacao = input.creditoObservacao || null;
   return out;
 }
 
