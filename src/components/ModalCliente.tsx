@@ -35,6 +35,8 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
     inscricaoEstadual: "",
     commercialProfile: "CLIENTE_FINAL" as "CLIENTE_FINAL" | "REVENDA",
     observacoes: "",
+    creditoPendente: "",
+    creditoObservacao: "",
   });
 
   useEffect(() => {
@@ -55,6 +57,8 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
         inscricaoEstadual: cliente.inscricaoEstadual || "",
         commercialProfile: cliente.commercialProfile || "CLIENTE_FINAL",
         observacoes: cliente.observacoes || "",
+        creditoPendente: cliente.creditoPendente ? String(cliente.creditoPendente).replace(".", ",") : "",
+        creditoObservacao: cliente.creditoObservacao || "",
       });
     }
   }, [cliente]);
@@ -70,7 +74,9 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
       valorFormatado = formatCNPJ(value);
     } else if (name === "telefone" || name === "telefone2") {
       valorFormatado = formatPhone(value);
-    } else if (name !== "observacoes") {
+    } else if (name === "creditoPendente") {
+      valorFormatado = value.replace(/[^\d.,]/g, "");
+    } else if (name !== "observacoes" && name !== "creditoObservacao") {
       // Maiúsculas para todos os campos exceto observações
       valorFormatado = value.toUpperCase();
     }
@@ -105,8 +111,11 @@ export default function ModalCliente({ cliente, onSalvar, onFechar }: Props) {
     const nomeExibicao = pj
       ? (form.nomeFantasia.trim() || form.razaoSocial.trim())
       : [form.primeiroNome.trim(), form.sobrenome.trim()].filter(Boolean).join(" ");
+    const creditoNumero = Number(String(form.creditoPendente).replace(/\./g, "").replace(",", ".")) || 0;
     onSalvar({
       ...form,
+      creditoPendente: creditoNumero,
+      creditoObservacao: form.creditoObservacao,
       nome: nomeExibicao || form.nome,
       cpf: pj ? "" : form.cpf,
       cnpj: pj ? form.cnpj : "",
