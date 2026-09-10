@@ -23,6 +23,8 @@ type ClienteRow = {
   inscricao_estadual: string | null;
   commercial_profile: "CLIENTE_FINAL" | "REVENDA";
   observacoes: string | null;
+  credito_pendente: number | string | null;
+  credito_observacao: string | null;
   created_at: string;
   updated_at: string;
 };
