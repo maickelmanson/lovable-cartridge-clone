@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AvisoCredito from "@/components/AvisoCredito";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -284,6 +285,12 @@ export default function PedidoDetalhe({ params }: Props) {
           .print\\:hidden, header, footer, .no-print { display: none !important; }
         }
       `}</style>
+
+      <AvisoCredito
+        valor={(clienteQuery.data as any)?.creditoPendente}
+        observacao={(clienteQuery.data as any)?.creditoObservacao}
+        clienteNome={pedido.clienteNome}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
