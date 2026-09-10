@@ -23,6 +23,8 @@ type ClienteRow = {
   inscricao_estadual: string | null;
   commercial_profile: "CLIENTE_FINAL" | "REVENDA";
   observacoes: string | null;
+  credito_pendente: number | string | null;
+  credito_observacao: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -44,6 +46,8 @@ type ClienteApp = {
   inscricaoEstadual: string | null;
   commercialProfile: "CLIENTE_FINAL" | "REVENDA";
   observacoes: string | null;
+  creditoPendente: number;
+  creditoObservacao: string | null;
   criadoEm: string;
   atualizadoEm: string;
 };
@@ -66,6 +70,8 @@ function toApp(r: ClienteRow): ClienteApp {
     inscricaoEstadual: r.inscricao_estadual,
     commercialProfile: r.commercial_profile,
     observacoes: r.observacoes,
+    creditoPendente: Number(r.credito_pendente ?? 0) || 0,
+    creditoObservacao: r.credito_observacao ?? null,
     criadoEm: r.created_at,
     atualizadoEm: r.updated_at,
   };
@@ -101,6 +107,8 @@ function toDb(input: any) {
   if ("inscricaoEstadual" in input) out.inscricao_estadual = input.inscricaoEstadual || null;
   if ("commercialProfile" in input) out.commercial_profile = input.commercialProfile || "CLIENTE_FINAL";
   if ("observacoes" in input) out.observacoes = input.observacoes || null;
+  if ("creditoPendente" in input) out.credito_pendente = Number(input.creditoPendente) || 0;
+  if ("creditoObservacao" in input) out.credito_observacao = input.creditoObservacao || null;
   return out;
 }
 

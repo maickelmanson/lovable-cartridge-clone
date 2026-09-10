@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AvisoCredito from "@/components/AvisoCredito";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -364,6 +365,41 @@ export default function RemanPedidoDetalhe({ params }: Props) {
     }
   };
 
+  const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
+  const atualizarClienteMutation = trpc.clientes.atualizar.useMutation();
+  const cliente = clienteQuery.data as any;
+  const creditoPendente = Number(cliente?.creditoPendente ?? 0) || 0;
+
+  const handleAplicarCredito = async () => {
+    if (!pedido || creditoPendente <= 0) return;
+    const totalAtual = Number(pedido.total || 0);
+    const descontoAtual = Number(pedido.discount || 0);
+    const aplicar = Math.min(creditoPendente, totalAtual);
+    if (aplicar <= 0) {
+      toast.error("Esta ordem não possui valor a abater.");
+      return;
+    }
+    try {
+      await atualizarPedidoMutation.mutateAsync({
+        id,
+        discount: (descontoAtual + aplicar).toFixed(2),
+      });
+      const restante = Number((creditoPendente - aplicar).toFixed(2));
+      await atualizarClienteMutation.mutateAsync({
+        id: cliente.id,
+        creditoPendente: restante,
+        creditoObservacao: restante > 0
+          ? `${cliente.creditoObservacao ? cliente.creditoObservacao + " | " : ""}Parcial abatido na ordem ${pedido.orderNumber}`
+          : null,
+      });
+      toast.success("Crédito aplicado como desconto!");
+      clienteQuery.refetch();
+      refetchAll();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao aplicar o crédito.");
+    }
+  };
+
   const handleSalvarStatus = async () => {
     try {
       await atualizarPedidoMutation.mutateAsync({
@@ -457,6 +493,16 @@ export default function RemanPedidoDetalhe({ params }: Props) {
           </Button>
         </div>
       </div>
+
+      <AvisoCredito
+        valor={creditoPendente}
+        observacao={cliente?.creditoObservacao}
+        clienteNome={pedido.clienteNome}
+      >
+        <Button size="sm" onClick={handleAplicarCredito} disabled={atualizarPedidoMutation.isPending}>
+          Aplicar crédito
+        </Button>
+      </AvisoCredito>
 
       {/* ============================================================ */}
       {/* BLOCO A — Cabeçalho do Pedido */}

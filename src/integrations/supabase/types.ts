@@ -101,6 +101,8 @@ export type Database = {
           commercial_profile: Database["public"]["Enums"]["commercial_profile"]
           cpf: string | null
           created_at: string
+          credito_observacao: string | null
+          credito_pendente: number
           endereco: string | null
           id: number
           inscricao_estadual: string | null
@@ -122,6 +124,8 @@ export type Database = {
           commercial_profile?: Database["public"]["Enums"]["commercial_profile"]
           cpf?: string | null
           created_at?: string
+          credito_observacao?: string | null
+          credito_pendente?: number
           endereco?: string | null
           id?: number
           inscricao_estadual?: string | null
@@ -143,6 +147,8 @@ export type Database = {
           commercial_profile?: Database["public"]["Enums"]["commercial_profile"]
           cpf?: string | null
           created_at?: string
+          credito_observacao?: string | null
+          credito_pendente?: number
           endereco?: string | null
           id?: number
           inscricao_estadual?: string | null
