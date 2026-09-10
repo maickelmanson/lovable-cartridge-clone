@@ -70,6 +70,8 @@ function toApp(r: ClienteRow): ClienteApp {
     inscricaoEstadual: r.inscricao_estadual,
     commercialProfile: r.commercial_profile,
     observacoes: r.observacoes,
+    creditoPendente: Number(r.credito_pendente ?? 0) || 0,
+    creditoObservacao: r.credito_observacao ?? null,
     criadoEm: r.created_at,
     atualizadoEm: r.updated_at,
   };
