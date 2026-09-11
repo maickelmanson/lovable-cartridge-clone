@@ -102,7 +102,16 @@ export default function Clientes() {
                     className="border-b hover:bg-muted/50 cursor-pointer"
                     onClick={() => setLocation(`/clientes/${c.id}`)}
                   >
-                    <td className="px-4 py-3">{c.nome}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span>{c.nome}</span>
+                        {Number((c as any).creditoPendente ?? 0) > 0 && (
+                          <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-900 font-medium">
+                            Crédito {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number((c as any).creditoPendente))}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-sm">{formatPhone(c.telefone) || "-"}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-1 rounded ${
