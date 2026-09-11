@@ -143,9 +143,14 @@ CREATE TABLE IF NOT EXISTS public.clientes (
   inscricao_estadual varchar,
   commercial_profile public.commercial_profile NOT NULL DEFAULT 'CLIENTE_FINAL',
   observacoes text,
+  credito_pendente numeric NOT NULL DEFAULT 0,
+  credito_observacao text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE public.clientes
+  ADD COLUMN IF NOT EXISTS credito_pendente numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS credito_observacao text;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.clientes TO authenticated;
 GRANT ALL ON public.clientes TO service_role;
 ALTER TABLE public.clientes ENABLE ROW LEVEL SECURITY;
