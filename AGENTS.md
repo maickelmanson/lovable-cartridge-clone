@@ -44,7 +44,7 @@ Observações importantes:
 | `AuthPage.tsx` | Tela auxiliar de autenticação (fluxo Supabase legado). |
 | `Dashboard.tsx` | Painel principal com indicadores do dia. |
 | `DashboardAnalise.tsx` | Análises e gráficos consolidados (recharts). |
-| `Clientes.tsx` | Lista, busca e criação de clientes. |
+| `Clientes.tsx` | Lista, busca e criação de clientes (PF/PJ); selo amarelo de crédito pendente quando o cliente tem saldo. |
 | `ClienteDetalhe.tsx` | Ficha do cliente com histórico de pedidos. |
 | `Pedidos.tsx` | Lista de pedidos (abertos no topo, destacados em vermelho), filtros, exclusão (em cascata com remanufatura). |
 | `PedidoDetalhe.tsx` | Pedido aberto: cartuchos, pesos, status, observação geral, WhatsApp e campo de usuário responsável no modal de editar cartucho (pré-selecionado com o usuário logado). |
@@ -70,7 +70,7 @@ Observações importantes:
 | Arquivo | Descrição |
 | --- | --- |
 | `trpc.ts` | Proxy que expõe `api.<modulo>.<procedimento>` e resolve para os drivers reais. |
-| `trpc-real/clientes.ts` | CRUD de clientes. |
+| `trpc-real/clientes.ts` | CRUD de clientes, incluindo campos PF/PJ e crédito pendente (`credito_pendente`, `credito_observacao`). |
 | `trpc-real/pedidos.ts` | Pedidos: numeração histórica, finalização, exclusão em cascata. |
 | `trpc-real/pedidoCartuchos.ts` | Itens do pedido: pesos, status, observações. |
 | `trpc-real/cartuchos.ts` | Modelos de cartucho e preços. |
