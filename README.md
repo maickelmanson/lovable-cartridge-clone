@@ -33,9 +33,10 @@ This project was built with [Lovable](https://lovable.dev).
 ## Funcionalidades
 
 - **Login com JWT próprio** — e-mail e senha validados com bcrypt; token de 7 dias guardado no navegador, com renovação automática e revalidação antes de encerrar a sessão.
-- **Gestão de clientes** — cadastro completo, perfil comercial, histórico de pedidos.
-- **Pedidos** — numeração automática, observação geral, duplicação, finalização e reabertura.
-- **Cartuchos do pedido** — modelo, código, peso de chegada/saída (em gramas), protegido, status, observações e **usuário responsável**.
+- **Gestão de clientes** — cadastro por tipo de pessoa: **Pessoa Física** (primeiro nome + sobrenome) e **Pessoa Jurídica** (razão social, nome fantasia e nome do responsável); perfil comercial e histórico de pedidos.
+- **Crédito pendente do cliente** — valor em reais + observação na ficha do cliente; aviso em destaque ao criar um novo pedido, dentro do pedido aberto e na tela de valores da remanufatura; botão **Aplicar crédito** que abate como desconto limitado ao total do pedido (o saldo que sobrar continua guardado no cliente); selo amarelo na lista de clientes para quem tem crédito.
+- **Pedidos** — numeração automática, observação geral, duplicação, finalização e reabertura; **pedidos em aberto aparecem no topo da lista, destacados em vermelho**.
+- **Cartuchos do pedido** — modelo, código, peso de chegada/saída (em gramas), protegido, status, observações e **usuário responsável**; busca prática de modelo no modal, filtrando por código ou descrição enquanto digita.
 - **Remanufatura** — ordens geradas a partir do pedido, itens e unidades, garantia, preços por perfil e impressão em duas vias.
 - **Buscador de cartuchos** — busca por período com filtro de usuário responsável, quantidade total, valor total e exportação CSV.
 - **Auditoria** — cada mutação registra usuário, ação, entidade e o diff dos campos alterados.
@@ -43,7 +44,8 @@ This project was built with [Lovable](https://lovable.dev).
 - **Backup do banco** — exportação em SQL pela interface (admin) ou pelo terminal.
 - **Dashboard retrátil** — barra lateral que recolhe e expande, com preferência salva no localStorage.
 - **Máscaras** — CPF, CNPJ, telefone e CEP aplicadas nos formulários.
-- **WhatsApp via wa.me** — mensagens padrão configuráveis e histórico de envios.
+- **WhatsApp via wa.me** — mensagens padrão configuráveis, histórico de envios e variáveis dinâmicas: `{cliente}`, `{pedido}`, `{status}`, `{empresa}`, `{total}` (valor total do pedido), `{periodo}` ("dia" até 11h59, "tarde" até 17h59 e "noite" a partir das 18h), `{primeiro_nome}`, `{nome_fantasia}` e `{razao_social}`.
+- **Dados da empresa compartilhados** — um único cadastro de empresa visível e editável por todos os usuários logados, usado nos cabeçalhos de impressão.
 
 ## Pré-requisitos
 
@@ -151,6 +153,10 @@ scripts/
 ## Banco de dados
 
 Tabelas principais: `users`, `audit_logs`, `clientes`, `pedidos`, `pedido_cartuchos`, `cartuchos_cadastro`, `empresa_dados`, `reman_orders`, `reman_order_items`, `reman_order_units`, `notifications`, `whatsapp_templates`, `error_logs`.
+
+Campos de destaque adicionados recentemente:
+- `clientes`: `tipo_pessoa` (FISICA/JURIDICA), `primeiro_nome`, `sobrenome`, `razao_social`, `nome_fantasia`, `responsavel_nome`, `credito_pendente` (numeric, default 0) e `credito_observacao`.
+- `pedido_cartuchos`: `usuario_id` (FK → `users.id`), que registra o usuário responsável pelo serviço.
 
 Schema completo e idempotente: `supabase/seed.sql` (`npm run seed-sql`).
 
