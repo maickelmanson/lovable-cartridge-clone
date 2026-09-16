@@ -44,9 +44,9 @@ Observações importantes:
 | `AuthPage.tsx` | Tela auxiliar de autenticação (fluxo Supabase legado). |
 | `Dashboard.tsx` | Painel principal com indicadores do dia. |
 | `DashboardAnalise.tsx` | Análises e gráficos consolidados (recharts). |
-| `Clientes.tsx` | Lista, busca e criação de clientes. |
+| `Clientes.tsx` | Lista, busca e criação de clientes (PF/PJ); selo amarelo de crédito pendente quando o cliente tem saldo. |
 | `ClienteDetalhe.tsx` | Ficha do cliente com histórico de pedidos. |
-| `Pedidos.tsx` | Lista de pedidos, filtros, exclusão (em cascata com remanufatura). |
+| `Pedidos.tsx` | Lista de pedidos (abertos no topo, destacados em vermelho), filtros, exclusão (em cascata com remanufatura). |
 | `PedidoDetalhe.tsx` | Pedido aberto: cartuchos, pesos, status, observação geral, WhatsApp e campo de usuário responsável no modal de editar cartucho (pré-selecionado com o usuário logado). |
 | `RemanPedidos.tsx` | Lista de ordens de remanufatura. |
 | `RemanPedidoDetalhe.tsx` | Itens/unidades da ordem, preços, garantia, finalização. |
@@ -55,11 +55,11 @@ Observações importantes:
 | `BuscadorCartuchos.tsx` | Busca de cartuchos por período com filtro de usuário responsável (Select), quantidade total, valor total e exportação CSV. |
 | `TestBuscadorCartuchos.tsx` | Página de teste do buscador. |
 | `BuscaAvancada.tsx` | Busca global (clientes, pedidos, cartuchos) com normalização fuzzy. |
-| `DadosEmpresa.tsx` | Dados da empresa usados nos cabeçalhos de impressão. |
+| `DadosEmpresa.tsx` | Dados da empresa (registro único compartilhado entre todos os usuários) usados nos cabeçalhos de impressão. |
 | `Usuarios.tsx` | CRUD de usuários, papéis e permissões por caixas de marcação. |
 | `Equipe.tsx` | Visão da equipe/perfis. |
 | `Auditoria.tsx` | Consulta dos registros de auditoria. |
-| `MensagensWhatsApp.tsx` | Edição dos modelos de mensagem com variáveis `{cliente}`, `{pedido}`. |
+| `MensagensWhatsApp.tsx` | Edição dos modelos de mensagem com variáveis `{cliente}`, `{pedido}`, `{status}`, `{empresa}`, `{total}`, `{periodo}` (dia/tarde/noite), `{primeiro_nome}`, `{nome_fantasia}`, `{razao_social}`. |
 | `MensagensEnviadas.tsx` | Histórico de notificações enviadas (data, destino, status, reenvio). |
 | `PainelErros.tsx` | Painel de erros capturados (`error_logs`). |
 | `ComponentShowcase.tsx` | Vitrine de componentes de UI. |
@@ -70,7 +70,7 @@ Observações importantes:
 | Arquivo | Descrição |
 | --- | --- |
 | `trpc.ts` | Proxy que expõe `api.<modulo>.<procedimento>` e resolve para os drivers reais. |
-| `trpc-real/clientes.ts` | CRUD de clientes. |
+| `trpc-real/clientes.ts` | CRUD de clientes, incluindo campos PF/PJ e crédito pendente (`credito_pendente`, `credito_observacao`). |
 | `trpc-real/pedidos.ts` | Pedidos: numeração histórica, finalização, exclusão em cascata. |
 | `trpc-real/pedidoCartuchos.ts` | Itens do pedido: pesos, status, observações. |
 | `trpc-real/cartuchos.ts` | Modelos de cartucho e preços. |
@@ -114,7 +114,7 @@ em_andamento, processo, funcionando, circuito_queimado, defeito_cabeca, garantia
 | `profiles` | id (auth.users), email, name, role, active, last_login |
 | `user_roles` | user_id, role |
 | `audit_logs` | user_id/name/email/role, action, entity_type, entity_id, entity_label, details (jsonb), ip_address, session_id |
-| `clientes` | nome, telefone, telefone2, endereco, cpf, cnpj, inscricao_estadual, commercial_profile, observacoes |
+| `clientes` | nome, tipo_pessoa (FISICA/JURIDICA), primeiro_nome, sobrenome, razao_social, nome_fantasia, responsavel_nome, telefone, telefone2, endereco, cpf, cnpj, inscricao_estadual, commercial_profile, observacoes, credito_pendente (numeric, default 0), credito_observacao |
 | `cartuchos_cadastro` | modelo_01, modelo_02, price_final_customer, price_reseller |
 | `pedidos` | numero, cliente_id, status, observacao_geral, data_finalizacao |
 | `pedido_cartuchos` | pedido_id, cartucho_id, codigo, peso_chegada, peso_saida, protegido, status, observacoes, usuario_id (FK → users.id, registra qual usuário fez o serviço) |
