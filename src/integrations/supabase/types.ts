@@ -331,6 +331,7 @@ export type Database = {
           pedido_id: number
           peso_chegada: string | null
           peso_saida: string | null
+          preco_unitario: number | null
           protegido: number
           status: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at: string
@@ -346,6 +347,7 @@ export type Database = {
           pedido_id: number
           peso_chegada?: string | null
           peso_saida?: string | null
+          preco_unitario?: number | null
           protegido?: number
           status?: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at?: string
@@ -361,6 +363,7 @@ export type Database = {
           pedido_id?: number
           peso_chegada?: string | null
           peso_saida?: string | null
+          preco_unitario?: number | null
           protegido?: number
           status?: Database["public"]["Enums"]["pedido_cartucho_status"]
           updated_at?: string
@@ -395,6 +398,7 @@ export type Database = {
           cliente_id: number
           created_at: string
           data_finalizacao: string | null
+          desconto: number
           id: number
           numero: string
           observacao_geral: string | null
@@ -406,6 +410,7 @@ export type Database = {
           cliente_id: number
           created_at?: string
           data_finalizacao?: string | null
+          desconto?: number
           id?: number
           numero: string
           observacao_geral?: string | null
@@ -417,6 +422,7 @@ export type Database = {
           cliente_id?: number
           created_at?: string
           data_finalizacao?: string | null
+          desconto?: number
           id?: number
           numero?: string
           observacao_geral?: string | null
