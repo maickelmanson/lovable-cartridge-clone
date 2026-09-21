@@ -82,7 +82,7 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
 
   const { data: pedido, error: ePed } = await supabase
     .from("pedidos")
-    .select("id, numero, cliente_id, observacao_geral")
+    .select("id, numero, cliente_id, observacao_geral, desconto")
     .eq("id", pedidoId)
     .single();
   if (ePed) throw ePed;
@@ -244,16 +244,19 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
     }
   }
 
+  // Desconto: o digitado no pedido tem prioridade; se for zero, mantém o da ordem.
   const { data: atual } = await supabase
     .from("reman_orders")
     .select("discount")
     .eq("id", remanOrderId)
     .maybeSingle();
-  const discount = Number(atual?.discount || 0);
+  const descontoPedido = Number((pedido as any)?.desconto || 0);
+  const discount = descontoPedido > 0 ? descontoPedido : Number(atual?.discount || 0);
   await supabase
     .from("reman_orders")
     .update({
       subtotal: subtotal.toFixed(2),
+      discount: discount.toFixed(2),
       total: Math.max(0, subtotal - discount).toFixed(2),
     } as any)
     .eq("id", remanOrderId);
