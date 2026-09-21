@@ -599,6 +599,56 @@ export default function PedidoDetalhe({ params }: Props) {
         )}
       </Card>
 
+      {/* Valores do pedido */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold mb-3">Valores do pedido</h2>
+        <div className="space-y-2 max-w-sm ml-auto text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium">{formatarMoeda(subtotal)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Desconto</span>
+            {!isFinalizado && editandoDesconto ? (
+              <div className="flex gap-1">
+                <Input
+                  type="text"
+                  value={descontoTemp}
+                  onChange={(e) => setDescontoTemp(e.target.value.replace(/[^0-9.,]/g, ""))}
+                  className="w-24 h-8"
+                  autoFocus
+                />
+                <Button size="sm" variant="outline" onClick={handleSalvarDesconto} className="h-8 px-2">✓</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditandoDesconto(false)}
+                  className="h-8 px-2"
+                >
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <span
+                className={!isFinalizado ? "cursor-pointer hover:underline font-medium" : "font-medium"}
+                onClick={() => {
+                  if (!isFinalizado) {
+                    setDescontoTemp(String(descontoPedido).replace(".", ","));
+                    setEditandoDesconto(true);
+                  }
+                }}
+              >
+                {formatarMoeda(descontoPedido)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center justify-between border-t pt-2 text-base font-semibold">
+            <span>Total</span>
+            <span>{formatarMoeda(totalPedido)}</span>
+          </div>
+        </div>
+      </Card>
+
       {/* Observação geral do pedido */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-3">
