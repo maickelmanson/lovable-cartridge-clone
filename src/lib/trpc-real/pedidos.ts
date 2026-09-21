@@ -20,6 +20,7 @@ function toApp(r: any, clienteNome?: string | null) {
     dataCriacao: r.created_at,
     dataFinalizacao: r.data_finalizacao,
     observacaoGeral: r.observacao_geral ?? null,
+    desconto: r.desconto ?? 0,
   };
 }
 
