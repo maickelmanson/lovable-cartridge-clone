@@ -51,11 +51,12 @@ const formatarPesoComVirgula = (valor: string) => {
 interface Props {
   pedidoId: number;
   cartucho?: any;
+  perfilCliente?: "CLIENTE_FINAL" | "REVENDA";
   onSalvar: () => void;
   onFechar: () => void;
 }
 
-export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }: Props) {
+export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSalvar, onFechar }: Props) {
   const { user } = useAuth();
   const usuariosQuery = useUsuariosAtivos();
   const [form, setForm] = React.useState({
@@ -66,11 +67,13 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
     protegido: cartucho?.protegido === 1,
     observacoes: cartucho?.observacoes || "",
     usuarioId: cartucho?.usuarioId || "",
+    precoUnitario:
+      cartucho?.precoUnitario != null ? String(cartucho.precoUnitario).replace(".", ",") : "",
   });
 
-  // Ao criar um cartucho, o usuário logado vem pré-selecionado (pode ser trocado).
+  // O usuário logado vem pré-selecionado sempre que o cartucho ainda não tem responsável.
   React.useEffect(() => {
-    if (!cartucho?.id && !form.usuarioId && user?.id) {
+    if (!form.usuarioId && user?.id) {
       setForm((prev) => (prev.usuarioId ? prev : { ...prev, usuarioId: user.id }));
     }
   }, [user?.id, cartucho?.id]);
