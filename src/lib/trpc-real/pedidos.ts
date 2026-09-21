@@ -165,7 +165,13 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
   type Grupo = {
     cartuchoId: number;
     modelo: any;
-    unidades: { codigo: string | null; pesoSaida: string | null; garantia: boolean; defeito: string | null }[];
+    unidades: {
+      codigo: string | null;
+      pesoSaida: string | null;
+      garantia: boolean;
+      defeito: string | null;
+      preco: number | null;
+    }[];
   };
   const grupos = new Map<number, Grupo>();
 
@@ -182,20 +188,27 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
       pesoSaida: c.peso_saida,
       garantia: isGarantia,
       defeito: isDefeito ? defeitoLabel(c.status) : null,
+      preco: c.preco_unitario != null ? Number(c.preco_unitario) : null,
     });
   }
 
   let subtotal = 0;
 
   for (const grupo of Array.from(grupos.values())) {
-    const unitPrice = Number(
+    // Preço do cadastro (fallback quando o pedido não tem valor digitado)
+    const precoCadastro = Number(
       profile === "REVENDA"
         ? grupo.modelo?.price_reseller || 0
         : grupo.modelo?.price_final_customer || 0,
     );
     // Cobrança apenas de cartuchos funcionando e fora de garantia
-    const cobraveis = grupo.unidades.filter((u) => !u.defeito && !u.garantia).length;
-    const lineTotal = unitPrice * cobraveis;
+    const unidadesCobraveis = grupo.unidades.filter((u) => !u.defeito && !u.garantia);
+    const cobraveis = unidadesCobraveis.length;
+    const lineTotal = unidadesCobraveis.reduce(
+      (soma, u) => soma + (u.preco != null && Number.isFinite(u.preco) ? u.preco : precoCadastro),
+      0,
+    );
+    const unitPrice = cobraveis ? lineTotal / cobraveis : precoCadastro;
     subtotal += lineTotal;
 
     const { data: item, error: eItem } = await supabase
