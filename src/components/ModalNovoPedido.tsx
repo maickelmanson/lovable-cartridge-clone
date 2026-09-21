@@ -320,6 +320,20 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
                   />
                 </div>
 
+                <div>
+                  <label className="text-sm font-medium">Valor (R$)</label>
+                  <Input
+                    value={novoCartucho.precoUnitario}
+                    onChange={(e) =>
+                      handleChangeCartucho("precoUnitario", e.target.value.replace(/[^0-9.,]/g, ""))
+                    }
+                    placeholder="0,00"
+                    className="h-8"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-end gap-2">
                   <Checkbox
                     id="protegido"
