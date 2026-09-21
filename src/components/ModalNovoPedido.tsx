@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface Props {
   onSalvar: (clienteId: number, cartuchos?: any[], observacaoGeral?: string) => void;
@@ -28,6 +29,8 @@ interface CartuchodoFormulario {
   pesoSaida: string;
   protegido: boolean;
   observacoes: string;
+  precoUnitario: string;
+  usuarioId?: string | null;
 }
 
 const formatarPeso = (valor: string) => {
