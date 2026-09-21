@@ -155,6 +155,7 @@ export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSal
           protegido: form.protegido,
           observacoes: form.observacoes,
           usuarioId: form.usuarioId || null,
+          precoUnitario: form.precoUnitario || null,
         });
       }
       onSalvar();
