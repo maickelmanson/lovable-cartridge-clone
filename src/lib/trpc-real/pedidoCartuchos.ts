@@ -31,6 +31,8 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
     dataInclusao: r.created_at,
     modelo01: modelo?.modelo_01 ?? null,
     modelo02: modelo?.modelo_02 ?? null,
+    precoModeloClienteFinal: (modelo as any)?.price_final_customer ?? null,
+    precoModeloRevenda: (modelo as any)?.price_reseller ?? null,
   };
 }
 
