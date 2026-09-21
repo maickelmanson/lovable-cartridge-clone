@@ -71,6 +71,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
     pesoSaida: "",
     protegido: false,
     observacoes: "",
+    precoUnitario: "",
   });
 
   const clientesQuery = trpc.clientes.listar.useQuery();
@@ -134,6 +135,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
       pesoSaida: "",
       protegido: false,
       observacoes: "",
+      precoUnitario: "",
     });
     setBuscaCartucho("");
   };
