@@ -122,6 +122,8 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
     }
     const cartuchodComId = {
       ...novoCartucho,
+      // O usuário logado entra como responsável pelo cartucho.
+      usuarioId: user?.id ?? null,
       id:
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
@@ -261,6 +263,13 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
                         onClick={() => {
                           handleChangeCartucho("cartuchoId", String(c.id));
                           setBuscaCartucho(`${c.modelo02} - ${c.modelo01}`);
+                          const preco =
+                            (clienteComCredito?.commercialProfile ?? "CLIENTE_FINAL") === "REVENDA"
+                              ? c.priceReseller
+                              : c.priceFinalCustomer;
+                          if (preco != null && preco !== "") {
+                            handleChangeCartucho("precoUnitario", String(preco).replace(".", ","));
+                          }
                         }}
                       >
                         {c.modelo02} - {c.modelo01}
