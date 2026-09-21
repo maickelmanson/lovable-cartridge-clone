@@ -27,6 +27,7 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
     status: r.status,
     observacoes: r.observacoes,
     usuarioId: r.usuario_id ?? null,
+    precoUnitario: r.preco_unitario ?? null,
     dataInclusao: r.created_at,
     modelo01: modelo?.modelo_01 ?? null,
     modelo02: modelo?.modelo_02 ?? null,
@@ -45,6 +46,11 @@ function toDb(i: any) {
   if ("status" in i) o.status = i.status;
   if ("observacoes" in i) o.observacoes = i.observacoes || null;
   if ("usuarioId" in i) o.usuario_id = i.usuarioId || null;
+  if ("precoUnitario" in i)
+    o.preco_unitario =
+      i.precoUnitario === "" || i.precoUnitario == null
+        ? null
+        : Number(String(i.precoUnitario).replace(",", "."));
   return o;
 }
 
