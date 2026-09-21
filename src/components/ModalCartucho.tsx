@@ -289,6 +289,23 @@ export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSal
             </div>
 
             <div>
+              <label className="text-sm font-medium">Valor (R$)</label>
+              <Input
+                name="precoUnitario"
+                type="text"
+                inputMode="decimal"
+                value={form.precoUnitario}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    precoUnitario: e.target.value.replace(/[^0-9.,]/g, ""),
+                  }))
+                }
+                placeholder="0,00"
+              />
+            </div>
+
+            <div>
               <label className="text-sm font-medium">Usuário responsável</label>
               <Select
                 value={form.usuarioId || ""}
@@ -298,11 +315,18 @@ export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSal
                   <SelectValue placeholder="Selecione o responsável..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {(usuariosQuery.data ?? []).map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name || "Sem nome"}
-                    </SelectItem>
-                  ))}
+                  {(() => {
+                    const lista = [...(usuariosQuery.data ?? [])];
+                    // Garante que o usuário logado sempre apareça na lista.
+                    if (user?.id && !lista.some((u) => u.id === user.id)) {
+                      lista.unshift({ id: user.id, name: user.name, role: user.role });
+                    }
+                    return lista.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name || "Sem nome"}
+                      </SelectItem>
+                    ));
+                  })()}
                 </SelectContent>
               </Select>
             </div>
