@@ -72,6 +72,38 @@ export default function PedidoDetalhe({ params }: Props) {
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
   const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
+  const descontoMutation = trpc.pedidos.atualizarDesconto.useMutation();
+
+  const perfilCliente = ((clienteQuery.data as any)?.commercialProfile ?? "CLIENTE_FINAL") as
+    | "CLIENTE_FINAL"
+    | "REVENDA";
+
+  /** Valor cobrado de um cartucho: o digitado no pedido ou, na falta dele, o preço do modelo. */
+  const valorCartucho = (c: any) => {
+    if (c?.precoUnitario != null && c.precoUnitario !== "") return Number(c.precoUnitario) || 0;
+    const preco =
+      perfilCliente === "REVENDA" ? c?.precoModeloRevenda : c?.precoModeloClienteFinal;
+    return Number(preco) || 0;
+  };
+
+  const ehCobravel = (c: any) => c?.status === "funcionando";
+  const subtotal = (cartuchosQuery.data ?? [])
+    .filter(ehCobravel)
+    .reduce((soma: number, c: any) => soma + valorCartucho(c), 0);
+  const descontoPedido = Number((pedidoQuery.data as any)?.desconto || 0);
+  const totalPedido = Math.max(0, subtotal - descontoPedido);
+
+  const handleSalvarDesconto = async () => {
+    try {
+      await descontoMutation.mutateAsync({ id, desconto: descontoTemp || 0 });
+      await pedidoQuery.refetch();
+      setEditandoDesconto(false);
+      toast.success("Desconto atualizado!");
+    } catch (error: any) {
+      console.error("Erro ao salvar desconto:", error);
+      toast.error(error?.message || "Erro ao salvar desconto.");
+    }
+  };
   const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
   const empresaQuery = trpc.empresa.obter.useQuery();
   const [obsTemp, setObsTemp] = useState(pedidoQuery.data?.observacaoGeral || "");
