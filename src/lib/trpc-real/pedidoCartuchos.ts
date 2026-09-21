@@ -75,7 +75,7 @@ export const pedidoCartuchosApi = {
           if (ids.length) {
             const { data: mods, error: e2 } = await supabase
               .from("cartuchos_cadastro")
-              .select("id, modelo_01, modelo_02")
+              .select("id, modelo_01, modelo_02, price_final_customer, price_reseller")
               .in("id", ids);
             if (e2) throw e2;
             mapModelos = new Map((mods ?? []).map((m: any) => [m.id, m]));

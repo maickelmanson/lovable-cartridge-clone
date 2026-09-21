@@ -53,6 +53,11 @@ export default function PedidoDetalhe({ params }: Props) {
   const [pesoTemp, setPesoTemp] = useState("");
   const [reabrindo, setReabrindo] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
+  const [descontoTemp, setDescontoTemp] = useState("");
+  const [editandoDesconto, setEditandoDesconto] = useState(false);
+
+  const formatarMoeda = (valor: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor || 0);
 
   const usuariosQuery = useUsuariosAtivos();
   const nomeUsuario = (usuarioId?: string | null) =>
