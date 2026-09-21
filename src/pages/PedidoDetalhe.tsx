@@ -456,6 +456,7 @@ export default function PedidoDetalhe({ params }: Props) {
                   <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Peso Chegada (g)</th>
                   <th className="px-4 py-2 text-left">Peso Saída (g)</th>
+                  <th className="px-4 py-2 text-left">Valor</th>
                   <th className="px-4 py-2 text-left">Responsável</th>
                   <th className="px-4 py-2 text-left">Protegido</th>
                   <th className="px-4 py-2 text-left">Observações</th>
@@ -556,6 +557,12 @@ export default function PedidoDetalhe({ params }: Props) {
                         )}
                       </td>
 
+                      <td
+                        className={`px-4 py-2 ${!isFinalizado ? "cursor-pointer hover:underline" : ""}`}
+                        onClick={() => { if (!isFinalizado) { setCartuchoditando(c); setModalAberto(true); } }}
+                      >
+                        {formatarMoeda(valorCartucho(c))}
+                      </td>
                       <td className="px-4 py-2">{nomeUsuario(c.usuarioId)}</td>
                       <td className="px-4 py-2">{c.protegido ? "Sim" : "Não"}</td>
                       <td className="px-4 py-2 max-w-xs truncate">{c.observacoes || "-"}</td>
@@ -618,6 +625,7 @@ export default function PedidoDetalhe({ params }: Props) {
         <ModalCartucho
           pedidoId={id}
           cartucho={cartuchoditando}
+          perfilCliente={perfilCliente}
           onSalvar={() => {
             setModalAberto(false);
             setCartuchoditando(null);
