@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface Props {
   onSalvar: (clienteId: number, cartuchos?: any[], observacaoGeral?: string) => void;
@@ -28,6 +29,8 @@ interface CartuchodoFormulario {
   pesoSaida: string;
   protegido: boolean;
   observacoes: string;
+  precoUnitario: string;
+  usuarioId?: string | null;
 }
 
 const formatarPeso = (valor: string) => {
@@ -68,8 +71,10 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
     pesoSaida: "",
     protegido: false,
     observacoes: "",
+    precoUnitario: "",
   });
 
+  const { user } = useAuth();
   const clientesQuery = trpc.clientes.listar.useQuery();
   const cartuchosQuery = trpc.cartuchos.listar.useQuery();
 
@@ -117,6 +122,8 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
     }
     const cartuchodComId = {
       ...novoCartucho,
+      // O usuário logado entra como responsável pelo cartucho.
+      usuarioId: user?.id ?? null,
       id:
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
@@ -131,6 +138,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
       pesoSaida: "",
       protegido: false,
       observacoes: "",
+      precoUnitario: "",
     });
     setBuscaCartucho("");
   };
@@ -255,6 +263,13 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
                         onClick={() => {
                           handleChangeCartucho("cartuchoId", String(c.id));
                           setBuscaCartucho(`${c.modelo02} - ${c.modelo01}`);
+                          const preco =
+                            (clienteComCredito?.commercialProfile ?? "CLIENTE_FINAL") === "REVENDA"
+                              ? c.priceReseller
+                              : c.priceFinalCustomer;
+                          if (preco != null && preco !== "") {
+                            handleChangeCartucho("precoUnitario", String(preco).replace(".", ","));
+                          }
                         }}
                       >
                         {c.modelo02} - {c.modelo01}
@@ -305,6 +320,20 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
                   />
                 </div>
 
+                <div>
+                  <label className="text-sm font-medium">Valor (R$)</label>
+                  <Input
+                    value={novoCartucho.precoUnitario}
+                    onChange={(e) =>
+                      handleChangeCartucho("precoUnitario", e.target.value.replace(/[^0-9.,]/g, ""))
+                    }
+                    placeholder="0,00"
+                    className="h-8"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-end gap-2">
                   <Checkbox
                     id="protegido"

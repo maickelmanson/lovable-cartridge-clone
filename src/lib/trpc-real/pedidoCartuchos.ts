@@ -27,9 +27,12 @@ function toApp(r: any, modelo?: { modelo_01: string; modelo_02: string } | null)
     status: r.status,
     observacoes: r.observacoes,
     usuarioId: r.usuario_id ?? null,
+    precoUnitario: r.preco_unitario ?? null,
     dataInclusao: r.created_at,
     modelo01: modelo?.modelo_01 ?? null,
     modelo02: modelo?.modelo_02 ?? null,
+    precoModeloClienteFinal: (modelo as any)?.price_final_customer ?? null,
+    precoModeloRevenda: (modelo as any)?.price_reseller ?? null,
   };
 }
 
@@ -45,6 +48,11 @@ function toDb(i: any) {
   if ("status" in i) o.status = i.status;
   if ("observacoes" in i) o.observacoes = i.observacoes || null;
   if ("usuarioId" in i) o.usuario_id = i.usuarioId || null;
+  if ("precoUnitario" in i)
+    o.preco_unitario =
+      i.precoUnitario === "" || i.precoUnitario == null
+        ? null
+        : Number(String(i.precoUnitario).replace(",", "."));
   return o;
 }
 
@@ -67,7 +75,7 @@ export const pedidoCartuchosApi = {
           if (ids.length) {
             const { data: mods, error: e2 } = await supabase
               .from("cartuchos_cadastro")
-              .select("id, modelo_01, modelo_02")
+              .select("id, modelo_01, modelo_02, price_final_customer, price_reseller")
               .in("id", ids);
             if (e2) throw e2;
             mapModelos = new Map((mods ?? []).map((m: any) => [m.id, m]));

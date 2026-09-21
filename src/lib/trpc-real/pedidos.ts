@@ -20,6 +20,7 @@ function toApp(r: any, clienteNome?: string | null) {
     dataCriacao: r.created_at,
     dataFinalizacao: r.data_finalizacao,
     observacaoGeral: r.observacao_geral ?? null,
+    desconto: r.desconto ?? 0,
   };
 }
 
@@ -61,6 +62,8 @@ async function copiarCartuchosDoPedido(origemId: number, destinoId: number, owne
     protegido: c.protegido,
     status: "em_espera",
     observacoes: c.observacoes,
+    usuario_id: c.usuario_id ?? null,
+    preco_unitario: c.preco_unitario ?? null,
   }));
   const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows as any);
   if (e2) throw e2;
@@ -81,7 +84,7 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
 
   const { data: pedido, error: ePed } = await supabase
     .from("pedidos")
-    .select("id, numero, cliente_id, observacao_geral")
+    .select("id, numero, cliente_id, observacao_geral, desconto")
     .eq("id", pedidoId)
     .single();
   if (ePed) throw ePed;
@@ -164,7 +167,13 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
   type Grupo = {
     cartuchoId: number;
     modelo: any;
-    unidades: { codigo: string | null; pesoSaida: string | null; garantia: boolean; defeito: string | null }[];
+    unidades: {
+      codigo: string | null;
+      pesoSaida: string | null;
+      garantia: boolean;
+      defeito: string | null;
+      preco: number | null;
+    }[];
   };
   const grupos = new Map<number, Grupo>();
 
@@ -181,20 +190,27 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
       pesoSaida: c.peso_saida,
       garantia: isGarantia,
       defeito: isDefeito ? defeitoLabel(c.status) : null,
+      preco: c.preco_unitario != null ? Number(c.preco_unitario) : null,
     });
   }
 
   let subtotal = 0;
 
   for (const grupo of Array.from(grupos.values())) {
-    const unitPrice = Number(
+    // Preço do cadastro (fallback quando o pedido não tem valor digitado)
+    const precoCadastro = Number(
       profile === "REVENDA"
         ? grupo.modelo?.price_reseller || 0
         : grupo.modelo?.price_final_customer || 0,
     );
     // Cobrança apenas de cartuchos funcionando e fora de garantia
-    const cobraveis = grupo.unidades.filter((u) => !u.defeito && !u.garantia).length;
-    const lineTotal = unitPrice * cobraveis;
+    const unidadesCobraveis = grupo.unidades.filter((u) => !u.defeito && !u.garantia);
+    const cobraveis = unidadesCobraveis.length;
+    const lineTotal = unidadesCobraveis.reduce(
+      (soma, u) => soma + (u.preco != null && Number.isFinite(u.preco) ? u.preco : precoCadastro),
+      0,
+    );
+    const unitPrice = cobraveis ? lineTotal / cobraveis : precoCadastro;
     subtotal += lineTotal;
 
     const { data: item, error: eItem } = await supabase
@@ -230,16 +246,19 @@ async function gerarRemanAPartirDoPedido(pedidoId: number) {
     }
   }
 
+  // Desconto: o digitado no pedido tem prioridade; se for zero, mantém o da ordem.
   const { data: atual } = await supabase
     .from("reman_orders")
     .select("discount")
     .eq("id", remanOrderId)
     .maybeSingle();
-  const discount = Number(atual?.discount || 0);
+  const descontoPedido = Number((pedido as any)?.desconto || 0);
+  const discount = descontoPedido > 0 ? descontoPedido : Number(atual?.discount || 0);
   await supabase
     .from("reman_orders")
     .update({
       subtotal: subtotal.toFixed(2),
+      discount: discount.toFixed(2),
       total: Math.max(0, subtotal - discount).toFixed(2),
     } as any)
     .eq("id", remanOrderId);
@@ -340,6 +359,11 @@ export const pedidosApi = {
               protegido: c.protegido ? 1 : 0,
               status: c.status || "em_espera",
               observacoes: c.observacoes || null,
+              usuario_id: c.usuarioId || null,
+              preco_unitario:
+                c.precoUnitario != null && c.precoUnitario !== ""
+                  ? Number(String(c.precoUnitario).replace(",", "."))
+                  : null,
             }));
             // Insert único = atômico. Se falhar, desfaz o pedido para não deixar registro órfão.
             const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows);
@@ -439,6 +463,38 @@ export const pedidosApi = {
           const { data, error } = await supabase
             .from("pedidos")
             .update({ observacao_geral: input.observacaoGeral || null } as any)
+            .eq("id", input.id)
+            .select("*")
+            .single();
+          if (error) throw error;
+          await registrarAuditoria({
+            action: "pedido.editar",
+            entityType: "pedidos",
+            entityId: input.id,
+            entityLabel: `Pedido #${data.numero}`,
+            details: diff(antes ?? {}, data),
+          });
+          return toApp(data);
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+      });
+    },
+  },
+  atualizarDesconto: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (input: { id: number; desconto: number | string }) => {
+          requirePermission("pedido.editar");
+          const valor = Number(String(input.desconto ?? 0).replace(",", ".")) || 0;
+          const { data: antes } = await supabase
+            .from("pedidos")
+            .select("*")
+            .eq("id", input.id)
+            .maybeSingle();
+          const { data, error } = await supabase
+            .from("pedidos")
+            .update({ desconto: Math.max(0, valor).toFixed(2) } as any)
             .eq("id", input.id)
             .select("*")
             .single();

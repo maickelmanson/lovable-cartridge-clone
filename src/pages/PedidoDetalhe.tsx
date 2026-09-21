@@ -53,6 +53,11 @@ export default function PedidoDetalhe({ params }: Props) {
   const [pesoTemp, setPesoTemp] = useState("");
   const [reabrindo, setReabrindo] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
+  const [descontoTemp, setDescontoTemp] = useState("");
+  const [editandoDesconto, setEditandoDesconto] = useState(false);
+
+  const formatarMoeda = (valor: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor || 0);
 
   const usuariosQuery = useUsuariosAtivos();
   const nomeUsuario = (usuarioId?: string | null) =>
@@ -67,6 +72,38 @@ export default function PedidoDetalhe({ params }: Props) {
   const duplicarMutation = trpc.pedidos.duplicar.useMutation();
   const clienteQuery = trpc.clientes.buscar.useQuery(Number(pedidoQuery.data?.clienteId ?? 0));
   const obsMutation = trpc.pedidos.atualizarObservacao.useMutation();
+  const descontoMutation = trpc.pedidos.atualizarDesconto.useMutation();
+
+  const perfilCliente = ((clienteQuery.data as any)?.commercialProfile ?? "CLIENTE_FINAL") as
+    | "CLIENTE_FINAL"
+    | "REVENDA";
+
+  /** Valor cobrado de um cartucho: o digitado no pedido ou, na falta dele, o preço do modelo. */
+  const valorCartucho = (c: any) => {
+    if (c?.precoUnitario != null && c.precoUnitario !== "") return Number(c.precoUnitario) || 0;
+    const preco =
+      perfilCliente === "REVENDA" ? c?.precoModeloRevenda : c?.precoModeloClienteFinal;
+    return Number(preco) || 0;
+  };
+
+  const ehCobravel = (c: any) => c?.status === "funcionando";
+  const subtotal = (cartuchosQuery.data ?? [])
+    .filter(ehCobravel)
+    .reduce((soma: number, c: any) => soma + valorCartucho(c), 0);
+  const descontoPedido = Number((pedidoQuery.data as any)?.desconto || 0);
+  const totalPedido = Math.max(0, subtotal - descontoPedido);
+
+  const handleSalvarDesconto = async () => {
+    try {
+      await descontoMutation.mutateAsync({ id, desconto: descontoTemp || 0 });
+      await pedidoQuery.refetch();
+      setEditandoDesconto(false);
+      toast.success("Desconto atualizado!");
+    } catch (error: any) {
+      console.error("Erro ao salvar desconto:", error);
+      toast.error(error?.message || "Erro ao salvar desconto.");
+    }
+  };
   const templatesQuery = trpc.whatsappTemplates.listar.useQuery();
   const empresaQuery = trpc.empresa.obter.useQuery();
   const [obsTemp, setObsTemp] = useState(pedidoQuery.data?.observacaoGeral || "");
@@ -419,6 +456,7 @@ export default function PedidoDetalhe({ params }: Props) {
                   <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Peso Chegada (g)</th>
                   <th className="px-4 py-2 text-left">Peso Saída (g)</th>
+                  <th className="px-4 py-2 text-left">Valor</th>
                   <th className="px-4 py-2 text-left">Responsável</th>
                   <th className="px-4 py-2 text-left">Protegido</th>
                   <th className="px-4 py-2 text-left">Observações</th>
@@ -519,6 +557,12 @@ export default function PedidoDetalhe({ params }: Props) {
                         )}
                       </td>
 
+                      <td
+                        className={`px-4 py-2 ${!isFinalizado ? "cursor-pointer hover:underline" : ""}`}
+                        onClick={() => { if (!isFinalizado) { setCartuchoditando(c); setModalAberto(true); } }}
+                      >
+                        {formatarMoeda(valorCartucho(c))}
+                      </td>
                       <td className="px-4 py-2">{nomeUsuario(c.usuarioId)}</td>
                       <td className="px-4 py-2">{c.protegido ? "Sim" : "Não"}</td>
                       <td className="px-4 py-2 max-w-xs truncate">{c.observacoes || "-"}</td>
@@ -555,6 +599,56 @@ export default function PedidoDetalhe({ params }: Props) {
         )}
       </Card>
 
+      {/* Valores do pedido */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold mb-3">Valores do pedido</h2>
+        <div className="space-y-2 max-w-sm ml-auto text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium">{formatarMoeda(subtotal)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Desconto</span>
+            {!isFinalizado && editandoDesconto ? (
+              <div className="flex gap-1">
+                <Input
+                  type="text"
+                  value={descontoTemp}
+                  onChange={(e) => setDescontoTemp(e.target.value.replace(/[^0-9.,]/g, ""))}
+                  className="w-24 h-8"
+                  autoFocus
+                />
+                <Button size="sm" variant="outline" onClick={handleSalvarDesconto} className="h-8 px-2">✓</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditandoDesconto(false)}
+                  className="h-8 px-2"
+                >
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <span
+                className={!isFinalizado ? "cursor-pointer hover:underline font-medium" : "font-medium"}
+                onClick={() => {
+                  if (!isFinalizado) {
+                    setDescontoTemp(String(descontoPedido).replace(".", ","));
+                    setEditandoDesconto(true);
+                  }
+                }}
+              >
+                {formatarMoeda(descontoPedido)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center justify-between border-t pt-2 text-base font-semibold">
+            <span>Total</span>
+            <span>{formatarMoeda(totalPedido)}</span>
+          </div>
+        </div>
+      </Card>
+
       {/* Observação geral do pedido */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-3">
@@ -581,6 +675,7 @@ export default function PedidoDetalhe({ params }: Props) {
         <ModalCartucho
           pedidoId={id}
           cartucho={cartuchoditando}
+          perfilCliente={perfilCliente}
           onSalvar={() => {
             setModalAberto(false);
             setCartuchoditando(null);

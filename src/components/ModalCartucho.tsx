@@ -51,11 +51,12 @@ const formatarPesoComVirgula = (valor: string) => {
 interface Props {
   pedidoId: number;
   cartucho?: any;
+  perfilCliente?: "CLIENTE_FINAL" | "REVENDA";
   onSalvar: () => void;
   onFechar: () => void;
 }
 
-export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }: Props) {
+export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSalvar, onFechar }: Props) {
   const { user } = useAuth();
   const usuariosQuery = useUsuariosAtivos();
   const [form, setForm] = React.useState({
@@ -66,11 +67,13 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
     protegido: cartucho?.protegido === 1,
     observacoes: cartucho?.observacoes || "",
     usuarioId: cartucho?.usuarioId || "",
+    precoUnitario:
+      cartucho?.precoUnitario != null ? String(cartucho.precoUnitario).replace(".", ",") : "",
   });
 
-  // Ao criar um cartucho, o usuário logado vem pré-selecionado (pode ser trocado).
+  // O usuário logado vem pré-selecionado sempre que o cartucho ainda não tem responsável.
   React.useEffect(() => {
-    if (!cartucho?.id && !form.usuarioId && user?.id) {
+    if (!form.usuarioId && user?.id) {
       setForm((prev) => (prev.usuarioId ? prev : { ...prev, usuarioId: user.id }));
     }
   }, [user?.id, cartucho?.id]);
@@ -83,6 +86,18 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
   const criarMutation = trpc.pedidoCartuchos.adicionar.useMutation();
   const atualizarMutation = trpc.pedidoCartuchos.atualizar.useMutation();
   const criarModeloMutation = trpc.cartuchos.criar.useMutation();
+
+  // Preenche o valor com o preço do modelo (conforme o perfil do cliente) quando ainda vazio.
+  React.useEffect(() => {
+    if (!form.cartuchoId || form.precoUnitario) return;
+    const modelo = (modelosQuery.data as any[] | undefined)?.find((m: any) => m.id === form.cartuchoId);
+    if (!modelo) return;
+    const preco = perfilCliente === "REVENDA" ? modelo.priceReseller : modelo.priceFinalCustomer;
+    if (preco != null && preco !== "") {
+      setForm((prev) => (prev.precoUnitario ? prev : { ...prev, precoUnitario: String(preco).replace(".", ",") }));
+    }
+  }, [form.cartuchoId, modelosQuery.data, perfilCliente]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -128,6 +143,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
           protegido: form.protegido,
           observacoes: form.observacoes,
           usuarioId: form.usuarioId || null,
+          precoUnitario: form.precoUnitario || null,
         });
       } else {
         await criarMutation.mutateAsync({
@@ -139,6 +155,7 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
           protegido: form.protegido,
           observacoes: form.observacoes,
           usuarioId: form.usuarioId || null,
+          precoUnitario: form.precoUnitario || null,
         });
       }
       onSalvar();
@@ -272,6 +289,23 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
             </div>
 
             <div>
+              <label className="text-sm font-medium">Valor (R$)</label>
+              <Input
+                name="precoUnitario"
+                type="text"
+                inputMode="decimal"
+                value={form.precoUnitario}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    precoUnitario: e.target.value.replace(/[^0-9.,]/g, ""),
+                  }))
+                }
+                placeholder="0,00"
+              />
+            </div>
+
+            <div>
               <label className="text-sm font-medium">Usuário responsável</label>
               <Select
                 value={form.usuarioId || ""}
@@ -281,11 +315,18 @@ export default function ModalCartucho({ pedidoId, cartucho, onSalvar, onFechar }
                   <SelectValue placeholder="Selecione o responsável..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {(usuariosQuery.data ?? []).map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name || "Sem nome"}
-                    </SelectItem>
-                  ))}
+                  {(() => {
+                    const lista = [...(usuariosQuery.data ?? [])];
+                    // Garante que o usuário logado sempre apareça na lista.
+                    if (user?.id && !lista.some((u) => u.id === user.id)) {
+                      lista.unshift({ id: user.id, name: user.name, role: user.role });
+                    }
+                    return lista.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name || "Sem nome"}
+                      </SelectItem>
+                    ));
+                  })()}
                 </SelectContent>
               </Select>
             </div>
