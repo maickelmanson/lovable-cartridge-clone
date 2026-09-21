@@ -87,6 +87,18 @@ export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSal
   const atualizarMutation = trpc.pedidoCartuchos.atualizar.useMutation();
   const criarModeloMutation = trpc.cartuchos.criar.useMutation();
 
+  // Preenche o valor com o preço do modelo (conforme o perfil do cliente) quando ainda vazio.
+  React.useEffect(() => {
+    if (!form.cartuchoId || form.precoUnitario) return;
+    const modelo = (modelosQuery.data as any[] | undefined)?.find((m: any) => m.id === form.cartuchoId);
+    if (!modelo) return;
+    const preco = perfilCliente === "REVENDA" ? modelo.priceReseller : modelo.priceFinalCustomer;
+    if (preco != null && preco !== "") {
+      setForm((prev) => (prev.precoUnitario ? prev : { ...prev, precoUnitario: String(preco).replace(".", ",") }));
+    }
+  }, [form.cartuchoId, modelosQuery.data, perfilCliente]);
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
@@ -131,6 +143,7 @@ export default function ModalCartucho({ pedidoId, cartucho, perfilCliente, onSal
           protegido: form.protegido,
           observacoes: form.observacoes,
           usuarioId: form.usuarioId || null,
+          precoUnitario: form.precoUnitario || null,
         });
       } else {
         await criarMutation.mutateAsync({
