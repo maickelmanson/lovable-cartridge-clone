@@ -74,6 +74,7 @@ export default function ModalNovoPedido({ onSalvar, onFechar, clienteId: cliente
     precoUnitario: "",
   });
 
+  const { user } = useAuth();
   const clientesQuery = trpc.clientes.listar.useQuery();
   const cartuchosQuery = trpc.cartuchos.listar.useQuery();
 
