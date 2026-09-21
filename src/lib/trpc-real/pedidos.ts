@@ -357,6 +357,11 @@ export const pedidosApi = {
               protegido: c.protegido ? 1 : 0,
               status: c.status || "em_espera",
               observacoes: c.observacoes || null,
+              usuario_id: c.usuarioId || null,
+              preco_unitario:
+                c.precoUnitario != null && c.precoUnitario !== ""
+                  ? Number(String(c.precoUnitario).replace(",", "."))
+                  : null,
             }));
             // Insert único = atômico. Se falhar, desfaz o pedido para não deixar registro órfão.
             const { error: e2 } = await supabase.from("pedido_cartuchos").insert(rows);
@@ -456,6 +461,38 @@ export const pedidosApi = {
           const { data, error } = await supabase
             .from("pedidos")
             .update({ observacao_geral: input.observacaoGeral || null } as any)
+            .eq("id", input.id)
+            .select("*")
+            .single();
+          if (error) throw error;
+          await registrarAuditoria({
+            action: "pedido.editar",
+            entityType: "pedidos",
+            entityId: input.id,
+            entityLabel: `Pedido #${data.numero}`,
+            details: diff(antes ?? {}, data),
+          });
+          return toApp(data);
+        },
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["pedidos"] }),
+      });
+    },
+  },
+  atualizarDesconto: {
+    useMutation: () => {
+      const qc = useQueryClient();
+      return useMutation({
+        mutationFn: async (input: { id: number; desconto: number | string }) => {
+          requirePermission("pedido.editar");
+          const valor = Number(String(input.desconto ?? 0).replace(",", ".")) || 0;
+          const { data: antes } = await supabase
+            .from("pedidos")
+            .select("*")
+            .eq("id", input.id)
+            .maybeSingle();
+          const { data, error } = await supabase
+            .from("pedidos")
+            .update({ desconto: Math.max(0, valor).toFixed(2) } as any)
             .eq("id", input.id)
             .select("*")
             .single();
